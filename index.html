@@ -2397,6 +2397,241 @@
     .st-node-circle { width: 22px; height: 22px; }
   }
 
+  /* Skilltree v2 — Gate of Fates */
+  .stv2-module-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 18px;
+    flex-wrap: wrap;
+  }
+  .stv2-header {
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+  .stv2-title {
+    font-size: 30px;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1;
+    background: linear-gradient(180deg, #FFFFFF 0%, #FFD89E 110%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .stv2-subtitle {
+    font-size: 12.5px;
+    color: var(--text-tertiary);
+    flex: 1;
+    min-width: 200px;
+  }
+  .stv2-progress-text {
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+    font-size: 13px;
+    color: var(--text-primary);
+  }
+
+  .stv2-canvas-wrap {
+    position: relative;
+    width: 100%;
+    height: 78vh;
+    min-height: 520px;
+    border-radius: 16px;
+    overflow: hidden;
+    background:
+      radial-gradient(ellipse at center, rgba(80,60,40,0.10) 0%, transparent 55%),
+      radial-gradient(ellipse at 20% 20%, rgba(107,168,227,0.05) 0%, transparent 40%),
+      radial-gradient(ellipse at 80% 80%, rgba(184,155,233,0.05) 0%, transparent 40%),
+      #0A0A0C;
+    border: 1px solid rgba(255,255,255,0.06);
+    cursor: grab;
+    user-select: none;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.5), inset 0 0 80px rgba(0,0,0,0.4);
+    touch-action: none;
+  }
+  .stv2-canvas-wrap.is-panning { cursor: grabbing; }
+  .stv2-canvas-wrap svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  .stv2-stars { opacity: 0.7; }
+
+  .stv2-ring {
+    fill: none;
+    stroke: rgba(255,255,255,0.04);
+    stroke-width: 1;
+    stroke-dasharray: 3, 6;
+  }
+
+  .stv2-line {
+    stroke: rgba(255,255,255,0.10);
+    stroke-width: 1.4;
+    fill: none;
+    transition: stroke 0.4s ease, stroke-width 0.4s ease, opacity 0.4s ease, filter 0.4s ease;
+  }
+  .stv2-line.is-lit {
+    stroke: var(--day-color);
+    stroke-width: 2;
+    opacity: 0.85;
+    filter: drop-shadow(0 0 4px var(--day-color));
+  }
+
+  .stv2-node { cursor: pointer; transition: transform 0.2s ease; }
+  .stv2-node-glow {
+    fill: var(--day-color);
+    opacity: 0;
+    transition: opacity 0.45s ease;
+  }
+  .stv2-node-bg {
+    fill: #0F0F12;
+    stroke: rgba(255,255,255,0.22);
+    stroke-width: 1.5;
+    transition: stroke 0.3s ease, fill 0.3s ease, stroke-width 0.3s ease;
+  }
+  .stv2-node-inner {
+    fill: rgba(255,255,255,0.04);
+    pointer-events: none;
+    transition: fill 0.3s ease;
+  }
+
+  .stv2-node:hover .stv2-node-bg {
+    stroke: var(--day-color);
+    stroke-width: 2.2;
+  }
+  .stv2-node.is-done .stv2-node-bg {
+    fill: var(--day-color);
+    stroke: var(--day-color);
+  }
+  .stv2-node.is-done .stv2-node-inner {
+    fill: rgba(255,255,255,0.85);
+  }
+  .stv2-node.is-done .stv2-node-glow {
+    opacity: 0.55;
+  }
+
+  /* Hub special styling */
+  .stv2-node-hub .stv2-node-bg {
+    fill: #1A1208;
+    stroke: #FFD89E;
+    stroke-width: 2.5;
+  }
+  .stv2-node-hub .stv2-node-glow {
+    fill: #FFD89E;
+    opacity: 0.35;
+  }
+  .stv2-node-hub.is-done .stv2-node-bg {
+    fill: #FFD89E;
+  }
+
+  /* Chapter as 8-pointed star-like (we'll use 12-sided polygon for jewel) */
+  .stv2-node-chapter .stv2-node-bg { stroke-width: 2; }
+
+  .stv2-tooltip {
+    position: fixed;
+    background: rgba(15, 15, 18, 0.97);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 10px;
+    padding: 12px 14px;
+    max-width: 320px;
+    pointer-events: none;
+    z-index: 1000;
+    box-shadow: 0 18px 40px rgba(0,0,0,0.7);
+    font-size: 13px;
+    color: var(--text-primary);
+    line-height: 1.45;
+    backdrop-filter: blur(8px);
+  }
+  .stv2-tooltip-title {
+    font-weight: 700;
+    margin-bottom: 4px;
+    color: var(--text-primary);
+  }
+  .stv2-tooltip-meta {
+    font-size: 10.5px;
+    color: var(--day-color, var(--text-tertiary));
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    font-weight: 700;
+  }
+  .stv2-tooltip-status {
+    font-size: 10.5px;
+    color: var(--text-tertiary);
+    margin-top: 6px;
+    font-style: italic;
+  }
+  .stv2-tooltip-status.is-done {
+    color: var(--day-color, #6BE3A4);
+    font-weight: 700;
+    font-style: normal;
+  }
+
+  .stv2-zoom-controls {
+    position: absolute;
+    bottom: 14px;
+    right: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    z-index: 5;
+  }
+  .stv2-zoom-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: rgba(20, 20, 22, 0.85);
+    border: 1px solid rgba(255,255,255,0.10);
+    color: var(--text-primary);
+    cursor: pointer;
+    font-size: 16px;
+    font-family: inherit;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s ease, border-color 0.2s ease;
+    backdrop-filter: blur(6px);
+  }
+  .stv2-zoom-btn:hover {
+    background: rgba(255,255,255,0.10);
+    border-color: rgba(255,255,255,0.25);
+  }
+
+  .stv2-hint {
+    margin-top: 10px;
+    font-size: 11px;
+    color: var(--text-tertiary);
+    text-align: center;
+    font-style: italic;
+    letter-spacing: 0.04em;
+  }
+
+  .stv2-mastery-burst {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    border-radius: 16px;
+    box-shadow: inset 0 0 0 2px transparent;
+    animation: stv2-mastery 1.4s ease;
+  }
+  @keyframes stv2-mastery {
+    0%   { box-shadow: inset 0 0 0 0 #F2C063, inset 0 0 0 0 rgba(242,192,99,0); }
+    35%  { box-shadow: inset 0 0 0 3px #F2C063, inset 0 0 100px rgba(242,192,99,0.4); }
+    100% { box-shadow: inset 0 0 0 0 transparent, inset 0 0 0 0 transparent; }
+  }
+
+  @media (max-width: 480px) {
+    .stv2-title { font-size: 24px; }
+    .stv2-canvas-wrap { height: 70vh; }
+    .stv2-tooltip { font-size: 12px; max-width: 260px; }
+  }
+
   /* Auth gate (Clerk) */
   body.auth-pending > *:not(.auth-gate):not(#authGate) {
     visibility: hidden;
@@ -2603,6 +2838,7 @@
   <button class="tab-btn" data-tab="calendar" type="button">Calendar</button>
   <button class="tab-btn" data-tab="portal" type="button">Portal</button>
   <button class="tab-btn" data-tab="skilltree" type="button">Skilltree</button>
+  <button class="tab-btn" data-tab="skilltree-v2" type="button">Skilltree v2</button>
 </nav>
 
 <div class="tab-panel is-active" data-tab="dashboard">
@@ -2801,6 +3037,16 @@
     <div id="stContent"></div>
   </div>
 </div><!-- /tab-panel skilltree -->
+
+<div class="tab-panel" data-tab="skilltree-v2">
+  <div class="section">
+    <div class="section-title">Skilltree · Gate of Fates</div>
+    <div class="stv2-module-tabs" id="stv2ModuleTabs"></div>
+    <div class="stv2-header" id="stv2Header"></div>
+    <div class="stv2-canvas-wrap" id="stv2CanvasWrap"></div>
+    <div class="stv2-hint">Drag to pan · Scroll to zoom · Click a node to toggle</div>
+  </div>
+</div><!-- /tab-panel skilltree-v2 -->
 
 <div class="cal-modal-bg" id="portalModalBg" style="display:none;">
   <div class="cal-modal portal-modal" role="dialog" aria-modal="true">
@@ -5247,6 +5493,536 @@ Right-click any image on Pinterest and choose &quot;Copy image address&quot;."><
     }
   }
 
+  // ─── Skilltree v2 (Gate of Fates) ─────────────────────────────────
+  const SVG_NS = 'http://www.w3.org/2000/svg';
+  let stv2State = {
+    moduleId: SKILLTREE_MODULES[0].id,
+    nodes: [],
+    lines: [],
+    rendered: false,
+    viewBox: { x: -900, y: -900, w: 1800, h: 1800 },
+    tooltipFor: null
+  };
+
+  function stv2FanOffset(idx, total, spread) {
+    if (total === 1) return 0;
+    return ((idx + 0.5) / total - 0.5) * spread;
+  }
+
+  function stv2NodeIsLit(node, state, module) {
+    if (node.type === 'hub') {
+      for (const k in state) if (state[k]) return true;
+      return false;
+    }
+    if (node.type === 'task') return !!state[node.taskId];
+    if (node.type === 'subgroup') return computeSubgroupStats(module, node.chIdx, node.sgIdx, state).complete;
+    if (node.type === 'chapter') return computeChapterStats(module, node.chIdx, state).complete;
+    return false;
+  }
+
+  function stv2LineIsLit(line, state, module) {
+    // A line is lit when its outer endpoint is lit (path traveled outward).
+    if (line.toType === 'chapter') return computeChapterStats(module, line.toChIdx, state).complete;
+    if (line.toType === 'subgroup') return computeSubgroupStats(module, line.toChIdx, line.toSgIdx, state).complete;
+    if (line.toType === 'task') return !!state[stTaskId(module.id, line.toChIdx, line.toSgIdx, line.toTIdx)];
+    return false;
+  }
+
+  function stv2RefreshLitState() {
+    const module = SKILLTREE_MODULES.find(m => m.id === stv2State.moduleId) || SKILLTREE_MODULES[0];
+    const state = getSkilltreeState();
+    for (const n of stv2State.nodes) {
+      n.el.classList.toggle('is-done', stv2NodeIsLit(n, state, module));
+    }
+    for (const ln of stv2State.lines) {
+      ln.el.classList.toggle('is-lit', stv2LineIsLit(ln, state, module));
+    }
+    // Update header counter
+    let total = 0, done = 0;
+    module.chapters.forEach((c, i) => {
+      const s = computeChapterStats(module, i, state);
+      total += s.total; done += s.done;
+    });
+    const pctEl = document.querySelector('.stv2-progress-text');
+    if (pctEl) {
+      const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+      pctEl.textContent = done + ' / ' + total + ' · ' + pct + '%';
+    }
+  }
+
+  function stv2CreateNode(data, r) {
+    const g = document.createElementNS(SVG_NS, 'g');
+    g.setAttribute('class', 'stv2-node stv2-node-' + data.type);
+    g.setAttribute('transform', 'translate(' + data.x + ',' + data.y + ')');
+    g.style.setProperty('--day-color', data.color);
+    if (data.taskId) g.dataset.taskId = data.taskId;
+    if (data.chIdx !== undefined) g.dataset.chIdx = data.chIdx;
+    if (data.sgIdx !== undefined) g.dataset.sgIdx = data.sgIdx;
+    if (data.tIdx !== undefined) g.dataset.tIdx = data.tIdx;
+
+    const glow = document.createElementNS(SVG_NS, 'circle');
+    glow.setAttribute('r', r * 2.4);
+    glow.setAttribute('class', 'stv2-node-glow');
+    g.appendChild(glow);
+
+    const bg = document.createElementNS(SVG_NS, 'circle');
+    bg.setAttribute('r', r);
+    bg.setAttribute('class', 'stv2-node-bg');
+    g.appendChild(bg);
+
+    const inner = document.createElementNS(SVG_NS, 'circle');
+    inner.setAttribute('r', r * 0.45);
+    inner.setAttribute('class', 'stv2-node-inner');
+    g.appendChild(inner);
+
+    return g;
+  }
+
+  function stv2CreateLine(x1, y1, x2, y2, color) {
+    const line = document.createElementNS(SVG_NS, 'line');
+    line.setAttribute('x1', x1);
+    line.setAttribute('y1', y1);
+    line.setAttribute('x2', x2);
+    line.setAttribute('y2', y2);
+    line.setAttribute('class', 'stv2-line');
+    line.style.setProperty('--day-color', color);
+    return line;
+  }
+
+  function renderSkilltreeV2() {
+    const wrap = document.getElementById('stv2CanvasWrap');
+    const headerEl = document.getElementById('stv2Header');
+    const tabsEl = document.getElementById('stv2ModuleTabs');
+    if (!wrap || !headerEl || !tabsEl) return;
+
+    const module = SKILLTREE_MODULES.find(m => m.id === stv2State.moduleId) || SKILLTREE_MODULES[0];
+    const state = getSkilltreeState();
+
+    // Module tabs
+    tabsEl.innerHTML = '';
+    SKILLTREE_MODULES.forEach(m => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'st-module-tab' + (m.id === stv2State.moduleId ? ' is-active' : '');
+      btn.innerHTML = '<span class="st-module-tab-icon">' + m.icon + '</span><span class="st-module-tab-name">' + m.name + '</span>';
+      btn.addEventListener('click', () => {
+        stv2State.moduleId = m.id;
+        stv2State.viewBox = { x: -900, y: -900, w: 1800, h: 1800 };
+        renderSkilltreeV2();
+      });
+      tabsEl.appendChild(btn);
+    });
+    SKILLTREE_LOCKED_MODULES.forEach(m => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'st-module-tab is-locked';
+      btn.disabled = true;
+      btn.innerHTML = '<span class="st-module-tab-icon">' + m.icon + '</span><span class="st-module-tab-name">' + m.name + '</span>';
+      tabsEl.appendChild(btn);
+    });
+
+    // Header
+    let totalTasks = 0, doneTasks = 0;
+    module.chapters.forEach((c, i) => {
+      const s = computeChapterStats(module, i, state);
+      totalTasks += s.total; doneTasks += s.done;
+    });
+    const pct = totalTasks > 0 ? Math.round((doneTasks / totalTasks) * 100) : 0;
+    headerEl.innerHTML =
+      '<div class="stv2-title">' + module.name + '</div>' +
+      '<div class="stv2-subtitle">' + module.subtitle + '</div>' +
+      '<div class="stv2-progress-text">' + doneTasks + ' / ' + totalTasks + ' · ' + pct + '%</div>';
+
+    // Build SVG
+    wrap.innerHTML =
+      '<svg id="stv2Svg" xmlns="http://www.w3.org/2000/svg" viewBox="' +
+        stv2State.viewBox.x + ' ' + stv2State.viewBox.y + ' ' +
+        stv2State.viewBox.w + ' ' + stv2State.viewBox.h + '" preserveAspectRatio="xMidYMid meet">' +
+        '<g id="stv2Stars" class="stv2-stars"></g>' +
+        '<circle class="stv2-ring" cx="0" cy="0" r="240"/>' +
+        '<circle class="stv2-ring" cx="0" cy="0" r="440"/>' +
+        '<circle class="stv2-ring" cx="0" cy="0" r="640"/>' +
+        '<g id="stv2LinesG"></g>' +
+        '<g id="stv2NodesG"></g>' +
+      '</svg>' +
+      '<div class="stv2-tooltip" id="stv2Tooltip" style="display:none;">' +
+        '<div class="stv2-tooltip-meta"></div>' +
+        '<div class="stv2-tooltip-title"></div>' +
+        '<div class="stv2-tooltip-status">— not completed</div>' +
+      '</div>' +
+      '<div class="stv2-zoom-controls">' +
+        '<button class="stv2-zoom-btn" id="stv2ZoomIn" type="button" title="Zoom in">+</button>' +
+        '<button class="stv2-zoom-btn" id="stv2ZoomOut" type="button" title="Zoom out">−</button>' +
+        '<button class="stv2-zoom-btn" id="stv2ZoomFit" type="button" title="Fit">⊙</button>' +
+      '</div>';
+
+    const svg = document.getElementById('stv2Svg');
+    const starsG = document.getElementById('stv2Stars');
+    const linesG = document.getElementById('stv2LinesG');
+    const nodesG = document.getElementById('stv2NodesG');
+
+    // Stars
+    for (let i = 0; i < 240; i++) {
+      const star = document.createElementNS(SVG_NS, 'circle');
+      const a = Math.random() * 2 * Math.PI;
+      const rad = 80 + Math.pow(Math.random(), 0.7) * 850;
+      star.setAttribute('cx', rad * Math.cos(a));
+      star.setAttribute('cy', rad * Math.sin(a));
+      star.setAttribute('r', 0.4 + Math.random() * 1.3);
+      star.setAttribute('fill', 'rgba(255,255,255,' + (0.18 + Math.random() * 0.45) + ')');
+      starsG.appendChild(star);
+    }
+
+    stv2State.nodes = [];
+    stv2State.lines = [];
+
+    // HUB
+    const hubData = { type: 'hub', x: 0, y: 0, color: '#FFD89E', label: module.name, meta: 'CENTRO' };
+    const hubEl = stv2CreateNode(hubData, 28);
+    nodesG.appendChild(hubEl);
+    stv2State.nodes.push({ ...hubData, el: hubEl });
+
+    const N = module.chapters.length;
+    module.chapters.forEach((ch, chIdx) => {
+      const chAngle = (chIdx / N) * 2 * Math.PI - Math.PI / 2;
+      const chR = 240;
+      const chX = chR * Math.cos(chAngle);
+      const chY = chR * Math.sin(chAngle);
+
+      const chData = {
+        type: 'chapter', x: chX, y: chY, color: ch.color, chIdx,
+        label: ch.name, meta: ch.subtitle || 'CAPÍTULO'
+      };
+      const chEl = stv2CreateNode(chData, 18);
+      nodesG.appendChild(chEl);
+      stv2State.nodes.push({ ...chData, el: chEl });
+
+      const hubLine = stv2CreateLine(0, 0, chX, chY, ch.color);
+      linesG.appendChild(hubLine);
+      stv2State.lines.push({ el: hubLine, fromType: 'hub', toType: 'chapter', toChIdx: chIdx, color: ch.color });
+
+      const wedgeSpread = (2 * Math.PI / N) * 0.85;
+      const numSg = ch.subgroups.length;
+
+      ch.subgroups.forEach((sg, sgIdx) => {
+        const sgAngle = chAngle + stv2FanOffset(sgIdx, numSg, wedgeSpread);
+        // Staggered radius: alternate near/far so subgroups don't all collide on one ring
+        const sgR = 180 + (sgIdx % 2) * 40;
+        const sgX = chX + sgR * Math.cos(sgAngle);
+        const sgY = chY + sgR * Math.sin(sgAngle);
+
+        const sgData = {
+          type: 'subgroup', x: sgX, y: sgY, color: ch.color, chIdx, sgIdx,
+          label: sg.name || ch.name, meta: 'VÍDEO / PRÁCTICA'
+        };
+        const sgEl = stv2CreateNode(sgData, 12);
+        nodesG.appendChild(sgEl);
+        stv2State.nodes.push({ ...sgData, el: sgEl });
+
+        const sgLine = stv2CreateLine(chX, chY, sgX, sgY, ch.color);
+        linesG.appendChild(sgLine);
+        stv2State.lines.push({ el: sgLine, fromType: 'chapter', toType: 'subgroup', toChIdx: chIdx, toSgIdx: sgIdx, color: ch.color });
+
+        // Tasks: fan outward in a 200° arc from the subgroup (away from chapter)
+        const taskWedge = 200 * Math.PI / 180;
+        const tNum = sg.tasks.length;
+        sg.tasks.forEach((taskText, tIdx) => {
+          const tAngle = sgAngle + stv2FanOffset(tIdx, tNum, taskWedge);
+          const tR = 75;
+          const tX = sgX + tR * Math.cos(tAngle);
+          const tY = sgY + tR * Math.sin(tAngle);
+
+          const taskId = stTaskId(module.id, chIdx, sgIdx, tIdx);
+          const tData = {
+            type: 'task', x: tX, y: tY, color: ch.color,
+            chIdx, sgIdx, tIdx, taskId,
+            label: taskText,
+            meta: ch.name + ' · ' + (sg.name || 'tarea')
+          };
+          const tEl = stv2CreateNode(tData, 8);
+          nodesG.appendChild(tEl);
+          stv2State.nodes.push({ ...tData, el: tEl });
+
+          const tLine = stv2CreateLine(sgX, sgY, tX, tY, ch.color);
+          linesG.appendChild(tLine);
+          stv2State.lines.push({ el: tLine, fromType: 'subgroup', toType: 'task', toChIdx: chIdx, toSgIdx: sgIdx, toTIdx: tIdx, color: ch.color });
+        });
+      });
+    });
+
+    stv2RefreshLitState();
+    stv2WireInteractions(svg, wrap);
+    stv2State.rendered = true;
+  }
+
+  function stv2UpdateViewBox(svg) {
+    svg.setAttribute('viewBox',
+      stv2State.viewBox.x + ' ' + stv2State.viewBox.y + ' ' +
+      stv2State.viewBox.w + ' ' + stv2State.viewBox.h);
+  }
+
+  function stv2Zoom(factor, anchorSvgX, anchorSvgY, svg) {
+    const v = stv2State.viewBox;
+    const newW = Math.max(500, Math.min(4000, v.w * factor));
+    const newH = newW * (v.h / v.w);
+    const rX = (anchorSvgX - v.x) / v.w;
+    const rY = (anchorSvgY - v.y) / v.h;
+    v.x = anchorSvgX - rX * newW;
+    v.y = anchorSvgY - rY * newH;
+    v.w = newW; v.h = newH;
+    stv2UpdateViewBox(svg);
+  }
+
+  function stv2ScreenToSvg(svg, clientX, clientY) {
+    const rect = svg.getBoundingClientRect();
+    return {
+      x: stv2State.viewBox.x + ((clientX - rect.left) / rect.width) * stv2State.viewBox.w,
+      y: stv2State.viewBox.y + ((clientY - rect.top) / rect.height) * stv2State.viewBox.h
+    };
+  }
+
+  function stv2WireInteractions(svg, wrap) {
+    let isPanning = false;
+    let panStart = null;
+
+    svg.addEventListener('mousedown', (e) => {
+      if (e.target.closest('.stv2-node')) return;
+      isPanning = true;
+      wrap.classList.add('is-panning');
+      panStart = { cx: e.clientX, cy: e.clientY, vx: stv2State.viewBox.x, vy: stv2State.viewBox.y };
+    });
+    document.addEventListener('mousemove', (e) => {
+      if (!isPanning) return;
+      const rect = svg.getBoundingClientRect();
+      const sx = stv2State.viewBox.w / rect.width;
+      const sy = stv2State.viewBox.h / rect.height;
+      stv2State.viewBox.x = panStart.vx - (e.clientX - panStart.cx) * sx;
+      stv2State.viewBox.y = panStart.vy - (e.clientY - panStart.cy) * sy;
+      stv2UpdateViewBox(svg);
+    });
+    document.addEventListener('mouseup', () => {
+      if (isPanning) { isPanning = false; wrap.classList.remove('is-panning'); }
+    });
+
+    svg.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      const p = stv2ScreenToSvg(svg, e.clientX, e.clientY);
+      stv2Zoom(e.deltaY > 0 ? 1.12 : 0.88, p.x, p.y, svg);
+    }, { passive: false });
+
+    // Touch — single-finger pan + two-finger pinch zoom
+    let touchPanStart = null, pinchStart = null;
+    svg.addEventListener('touchstart', (e) => {
+      if (e.target.closest('.stv2-node') && e.touches.length === 1) return;
+      if (e.touches.length === 1) {
+        touchPanStart = { cx: e.touches[0].clientX, cy: e.touches[0].clientY,
+                          vx: stv2State.viewBox.x, vy: stv2State.viewBox.y };
+      } else if (e.touches.length === 2) {
+        touchPanStart = null;
+        const dx = e.touches[0].clientX - e.touches[1].clientX;
+        const dy = e.touches[0].clientY - e.touches[1].clientY;
+        pinchStart = { dist: Math.hypot(dx, dy), vw: stv2State.viewBox.w };
+      }
+    }, { passive: false });
+    svg.addEventListener('touchmove', (e) => {
+      if (touchPanStart && e.touches.length === 1) {
+        e.preventDefault();
+        const rect = svg.getBoundingClientRect();
+        const sx = stv2State.viewBox.w / rect.width;
+        const sy = stv2State.viewBox.h / rect.height;
+        stv2State.viewBox.x = touchPanStart.vx - (e.touches[0].clientX - touchPanStart.cx) * sx;
+        stv2State.viewBox.y = touchPanStart.vy - (e.touches[0].clientY - touchPanStart.cy) * sy;
+        stv2UpdateViewBox(svg);
+      } else if (pinchStart && e.touches.length === 2) {
+        e.preventDefault();
+        const dx = e.touches[0].clientX - e.touches[1].clientX;
+        const dy = e.touches[0].clientY - e.touches[1].clientY;
+        const dist = Math.hypot(dx, dy);
+        const factor = pinchStart.dist / dist;
+        const midCX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+        const midCY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+        const p = stv2ScreenToSvg(svg, midCX, midCY);
+        const target = Math.max(500, Math.min(4000, pinchStart.vw * factor));
+        const v = stv2State.viewBox;
+        const newW = target;
+        const newH = newW * (v.h / v.w);
+        const rX = (p.x - v.x) / v.w;
+        const rY = (p.y - v.y) / v.h;
+        v.x = p.x - rX * newW; v.y = p.y - rY * newH;
+        v.w = newW; v.h = newH;
+        stv2UpdateViewBox(svg);
+      }
+    }, { passive: false });
+    svg.addEventListener('touchend', (e) => {
+      if (e.touches.length === 0) { touchPanStart = null; pinchStart = null; }
+    });
+
+    // Zoom buttons
+    const c = stv2State.viewBox;
+    document.getElementById('stv2ZoomIn').addEventListener('click', () => {
+      stv2Zoom(0.85, c.x + c.w / 2, c.y + c.h / 2, svg);
+    });
+    document.getElementById('stv2ZoomOut').addEventListener('click', () => {
+      stv2Zoom(1.18, c.x + c.w / 2, c.y + c.h / 2, svg);
+    });
+    document.getElementById('stv2ZoomFit').addEventListener('click', () => {
+      stv2State.viewBox = { x: -900, y: -900, w: 1800, h: 1800 };
+      stv2UpdateViewBox(svg);
+    });
+
+    // Hover for tooltip + click
+    svg.addEventListener('mouseover', (e) => {
+      const nodeEl = e.target.closest('.stv2-node');
+      if (!nodeEl) return;
+      const nodeData = stv2State.nodes.find(n => n.el === nodeEl);
+      if (!nodeData) return;
+      stv2ShowTooltip(nodeData, e);
+    });
+    svg.addEventListener('mousemove', (e) => {
+      const tt = document.getElementById('stv2Tooltip');
+      if (tt && tt.style.display !== 'none') stv2PositionTooltip(e.clientX, e.clientY);
+    });
+    svg.addEventListener('mouseout', (e) => {
+      const nodeEl = e.target.closest('.stv2-node');
+      if (!nodeEl) return;
+      stv2HideTooltip();
+    });
+
+    svg.addEventListener('click', (e) => {
+      const nodeEl = e.target.closest('.stv2-node-task');
+      if (!nodeEl) return;
+      stv2OnTaskClick(nodeEl);
+    });
+  }
+
+  function stv2ShowTooltip(nodeData, e) {
+    const tt = document.getElementById('stv2Tooltip');
+    if (!tt) return;
+    const module = SKILLTREE_MODULES.find(m => m.id === stv2State.moduleId) || SKILLTREE_MODULES[0];
+    const state = getSkilltreeState();
+    tt.querySelector('.stv2-tooltip-meta').textContent = nodeData.meta || '';
+    tt.querySelector('.stv2-tooltip-title').textContent = nodeData.label;
+    const status = tt.querySelector('.stv2-tooltip-status');
+    const lit = stv2NodeIsLit(nodeData, state, module);
+    if (nodeData.type === 'task') {
+      status.textContent = lit ? '✓ Completed' : '— click to complete';
+      status.classList.toggle('is-done', lit);
+    } else {
+      const sub = (nodeData.type === 'hub') ? null :
+        (nodeData.type === 'chapter' ? computeChapterStats(module, nodeData.chIdx, state)
+         : computeSubgroupStats(module, nodeData.chIdx, nodeData.sgIdx, state));
+      status.textContent = sub ? sub.done + ' / ' + sub.total + ' done' : '';
+      status.classList.toggle('is-done', lit);
+    }
+    tt.style.setProperty('--day-color', nodeData.color);
+    tt.style.display = '';
+    stv2PositionTooltip(e.clientX, e.clientY);
+  }
+  function stv2PositionTooltip(cx, cy) {
+    const tt = document.getElementById('stv2Tooltip');
+    if (!tt) return;
+    let x = cx + 14, y = cy + 14;
+    const r = tt.getBoundingClientRect();
+    if (x + r.width > window.innerWidth - 12) x = cx - r.width - 14;
+    if (y + r.height > window.innerHeight - 12) y = cy - r.height - 14;
+    if (x < 8) x = 8;
+    if (y < 8) y = 8;
+    tt.style.left = x + 'px';
+    tt.style.top = y + 'px';
+  }
+  function stv2HideTooltip() {
+    const tt = document.getElementById('stv2Tooltip');
+    if (tt) tt.style.display = 'none';
+  }
+
+  function stv2OnTaskClick(nodeEl) {
+    const module = SKILLTREE_MODULES.find(m => m.id === stv2State.moduleId) || SKILLTREE_MODULES[0];
+    const taskId = nodeEl.dataset.taskId;
+    if (!taskId) return;
+    const chIdx = parseInt(nodeEl.dataset.chIdx, 10);
+    const sgIdx = parseInt(nodeEl.dataset.sgIdx, 10);
+    const tIdx = parseInt(nodeEl.dataset.tIdx, 10);
+    const ch = module.chapters[chIdx];
+
+    const stateBefore = getSkilltreeState();
+    const wasDone = !!stateBefore[taskId];
+    const nowDone = !wasDone;
+    setSkilltreeTask(taskId, nowDone);
+    const state = getSkilltreeState();
+
+    stv2RefreshLitState();
+
+    const r = nodeEl.getBoundingClientRect();
+    const cx = r.left + r.width / 2;
+    const cy = r.top + r.height / 2;
+
+    if (!nowDone) {
+      if (navigator.vibrate) navigator.vibrate(6);
+      return;
+    }
+
+    burstAt(cx, cy, { count: 12, spread: 50, sizeMin: 4, sizeMax: 9, colors: [ch.color, '#FFFFFF', ch.color] });
+    chime('check');
+    if (navigator.vibrate) navigator.vibrate([8, 24, 10]);
+
+    // Subgroup just completed?
+    const sgNow = computeSubgroupStats(module, chIdx, sgIdx, state);
+    const sgBefore = computeSubgroupStats(module, chIdx, sgIdx, stateBefore);
+    if (sgNow.complete && !sgBefore.complete) {
+      setTimeout(() => {
+        chime('pop');
+        const sgNode = stv2State.nodes.find(n => n.type === 'subgroup' && n.chIdx === chIdx && n.sgIdx === sgIdx);
+        if (sgNode) {
+          const sr = sgNode.el.getBoundingClientRect();
+          burstAt(sr.left + sr.width / 2, sr.top + sr.height / 2, {
+            count: 14, spread: 70, colors: [ch.color, '#FFFFFF']
+          });
+        }
+      }, 140);
+    }
+
+    // Chapter just completed?
+    const chNow = computeChapterStats(module, chIdx, state);
+    const chBefore = computeChapterStats(module, chIdx, stateBefore);
+    if (chNow.complete && !chBefore.complete) {
+      setTimeout(() => {
+        chime('celebration');
+        if (navigator.vibrate) navigator.vibrate([12, 40, 30, 60, 50]);
+        const chNode = stv2State.nodes.find(n => n.type === 'chapter' && n.chIdx === chIdx);
+        if (chNode) {
+          const cr = chNode.el.getBoundingClientRect();
+          spawnConfetti(cr, { count: 40, colors: [ch.color, '#FFFFFF', ch.color, '#FFD89E'] });
+        }
+      }, 240);
+    }
+
+    // Module mastery
+    let oldTotal = 0, oldDone = 0, newTotal = 0, newDone = 0;
+    module.chapters.forEach((c, i) => {
+      const a = computeChapterStats(module, i, stateBefore);
+      const b = computeChapterStats(module, i, state);
+      oldTotal += a.total; oldDone += a.done;
+      newTotal += b.total; newDone += b.done;
+    });
+    if (newDone === newTotal && oldDone < oldTotal) {
+      setTimeout(() => {
+        chime('finale');
+        const wrap = document.getElementById('stv2CanvasWrap');
+        if (wrap) {
+          const burst = document.createElement('div');
+          burst.className = 'stv2-mastery-burst';
+          wrap.appendChild(burst);
+          setTimeout(() => burst.remove(), 1450);
+        }
+        spawnConfetti(
+          { left: 0, top: -20, width: window.innerWidth, height: window.innerHeight * 0.5 },
+          { count: 90, colors: ['#F2C063','#FFD89E','#FFE4B0','#FFFFFF','#FFC857','#FF9F1C','#6BE3A4','#6BA8E3','#B89BE9','#FF8E72'] }
+        );
+        if (navigator.vibrate) navigator.vibrate([20, 60, 40, 60, 60, 80, 100]);
+      }, 420);
+    }
+  }
+
   // ─── Tabs ─────────────────────────────────────────────────────────
   function setActiveTab(name) {
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('is-active', b.dataset.tab === name));
@@ -5258,6 +6034,8 @@ Right-click any image on Pinterest and choose &quot;Copy image address&quot;."><
       loadPortalNotes();
     } else if (name === 'skilltree') {
       renderSkilltree();
+    } else if (name === 'skilltree-v2') {
+      renderSkilltreeV2();
     }
   }
   document.querySelectorAll('.tab-btn').forEach(b => {
