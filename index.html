@@ -1855,7 +1855,7 @@
     background: rgba(255,255,255,0.035);
     border: 1px solid rgba(255,255,255,0.06);
     color: var(--text-primary);
-    font-size: 15.5px;
+    font-size: var(--pv2-slide-text-size, 15.5px);
     font-family: inherit;
     line-height: 1.65;
     outline: none;
@@ -1968,6 +1968,65 @@
   }
   .pv2-slot.has-img .pv2-slot-placeholder { display: none; }
 
+  /* Portal v2 — text size control + scaled textareas */
+  .tab-panel[data-tab="portal"] {
+    --pv2-text-size: 16px;
+    --pv2-slide-text-size: 15.5px;
+  }
+  .tab-panel[data-tab="portal"][data-text-size="S"] {
+    --pv2-text-size: 14px;
+    --pv2-slide-text-size: 13.5px;
+  }
+  .tab-panel[data-tab="portal"][data-text-size="L"] {
+    --pv2-text-size: 21px;
+    --pv2-slide-text-size: 20px;
+  }
+  .pv2-tools {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    max-width: 1100px;
+    margin: 0 auto 32px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+  }
+  .pv2-tools-label {
+    flex: 1;
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--text-tertiary);
+  }
+  .pv2-size-btn {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.10);
+    color: var(--text-secondary);
+    cursor: pointer;
+    width: 34px;
+    height: 30px;
+    border-radius: 7px;
+    font-family: inherit;
+    font-weight: 700;
+    line-height: 1;
+    transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+    padding: 0;
+  }
+  .pv2-size-btn[data-size="S"] { font-size: 12px; }
+  .pv2-size-btn[data-size="M"] { font-size: 15px; }
+  .pv2-size-btn[data-size="L"] { font-size: 19px; }
+  .pv2-size-btn:hover {
+    background: rgba(255,255,255,0.08);
+    border-color: rgba(255,255,255,0.22);
+    color: var(--text-primary);
+  }
+  .pv2-size-btn.is-active {
+    background: rgba(242,192,99,0.14);
+    border-color: rgba(242,192,99,0.5);
+    color: #F2C063;
+  }
+
   /* Portal v2 textarea */
   .pv2-textarea {
     width: 100%;
@@ -1977,14 +2036,14 @@
     background: rgba(255,255,255,0.035);
     border: 1px solid rgba(255,255,255,0.06);
     color: var(--text-primary);
-    font-size: 16px;
+    font-size: var(--pv2-text-size, 16px);
     font-family: inherit;
     line-height: 1.65;
     outline: none;
     resize: vertical;
     font-weight: 500;
     letter-spacing: -0.005em;
-    transition: border-color 0.2s ease, background 0.2s ease;
+    transition: border-color 0.2s ease, background 0.2s ease, font-size 0.18s ease;
     box-sizing: border-box;
     white-space: pre-wrap;
   }
@@ -4329,6 +4388,13 @@
   <div class="section">
     <div class="section-title">Portal</div>
 
+    <div class="pv2-tools">
+      <span class="pv2-tools-label">— Tamaño de texto</span>
+      <button class="pv2-size-btn" type="button" data-size="S" aria-label="Tamaño pequeño">A</button>
+      <button class="pv2-size-btn is-active" type="button" data-size="M" aria-label="Tamaño medio">A</button>
+      <button class="pv2-size-btn" type="button" data-size="L" aria-label="Tamaño grande">A</button>
+    </div>
+
     <div class="pv2-block">
       <div class="pv2-eyebrow">— Mood board</div>
       <div class="pv2-board" id="pv2BoardInspiration"></div>
@@ -6365,6 +6431,40 @@
 
   // ─── Portal v2 — Notion-style mood board ─────────────────────────
   const PORTAL_V2_KEY = 'portal_v2_data';
+  const PORTAL_TEXT_SIZE_KEY = 'portal_text_size';
+
+  function getPortalTextSize() {
+    const v = storeGet(PORTAL_TEXT_SIZE_KEY);
+    return (v === 'S' || v === 'L') ? v : 'M';
+  }
+  function setPortalTextSize(size) {
+    storeSet(PORTAL_TEXT_SIZE_KEY, size);
+  }
+  function applyPortalTextSize(size) {
+    const panel = document.querySelector('.tab-panel[data-tab="portal"]');
+    if (!panel) return;
+    if (size === 'M') panel.removeAttribute('data-text-size');
+    else panel.setAttribute('data-text-size', size);
+    document.querySelectorAll('.pv2-size-btn').forEach(b => {
+      b.classList.toggle('is-active', b.dataset.size === size);
+    });
+  }
+  let _pv2TextSizeWired = false;
+  function setupPortalTextSize() {
+    if (_pv2TextSizeWired) return;
+    const btns = document.querySelectorAll('.pv2-size-btn');
+    if (!btns.length) return;
+    _pv2TextSizeWired = true;
+    btns.forEach(b => {
+      b.addEventListener('click', () => {
+        const size = b.dataset.size;
+        setPortalTextSize(size);
+        applyPortalTextSize(size);
+        if (typeof chime === 'function') chime('pop');
+      });
+    });
+    applyPortalTextSize(getPortalTextSize());
+  }
   const EMPTY_SLOT = { url: '', x: 50, y: 50 };
 
   function normalizeSlot(v) {
@@ -6742,6 +6842,7 @@
   }
 
   function renderPortalV2() {
+    setupPortalTextSize();
     const data = getPortalV2Data();
 
     // Inspiration board: 4 top (340×453) + 4 bottom (340×639)
