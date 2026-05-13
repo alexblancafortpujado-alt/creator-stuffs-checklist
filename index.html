@@ -1917,7 +1917,46 @@
     height: 100%;
     object-fit: cover;
     display: block;
+    transform-origin: center center;
+    transition: transform 0.18s ease;
+    will-change: transform;
   }
+  .pv2-slot.is-panning img,
+  .pv2-slot.is-zooming img { transition: none; }
+
+  .pv2-slot-zoom-controls {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    display: none;
+    gap: 4px;
+    z-index: 2;
+  }
+  .pv2-slot.has-img:hover .pv2-slot-zoom-controls { display: flex; }
+  .pv2-slot-zoom-btn {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: rgba(0,0,0,0.6);
+    border: 1px solid rgba(255,255,255,0.25);
+    color: #fff;
+    font-size: 14px;
+    line-height: 1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: inherit;
+    padding: 0;
+    transition: background 0.15s ease, border-color 0.15s ease;
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+  }
+  .pv2-slot-zoom-btn:hover {
+    background: rgba(0,0,0,0.85);
+    border-color: rgba(255,255,255,0.55);
+  }
+  .pv2-slot-zoom-btn:active { transform: scale(0.95); }
   .pv2-slot-placeholder {
     font-size: 11px;
     color: var(--text-tertiary);
@@ -6329,15 +6368,29 @@
   const EMPTY_SLOT = { url: '', x: 50, y: 50 };
 
   function normalizeSlot(v) {
-    if (typeof v === 'string') return { url: v, x: 50, y: 50 };
-    if (v && typeof v === 'object') {
-      return {
-        url: typeof v.url === 'string' ? v.url : '',
-        x: typeof v.x === 'number' ? v.x : 50,
-        y: typeof v.y === 'number' ? v.y : 50
-      };
+    if (typeof v === 'string') {
+      return { url: v, panX: 0, panY: 0, zoom: 1 };
     }
-    return { url: '', x: 50, y: 50 };
+    if (v && typeof v === 'object') {
+      const url = typeof v.url === 'string' ? v.url : '';
+      // New schema
+      if (typeof v.panX === 'number' || typeof v.panY === 'number' || typeof v.zoom === 'number') {
+        return {
+          url,
+          panX: typeof v.panX === 'number' ? v.panX : 0,
+          panY: typeof v.panY === 'number' ? v.panY : 0,
+          zoom: typeof v.zoom === 'number' ? v.zoom : 1
+        };
+      }
+      // Legacy schema {url, x, y} (object-position 0..100) → approximate translate
+      if (typeof v.x === 'number' || typeof v.y === 'number') {
+        const x = typeof v.x === 'number' ? v.x : 50;
+        const y = typeof v.y === 'number' ? v.y : 50;
+        return { url, panX: (50 - x), panY: (50 - y), zoom: 1 };
+      }
+      return { url, panX: 0, panY: 0, zoom: 1 };
+    }
+    return { url: '', panX: 0, panY: 0, zoom: 1 };
   }
   function normalizeSlotArray(arr, len) {
     const out = [];
@@ -6375,6 +6428,13 @@
   function setPortalV2Data(data) { storeSet(PORTAL_V2_KEY, data); }
 
   function clampPct(n) { return Math.max(0, Math.min(100, n)); }
+  function pv2MaxPan(zoom) { return 50 * Math.max(1, zoom); }
+  function pv2ClampPan(value, zoom) {
+    const m = pv2MaxPan(zoom);
+    return Math.max(-m, Math.min(m, value));
+  }
+  const PV2_ZOOM_MIN = 1;
+  const PV2_ZOOM_MAX = 4;
 
   // ─── Portal v2 lightbox ──────────────────────────────────────────
   let _pv2LbZoom = 1;
@@ -6516,9 +6576,13 @@
       img.src = slotData.url;
       img.alt = '';
       img.draggable = false;
-      img.style.objectPosition = (slotData.x ?? 50) + '% ' + (slotData.y ?? 50) + '%';
+      const panX = slotData.panX ?? 0;
+      const panY = slotData.panY ?? 0;
+      const zoom = slotData.zoom ?? 1;
+      img.style.transform = 'translate(' + panX + '%, ' + panY + '%) scale(' + zoom + ')';
       slot.classList.add('has-img');
-      slot.appendChild(img);
+      // Insert image before any non-img children (zoom controls) so it stays beneath them.
+      slot.insertBefore(img, slot.firstChild);
     } else {
       slot.classList.remove('has-img');
     }
@@ -6527,6 +6591,45 @@
   function wirePv2Slot(slot, getData, setData) {
     let panState = null;
     let suppressClickUntil = 0;
+
+    // Zoom controls (revealed on hover via CSS)
+    const controls = document.createElement('div');
+    controls.className = 'pv2-slot-zoom-controls';
+    const zOut = document.createElement('button');
+    zOut.className = 'pv2-slot-zoom-btn';
+    zOut.type = 'button';
+    zOut.textContent = '−';
+    zOut.title = 'Zoom out';
+    zOut.setAttribute('aria-label', 'Zoom out');
+    const zIn = document.createElement('button');
+    zIn.className = 'pv2-slot-zoom-btn';
+    zIn.type = 'button';
+    zIn.textContent = '+';
+    zIn.title = 'Zoom in';
+    zIn.setAttribute('aria-label', 'Zoom in');
+    controls.appendChild(zOut);
+    controls.appendChild(zIn);
+    slot.appendChild(controls);
+
+    function applyZoom(factor) {
+      const current = getData();
+      if (!current.url) return;
+      const newZoom = Math.max(PV2_ZOOM_MIN, Math.min(PV2_ZOOM_MAX, (current.zoom ?? 1) * factor));
+      const next = {
+        url: current.url,
+        panX: pv2ClampPan(current.panX ?? 0, newZoom),
+        panY: pv2ClampPan(current.panY ?? 0, newZoom),
+        zoom: newZoom
+      };
+      if (newZoom === 1) { next.panX = 0; next.panY = 0; }
+      setData(next);
+      suppressClickUntil = Date.now() + 200;
+    }
+    zIn.addEventListener('click', (e) => { e.stopPropagation(); applyZoom(1.25); });
+    zOut.addEventListener('click', (e) => { e.stopPropagation(); applyZoom(1 / 1.25); });
+    // Mousedown on buttons must NOT start a pan
+    zIn.addEventListener('mousedown', (e) => e.stopPropagation());
+    zOut.addEventListener('mousedown', (e) => e.stopPropagation());
 
     slot.addEventListener('mousedown', (e) => {
       if (e.button !== 0) return;
@@ -6539,10 +6642,11 @@
       panState = {
         startX: e.clientX,
         startY: e.clientY,
-        origX: current.x ?? 50,
-        origY: current.y ?? 50,
-        curX: current.x ?? 50,
-        curY: current.y ?? 50,
+        origPanX: current.panX ?? 0,
+        origPanY: current.panY ?? 0,
+        zoom: current.zoom ?? 1,
+        curPanX: current.panX ?? 0,
+        curPanY: current.panY ?? 0,
         moved: false,
         img,
         rect
@@ -6557,11 +6661,11 @@
       const dx = e.clientX - panState.startX;
       const dy = e.clientY - panState.startY;
       if (Math.abs(dx) > 3 || Math.abs(dy) > 3) panState.moved = true;
-      // Dragging the image right should reveal more of the LEFT side,
-      // so decrease object-position-x.
-      panState.curX = clampPct(panState.origX - (dx / panState.rect.width) * 100);
-      panState.curY = clampPct(panState.origY - (dy / panState.rect.height) * 100);
-      panState.img.style.objectPosition = panState.curX + '% ' + panState.curY + '%';
+      // Dragging right moves the image right (positive translate-x), revealing more
+      // of the image's LEFT side on the LEFT side of the slot.
+      panState.curPanX = pv2ClampPan(panState.origPanX + (dx / panState.rect.width) * 100, panState.zoom);
+      panState.curPanY = pv2ClampPan(panState.origPanY + (dy / panState.rect.height) * 100, panState.zoom);
+      panState.img.style.transform = 'translate(' + panState.curPanX + '%, ' + panState.curPanY + '%) scale(' + panState.zoom + ')';
     }
 
     function onPanUp() {
@@ -6570,7 +6674,12 @@
       slot.classList.remove('is-panning');
       if (panState && panState.moved) {
         const current = getData();
-        setData({ url: current.url, x: panState.curX, y: panState.curY });
+        setData({
+          url: current.url,
+          panX: panState.curPanX,
+          panY: panState.curPanY,
+          zoom: panState.zoom
+        });
         suppressClickUntil = Date.now() + 200;
       }
       panState = null;
@@ -6588,7 +6697,7 @@
       const trimmed = url.trim();
       if (trimmed === '') return;
       if (!/^https?:\/\//.test(trimmed)) { alert('URL must start with http:// or https://'); return; }
-      setData({ url: trimmed, x: 50, y: 50 });
+      setData({ url: trimmed, panX: 0, panY: 0, zoom: 1 });
       const r = slot.getBoundingClientRect();
       if (typeof burstAt === 'function') {
         burstAt(r.left + r.width / 2, r.top + r.height / 2, { count: 10, spread: 60, colors: ['#6BE3A4', '#FFFFFF', '#FFD89E'] });
@@ -6606,7 +6715,7 @@
       slot.classList.remove('is-drag-over');
       const url = extractDroppedUrl(e);
       if (!url) return;
-      setData({ url, x: 50, y: 50 });
+      setData({ url, panX: 0, panY: 0, zoom: 1 });
       const r = slot.getBoundingClientRect();
       if (typeof burstAt === 'function') {
         burstAt(r.left + r.width / 2, r.top + r.height / 2, { count: 14, spread: 80, colors: ['#6BE3A4', '#FFFFFF', '#FFD89E'] });
@@ -6616,7 +6725,7 @@
     slot.addEventListener('contextmenu', (e) => {
       e.preventDefault();
       if (!slot.classList.contains('has-img')) return;
-      if (confirm('Remove this image?')) setData({ url: '', x: 50, y: 50 });
+      if (confirm('Remove this image?')) setData({ url: '', panX: 0, panY: 0, zoom: 1 });
     });
   }
 
