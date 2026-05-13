@@ -2511,14 +2511,14 @@
 
   .stv2-ring {
     fill: none;
-    stroke: rgba(255,255,255,0.04);
+    stroke: rgba(255,255,255,0.07);
     stroke-width: 1;
-    stroke-dasharray: 3, 6;
+    stroke-dasharray: 4, 8;
   }
 
   .stv2-line {
-    stroke: rgba(255,255,255,0.09);
-    stroke-width: 1.4;
+    stroke: rgba(255,255,255,0.16);
+    stroke-width: 1.5;
     fill: none;
     transition: stroke 0.45s ease, stroke-width 0.45s ease, opacity 0.45s ease, filter 0.45s ease;
   }
@@ -2563,22 +2563,23 @@
   .stv2-node { cursor: pointer; }
   .stv2-node-glow {
     fill: var(--day-color);
-    opacity: 0;
+    opacity: 0.14;
     pointer-events: none;
     transition: opacity 0.5s ease;
   }
   .stv2-node-bg {
-    fill: #0E0E11;
-    stroke: rgba(255,255,255,0.20);
-    stroke-width: 1.5;
+    fill: #1B1B24;
+    stroke: rgba(255,255,255,0.36);
+    stroke-width: 1.8;
     transform-origin: center;
     transform-box: fill-box;
     transition: stroke 0.3s ease, fill 0.4s ease, stroke-width 0.3s ease,
                 transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1),
                 filter 0.45s ease;
+    filter: drop-shadow(0 0 4px rgba(255,255,255,0.10));
   }
   .stv2-node-inner {
-    fill: rgba(255,255,255,0.06);
+    fill: rgba(255,255,255,0.22);
     pointer-events: none;
     transform-origin: center;
     transform-box: fill-box;
@@ -5652,7 +5653,7 @@ Right-click any image on Pinterest and choose &quot;Copy image address&quot;."><
 
   // ─── Skilltree v2 (Gate of Fates) ─────────────────────────────────
   const SVG_NS = 'http://www.w3.org/2000/svg';
-  const STV2_DEFAULT_VIEWBOX = { x: -1100, y: -1100, w: 2200, h: 2200 };
+  const STV2_DEFAULT_VIEWBOX = { x: -1300, y: -1300, w: 2600, h: 2600 };
   let stv2State = {
     moduleId: SKILLTREE_MODULES[0].id,
     nodes: [],
@@ -5720,7 +5721,7 @@ Right-click any image on Pinterest and choose &quot;Copy image address&quot;."><
 
     // Stagger spawn delay by radial distance
     const dist = Math.hypot(data.x, data.y);
-    const delay = 0.05 + (dist / 800) * 0.5; // 50ms..650ms
+    const delay = 0.05 + (dist / 1000) * 0.55; // 50ms..600ms-ish
     g.style.setProperty('--spawn-delay', delay.toFixed(3) + 's');
 
     // Spawn wrapper — allows entry animation without conflicting with hover scale
@@ -5838,9 +5839,9 @@ Right-click any image on Pinterest and choose &quot;Copy image address&quot;."><
         stv2State.viewBox.x + ' ' + stv2State.viewBox.y + ' ' +
         stv2State.viewBox.w + ' ' + stv2State.viewBox.h + '" preserveAspectRatio="xMidYMid meet">' +
         '<g id="stv2Stars" class="stv2-stars"></g>' +
-        '<circle class="stv2-ring" cx="0" cy="0" r="300"/>' +
-        '<circle class="stv2-ring" cx="0" cy="0" r="560"/>' +
-        '<circle class="stv2-ring" cx="0" cy="0" r="820"/>' +
+        '<circle class="stv2-ring" cx="0" cy="0" r="360"/>' +
+        '<circle class="stv2-ring" cx="0" cy="0" r="660"/>' +
+        '<circle class="stv2-ring" cx="0" cy="0" r="980"/>' +
         '<g id="stv2LinesG"></g>' +
         '<g id="stv2NodesG"></g>' +
         '<g id="stv2RippleG"></g>' +
@@ -5862,14 +5863,14 @@ Right-click any image on Pinterest and choose &quot;Copy image address&quot;."><
     const nodesG = document.getElementById('stv2NodesG');
 
     // Stars (with some twinkling)
-    for (let i = 0; i < 340; i++) {
+    for (let i = 0; i < 400; i++) {
       const star = document.createElementNS(SVG_NS, 'circle');
       const a = Math.random() * 2 * Math.PI;
-      const rad = 80 + Math.pow(Math.random(), 0.65) * 1080;
+      const rad = 80 + Math.pow(Math.random(), 0.6) * 1300;
       star.setAttribute('cx', rad * Math.cos(a));
       star.setAttribute('cy', rad * Math.sin(a));
-      star.setAttribute('r', 0.4 + Math.random() * 1.6);
-      star.setAttribute('fill', 'rgba(255,255,255,' + (0.18 + Math.random() * 0.55) + ')');
+      star.setAttribute('r', 0.4 + Math.random() * 1.7);
+      star.setAttribute('fill', 'rgba(255,255,255,' + (0.20 + Math.random() * 0.55) + ')');
       if (Math.random() < 0.35) {
         star.setAttribute('class', 'stv2-star-tw');
         star.style.animationDelay = (Math.random() * 4) + 's';
@@ -5882,14 +5883,14 @@ Right-click any image on Pinterest and choose &quot;Copy image address&quot;."><
 
     // HUB
     const hubData = { type: 'hub', x: 0, y: 0, color: '#FFD89E', label: module.name, meta: 'CENTRO' };
-    const hubEl = stv2CreateNode(hubData, 40);
+    const hubEl = stv2CreateNode(hubData, 46);
     nodesG.appendChild(hubEl);
     stv2State.nodes.push({ ...hubData, el: hubEl });
 
     const N = module.chapters.length;
     module.chapters.forEach((ch, chIdx) => {
       const chAngle = (chIdx / N) * 2 * Math.PI - Math.PI / 2;
-      const chR = 320;
+      const chR = 380;
       const chX = chR * Math.cos(chAngle);
       const chY = chR * Math.sin(chAngle);
 
@@ -5897,22 +5898,22 @@ Right-click any image on Pinterest and choose &quot;Copy image address&quot;."><
         type: 'chapter', x: chX, y: chY, color: ch.color, chIdx,
         label: ch.name, meta: ch.subtitle || 'CAPÍTULO'
       };
-      const chEl = stv2CreateNode(chData, 22);
+      const chEl = stv2CreateNode(chData, 26);
       nodesG.appendChild(chEl);
       stv2State.nodes.push({ ...chData, el: chEl });
 
-      const hubLine = stv2CreateLine(0, 0, chX, chY, ch.color, 0.05 + (Math.hypot(chX, chY) / 800) * 0.5);
+      const hubLine = stv2CreateLine(0, 0, chX, chY, ch.color, 0.05 + (Math.hypot(chX, chY) / 1000) * 0.55);
       linesG.appendChild(hubLine);
       stv2State.lines.push({ el: hubLine, fromType: 'hub', toType: 'chapter', toChIdx: chIdx, color: ch.color });
 
-      const wedgeSpread = (2 * Math.PI / N) * 0.86;
+      const wedgeSpread = (2 * Math.PI / N) * 0.88;
       const numSg = ch.subgroups.length;
 
       ch.subgroups.forEach((sg, sgIdx) => {
         const sgAngle = chAngle + stv2FanOffset(sgIdx, numSg, wedgeSpread);
-        // Staggered orbit: alternate three rings to spread crowded chapters like Día 1
-        const orbitOffset = (sgIdx % 3) * 70; // 0 / 70 / 140
-        const sgR = 200 + orbitOffset;
+        // Three-orbit stagger with wider spacing to fully separate crowded chapters (Día 1)
+        const orbitOffset = (sgIdx % 3) * 95; // 0 / 95 / 190
+        const sgR = 240 + orbitOffset;
         const sgX = chX + sgR * Math.cos(sgAngle);
         const sgY = chY + sgR * Math.sin(sgAngle);
 
@@ -5920,20 +5921,20 @@ Right-click any image on Pinterest and choose &quot;Copy image address&quot;."><
           type: 'subgroup', x: sgX, y: sgY, color: ch.color, chIdx, sgIdx,
           label: sg.name || ch.name, meta: 'VÍDEO / PRÁCTICA'
         };
-        const sgEl = stv2CreateNode(sgData, 14);
+        const sgEl = stv2CreateNode(sgData, 17);
         nodesG.appendChild(sgEl);
         stv2State.nodes.push({ ...sgData, el: sgEl });
 
-        const sgLine = stv2CreateLine(chX, chY, sgX, sgY, ch.color, 0.05 + (Math.hypot(sgX, sgY) / 800) * 0.5);
+        const sgLine = stv2CreateLine(chX, chY, sgX, sgY, ch.color, 0.05 + (Math.hypot(sgX, sgY) / 1000) * 0.55);
         linesG.appendChild(sgLine);
         stv2State.lines.push({ el: sgLine, fromType: 'chapter', toType: 'subgroup', toChIdx: chIdx, toSgIdx: sgIdx, color: ch.color });
 
-        // Tasks: fan outward in a 220° arc from the subgroup (away from chapter)
+        // Tasks: fan outward in a 220° arc with more room
         const taskWedge = 220 * Math.PI / 180;
         const tNum = sg.tasks.length;
         sg.tasks.forEach((taskText, tIdx) => {
           const tAngle = sgAngle + stv2FanOffset(tIdx, tNum, taskWedge);
-          const tR = 92;
+          const tR = 115;
           const tX = sgX + tR * Math.cos(tAngle);
           const tY = sgY + tR * Math.sin(tAngle);
 
@@ -5944,11 +5945,11 @@ Right-click any image on Pinterest and choose &quot;Copy image address&quot;."><
             label: taskText,
             meta: ch.name + ' · ' + (sg.name || 'tarea')
           };
-          const tEl = stv2CreateNode(tData, 10);
+          const tEl = stv2CreateNode(tData, 12);
           nodesG.appendChild(tEl);
           stv2State.nodes.push({ ...tData, el: tEl });
 
-          const tLine = stv2CreateLine(sgX, sgY, tX, tY, ch.color, 0.05 + (Math.hypot(tX, tY) / 800) * 0.5);
+          const tLine = stv2CreateLine(sgX, sgY, tX, tY, ch.color, 0.05 + (Math.hypot(tX, tY) / 1000) * 0.55);
           linesG.appendChild(tLine);
           stv2State.lines.push({ el: tLine, fromType: 'subgroup', toType: 'task', toChIdx: chIdx, toSgIdx: sgIdx, toTIdx: tIdx, color: ch.color });
         });
