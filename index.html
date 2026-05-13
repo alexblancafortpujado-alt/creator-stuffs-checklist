@@ -1996,6 +1996,23 @@
     color: var(--text-tertiary);
     font-weight: 400;
   }
+  /* contenteditable version */
+  div.pv2-textarea, div.pv2-slide-text {
+    overflow: auto;
+    cursor: text;
+  }
+  div.pv2-textarea:empty::before,
+  div.pv2-slide-text:empty::before {
+    content: attr(data-placeholder);
+    color: var(--text-tertiary);
+    font-weight: 400;
+    pointer-events: none;
+    white-space: pre-line;
+  }
+  div.pv2-textarea strong, div.pv2-slide-text strong {
+    font-weight: 800;
+    color: var(--text-primary);
+  }
 
   /* Portal v2 — image lightbox */
   .pv2-lightbox {
@@ -4336,7 +4353,7 @@
 
     <div class="pv2-block">
       <div class="pv2-eyebrow">— 10 creencias clave</div>
-      <textarea class="pv2-textarea" id="pv2Beliefs" placeholder="1. …&#10;2. …&#10;3. …" spellcheck="true"></textarea>
+      <div class="pv2-textarea" id="pv2Beliefs" contenteditable="true" spellcheck="true" data-placeholder="1. …&#10;2. …&#10;3. …"></div>
     </div>
 
     <div class="pv2-block">
@@ -4346,7 +4363,7 @@
 
     <div class="pv2-block">
       <div class="pv2-eyebrow">— Portal</div>
-      <textarea class="pv2-textarea" id="pv2PortalText" placeholder="Tu portal…" spellcheck="true"></textarea>
+      <div class="pv2-textarea" id="pv2PortalText" contenteditable="true" spellcheck="true" data-placeholder="Tu portal…"></div>
     </div>
 
     <div class="pv2-block">
@@ -4356,7 +4373,7 @@
 
     <div class="pv2-block">
       <div class="pv2-eyebrow">— Anti-portal</div>
-      <textarea class="pv2-textarea" id="pv2AntiportalText" placeholder="Tu anti-portal…" spellcheck="true"></textarea>
+      <div class="pv2-textarea" id="pv2AntiportalText" contenteditable="true" spellcheck="true" data-placeholder="Tu anti-portal…"></div>
     </div>
   </div>
 </div><!-- /tab-panel portal -->
@@ -6730,15 +6747,83 @@
   }
 
   const _pv2TextareaTimers = new WeakMap();
-  function setupPv2Textarea(ta, getValue, setValue) {
-    if (!ta) return;
-    if (ta.dataset.loaded === '1') return;
-    ta.value = getValue() || '';
-    ta.dataset.loaded = '1';
-    ta.addEventListener('input', () => {
-      clearTimeout(_pv2TextareaTimers.get(ta));
-      _pv2TextareaTimers.set(ta, setTimeout(() => setValue(ta.value), 300));
+
+  function _escapeHtml(s) {
+    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
+
+  function _loadRichValue(s) {
+    if (!s) return '';
+    if (typeof s !== 'string') return '';
+    // If the stored value already contains HTML tags we wrote (strong, br, span,
+    // div), trust it. Otherwise treat as plain text and convert **bold** markers.
+    if (/<\/?(strong|br|span|div|b)\b/i.test(s)) return s;
+    const escaped = _escapeHtml(s).replace(/\r?\n/g, '<br>');
+    return escaped.replace(/\*\*([^*\n]+?)\*\*/g, '<strong>$1</strong>');
+  }
+
+  function _installBoldShortcut(el) {
+    // When the user types the second `*` of a `**text**` pattern, replace the
+    // run with a <strong> element and remove the asterisks.
+    el.addEventListener('input', (e) => {
+      if (e.inputType !== 'insertText' || e.data !== '*') return;
+      const sel = window.getSelection();
+      if (!sel || !sel.rangeCount) return;
+      const range = sel.getRangeAt(0);
+      if (!range.collapsed) return;
+      const node = range.startContainer;
+      if (!node || node.nodeType !== Node.TEXT_NODE) return;
+      const text = node.textContent;
+      const cursor = range.startOffset;
+      if (cursor < 4) return;
+      if (text.charAt(cursor - 1) !== '*' || text.charAt(cursor - 2) !== '*') return;
+      const beforeClose = text.substring(0, cursor - 2);
+      const openMatch = beforeClose.match(/\*\*([^*\n]+)$/);
+      if (!openMatch) return;
+      const content = openMatch[1];
+      const openStart = beforeClose.length - openMatch[0].length;
+      const head = text.substring(0, openStart);
+      const tail = text.substring(cursor);
+
+      const parent = node.parentNode;
+      if (!parent) return;
+      const headNode = document.createTextNode(head);
+      const strong = document.createElement('strong');
+      strong.textContent = content;
+      const tailNode = document.createTextNode(tail || '​'); // zero-width so cursor has a place to land
+      parent.insertBefore(headNode, node);
+      parent.insertBefore(strong, node);
+      parent.insertBefore(tailNode, node);
+      parent.removeChild(node);
+
+      const newRange = document.createRange();
+      newRange.setStart(tailNode, 0);
+      newRange.collapse(true);
+      sel.removeAllRanges();
+      sel.addRange(newRange);
     });
+  }
+
+  function setupPv2Textarea(el, getValue, setValue) {
+    if (!el) return;
+    if (el.dataset.loaded === '1') return;
+    const isEditableDiv = el.getAttribute('contenteditable') === 'true';
+    if (isEditableDiv) {
+      el.innerHTML = _loadRichValue(getValue());
+      _installBoldShortcut(el); // register BEFORE the save handler so DOM is updated first
+      el.addEventListener('input', () => {
+        clearTimeout(_pv2TextareaTimers.get(el));
+        _pv2TextareaTimers.set(el, setTimeout(() => setValue(el.innerHTML), 300));
+      });
+    } else {
+      el.value = getValue() || '';
+      el.addEventListener('input', () => {
+        clearTimeout(_pv2TextareaTimers.get(el));
+        _pv2TextareaTimers.set(el, setTimeout(() => setValue(el.value), 300));
+      });
+    }
+    el.dataset.loaded = '1';
   }
 
   function renderPortalV2() {
@@ -6817,10 +6902,11 @@
       }
       body.appendChild(frame);
 
-      const ta = document.createElement('textarea');
+      const ta = document.createElement('div');
       ta.className = 'pv2-slide-text';
-      ta.spellcheck = true;
-      ta.placeholder = (isAnti ? 'Anti-slide ' : 'Slide ') + (s + 1) + '…';
+      ta.setAttribute('contenteditable', 'true');
+      ta.setAttribute('spellcheck', 'true');
+      ta.setAttribute('data-placeholder', (isAnti ? 'Anti-slide ' : 'Slide ') + (s + 1) + '…');
       setupPv2Textarea(ta,
         () => getPortalV2Data()[dataKey][sIdx].text,
         (v) => { const d = getPortalV2Data(); d[dataKey][sIdx].text = v; setPortalV2Data(d); });
