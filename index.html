@@ -3691,12 +3691,23 @@
     margin-bottom: 10px;
     flex-wrap: wrap;
   }
+  .admin-row-name {
+    font-size: 16px;
+    font-weight: 800;
+    color: var(--text-primary);
+    letter-spacing: -0.01em;
+  }
+  .admin-row-name.is-unset {
+    color: var(--text-tertiary);
+    font-weight: 500;
+    font-style: italic;
+  }
   .admin-row-id {
     font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
-    font-size: 12.5px;
-    font-weight: 700;
-    color: var(--text-primary);
-    letter-spacing: 0.02em;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-tertiary);
+    letter-spacing: 0.04em;
   }
   .admin-row-badge {
     font-size: 9.5px;
@@ -3848,6 +3859,23 @@
     gap: 14px;
   }
   .dash-title-row .dash-title { margin-bottom: 0; }
+  .dash-name {
+    outline: none;
+    cursor: text;
+    border-radius: 6px;
+    padding: 0 4px;
+    margin-left: -4px;
+    transition: background 0.2s ease, box-shadow 0.2s ease;
+    color: inherit;
+    border-bottom: 1.5px dashed transparent;
+  }
+  .dash-name:hover { border-bottom-color: rgba(255,255,255,0.18); }
+  .dash-name[contenteditable="true"] {
+    background: rgba(255,255,255,0.05);
+    border-bottom-color: rgba(255,255,255,0.4);
+    box-shadow: 0 0 0 1px rgba(255,255,255,0.06);
+    cursor: text;
+  }
   #clerkUserButton {
     display: flex;
     align-items: center;
@@ -3997,7 +4025,7 @@
 </div>
 
 <div class="dash-title-row">
-  <h1 class="dash-title">Welcome back, Alex!</h1>
+  <h1 class="dash-title">Bienvenido, <span class="dash-name" id="dashName" title="Haz click para cambiar tu nombre">…</span></h1>
   <div id="clerkUserButton"></div>
 </div>
 
@@ -7841,19 +7869,26 @@
     const moduleTotal = chapterTotals.reduce((s, n) => s + n, 0);
 
     try {
-      const { data, error } = await supabaseClient
-        .from('user_state')
-        .select('user_id, value, updated_at')
-        .eq('key', 'skilltree_v1');
-      if (error) throw error;
+      const [stateRes, namesRes] = await Promise.all([
+        supabaseClient.from('user_state').select('user_id, value, updated_at').eq('key', 'skilltree_v1'),
+        supabaseClient.from('user_state').select('user_id, value').eq('key', DISPLAY_NAME_KEY)
+      ]);
+      if (stateRes.error) throw stateRes.error;
+      if (namesRes.error) console.warn('[admin] display_name load failed:', namesRes.error.message);
+
+      const namesByUser = {};
+      for (const r of (namesRes.data || [])) {
+        if (typeof r.value === 'string' && r.value.trim()) namesByUser[r.user_id] = r.value.trim();
+      }
 
       const myId = (window.Clerk && window.Clerk.user) ? window.Clerk.user.id : null;
-      const students = (data || []).map(row => {
+      const students = (stateRes.data || []).map(row => {
         const v = row.value || {};
         const completed = Object.values(v).filter(x => x === true).length;
         const perChapter = adminComputeChapterCounts(v, moduleId);
         return {
           userId: row.user_id,
+          displayName: namesByUser[row.user_id] || null,
           completed,
           percentage: moduleTotal > 0 ? Math.round((completed / moduleTotal) * 100) : 0,
           perChapter,
@@ -7889,17 +7924,26 @@
 
       const header = document.createElement('div');
       header.className = 'admin-row-header';
+
+      const nameEl = document.createElement('span');
+      nameEl.className = 'admin-row-name' + (st.displayName ? '' : ' is-unset');
+      nameEl.textContent = st.displayName || 'Sin nombre';
+      nameEl.title = st.userId;
+      header.appendChild(nameEl);
+
       const idEl = document.createElement('span');
       idEl.className = 'admin-row-id';
       idEl.title = st.userId;
       idEl.textContent = adminShortId(st.userId);
       header.appendChild(idEl);
+
       if (st.isMe) {
         const badge = document.createElement('span');
         badge.className = 'admin-row-badge';
         badge.textContent = 'YOU';
         header.appendChild(badge);
       }
+
       const activity = document.createElement('span');
       activity.className = 'admin-row-activity';
       activity.textContent = adminRelativeTime(st.updatedAt);
@@ -7963,6 +8007,89 @@
     if (!tabBtn) return;
     if (isAdmin()) tabBtn.classList.add('is-revealed');
     else tabBtn.classList.remove('is-revealed');
+  }
+
+  // ─── Display name ────────────────────────────────────────────────
+  const DISPLAY_NAME_KEY = 'display_name';
+
+  function defaultDisplayName() {
+    const u = window.Clerk && window.Clerk.user;
+    if (u) {
+      if (u.firstName && u.firstName.trim()) return u.firstName.trim();
+      if (u.username && u.username.trim()) return u.username.trim();
+      const email = u.primaryEmailAddress && u.primaryEmailAddress.emailAddress;
+      if (email) return email.split('@')[0];
+    }
+    return 'amigo';
+  }
+
+  function getDisplayName() {
+    const stored = storeGet(DISPLAY_NAME_KEY);
+    if (typeof stored === 'string' && stored.trim()) return stored.trim();
+    return defaultDisplayName();
+  }
+
+  function setDisplayName(name) {
+    const trimmed = (name || '').trim().slice(0, 80);
+    if (trimmed) storeSet(DISPLAY_NAME_KEY, trimmed);
+    else storeDelete(DISPLAY_NAME_KEY);
+  }
+
+  function renderDashName() {
+    const el = document.getElementById('dashName');
+    if (!el) return;
+    if (document.activeElement === el) return; // don't stomp while editing
+    el.textContent = getDisplayName();
+  }
+
+  let _dashNameWired = false;
+  function setupDashNameEditable() {
+    const el = document.getElementById('dashName');
+    if (!el || _dashNameWired) return;
+    _dashNameWired = true;
+
+    el.addEventListener('click', () => {
+      if (el.getAttribute('contenteditable') === 'true') return;
+      el.setAttribute('contenteditable', 'true');
+      el.focus();
+      const r = document.createRange();
+      r.selectNodeContents(el);
+      const sel = window.getSelection();
+      sel.removeAllRanges();
+      sel.addRange(r);
+    });
+
+    el.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        el.blur();
+      } else if (e.key === 'Escape') {
+        e.preventDefault();
+        el.textContent = getDisplayName();
+        el.blur();
+      }
+    });
+
+    el.addEventListener('blur', () => {
+      el.setAttribute('contenteditable', 'false');
+      const raw = (el.textContent || '').replace(/\s+/g, ' ').trim();
+      const current = getDisplayName();
+      if (!raw) {
+        el.textContent = current;
+        return;
+      }
+      if (raw !== current) {
+        setDisplayName(raw);
+      }
+      el.textContent = getDisplayName();
+    });
+
+    el.addEventListener('paste', (e) => {
+      // Strip formatting from pasted content
+      e.preventDefault();
+      const text = (e.clipboardData || window.clipboardData).getData('text');
+      document.execCommand('insertText', false, text.replace(/\s+/g, ' '));
+    });
   }
 
   // ─── Boss Fight ──────────────────────────────────────────────────
@@ -8487,6 +8614,7 @@
       }
     }
 
+    renderDashName();
     runRollover();
     runStreakCheck();
     loadToday();
@@ -8549,6 +8677,8 @@
       revealAdminTabIfNeeded();
       setupAdminControls();
       setupBossControls();
+      setupDashNameEditable();
+      renderDashName();
       bootApp();
     } else {
       document.body.classList.add('auth-pending');
