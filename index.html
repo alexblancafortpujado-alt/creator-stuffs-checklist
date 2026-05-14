@@ -3251,6 +3251,443 @@
     background: linear-gradient(90deg, #cc1f3a, #ff6e7f);
     transition: width 0.4s ease;
   }
+
+  /* Boss arena */
+  .exam-arena {
+    position: relative;
+    margin: 0 auto 28px;
+    padding: 28px 24px 24px;
+    border-radius: 18px;
+    background:
+      radial-gradient(ellipse at 50% 110%, rgba(255,60,80,0.25), transparent 60%),
+      radial-gradient(ellipse at 50% 0%, rgba(120,20,40,0.18), transparent 70%),
+      linear-gradient(180deg, #0a0509 0%, #140609 60%, #1d070d 100%);
+    border: 1px solid rgba(255,60,80,0.22);
+    box-shadow: 0 0 60px rgba(255,60,80,0.12), inset 0 0 80px rgba(0,0,0,0.5);
+    overflow: hidden;
+    text-align: center;
+  }
+  .exam-arena::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      repeating-linear-gradient(
+        180deg,
+        transparent 0,
+        transparent 6px,
+        rgba(255,60,80,0.025) 6px,
+        rgba(255,60,80,0.025) 7px
+      );
+    pointer-events: none;
+    mix-blend-mode: screen;
+  }
+  .exam-arena.is-shake { animation: arena-shake 0.5s cubic-bezier(.36,.07,.19,.97); }
+  @keyframes arena-shake {
+    0%, 100% { transform: translateX(0); }
+    10% { transform: translateX(-6px) translateY(-2px); }
+    20% { transform: translateX(8px) translateY(3px); }
+    30% { transform: translateX(-7px) translateY(-1px); }
+    40% { transform: translateX(6px) translateY(2px); }
+    50% { transform: translateX(-4px) translateY(-1px); }
+    60% { transform: translateX(4px) translateY(1px); }
+    70% { transform: translateX(-2px); }
+    80% { transform: translateX(2px); }
+    90% { transform: translateX(-1px); }
+  }
+  .exam-boss-name {
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 10.5px;
+    letter-spacing: 0.34em;
+    color: rgba(255,90,110,0.9);
+    font-weight: 800;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .exam-boss-subname {
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: -0.015em;
+    color: #fff;
+    text-shadow: 0 0 20px rgba(255,60,80,0.45);
+    margin-bottom: 18px;
+  }
+  .exam-boss-stage {
+    position: relative;
+    height: 220px;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+  }
+  .exam-boss-svg {
+    width: 200px;
+    height: 220px;
+    filter: drop-shadow(0 18px 28px rgba(255,30,60,0.35));
+    animation: boss-idle 3.4s ease-in-out infinite;
+    transform-origin: 50% 100%;
+  }
+  @keyframes boss-idle {
+    0%, 100% { transform: translateY(0) scale(1); }
+    50% { transform: translateY(-8px) scale(1.01); }
+  }
+  .exam-boss-svg.is-hit { animation: boss-hit 0.55s ease; }
+  @keyframes boss-hit {
+    0% { transform: translateY(0) scale(1); filter: drop-shadow(0 18px 28px rgba(255,30,60,0.35)); }
+    18% { transform: translateY(2px) scale(0.96) translateX(-10px); filter: drop-shadow(0 18px 28px rgba(255,30,60,0.35)) brightness(2) saturate(0.2); }
+    35% { transform: translateY(-4px) scale(1.02) translateX(8px); filter: drop-shadow(0 18px 28px rgba(255,30,60,0.35)) brightness(1.4); }
+    55% { transform: translateY(0) scale(0.98) translateX(-4px); }
+    100% { transform: translateY(0) scale(1) translateX(0); filter: drop-shadow(0 18px 28px rgba(255,30,60,0.35)); }
+  }
+  .exam-boss-svg.is-attacking { animation: boss-attack 0.55s cubic-bezier(.5,0,.5,1); }
+  @keyframes boss-attack {
+    0% { transform: translateY(0) scale(1); }
+    30% { transform: translateY(-14px) scale(1.05); }
+    55% { transform: translateY(40px) scale(1.18); filter: drop-shadow(0 4px 28px rgba(255,30,60,0.75)) brightness(1.2); }
+    80% { transform: translateY(-4px) scale(1.02); }
+    100% { transform: translateY(0) scale(1); }
+  }
+  .exam-boss-svg.is-dying { animation: boss-defeat 1.4s ease forwards; }
+  @keyframes boss-defeat {
+    0% { transform: translateY(0) scale(1) rotate(0deg); opacity: 1; }
+    25% { transform: translateY(6px) scale(0.98) rotate(-3deg); filter: drop-shadow(0 18px 28px rgba(242,192,99,0.55)) brightness(1.6); }
+    55% { transform: translateY(20px) scale(0.85) rotate(8deg); filter: drop-shadow(0 18px 28px rgba(242,192,99,0.9)) brightness(2); opacity: 0.85; }
+    100% { transform: translateY(120px) scale(0.3) rotate(-20deg); opacity: 0; filter: drop-shadow(0 18px 28px rgba(242,192,99,0.4)) brightness(3) blur(2px); }
+  }
+  .exam-boss-eye { animation: boss-eye-pulse 2.4s ease-in-out infinite; transform-origin: center; }
+  @keyframes boss-eye-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+  }
+  .exam-boss-svg.is-hit .exam-boss-eye { animation: none; opacity: 0.2; }
+  .exam-boss-svg.is-dying .exam-boss-eye { animation: none; opacity: 0; }
+
+  .exam-slash {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .exam-slash::before {
+    content: '';
+    width: 220px;
+    height: 8px;
+    background: linear-gradient(90deg, transparent, #fff, transparent);
+    border-radius: 4px;
+    box-shadow: 0 0 22px #fff, 0 0 44px #6BE3A4;
+    transform: rotate(-22deg) scaleX(0);
+    animation: slash-anim 0.45s cubic-bezier(.5,0,.5,1) forwards;
+  }
+  @keyframes slash-anim {
+    0% { transform: rotate(-22deg) scaleX(0); opacity: 0; }
+    35% { transform: rotate(-22deg) scaleX(1); opacity: 1; }
+    100% { transform: rotate(-22deg) scaleX(1.4) translateX(40px); opacity: 0; }
+  }
+
+  .exam-boss-hp-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0 auto;
+    max-width: 460px;
+    padding: 0 4px;
+  }
+  .exam-boss-hp-label {
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    color: rgba(255,90,110,0.75);
+    text-transform: uppercase;
+    font-weight: 800;
+  }
+  .exam-boss-hp-bar {
+    flex: 1;
+    height: 14px;
+    background: rgba(0,0,0,0.6);
+    border: 1px solid rgba(255,60,80,0.4);
+    border-radius: 7px;
+    overflow: hidden;
+    position: relative;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.8);
+  }
+  .exam-boss-hp-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #5a0d1a 0%, #cc1f3a 35%, #ff6e7f 100%);
+    box-shadow: 0 0 12px rgba(255,60,80,0.6), inset 0 1px 0 rgba(255,255,255,0.18);
+    transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .exam-boss-hp-num {
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-variant-numeric: tabular-nums;
+    font-size: 12px;
+    font-weight: 800;
+    color: #ff6e7f;
+    min-width: 64px;
+    text-align: right;
+  }
+
+  .exam-floater {
+    position: absolute;
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-weight: 800;
+    font-size: 28px;
+    pointer-events: none;
+    animation: floater-anim 1.1s cubic-bezier(.22,1,.36,1) forwards;
+    text-shadow: 0 0 12px currentColor, 0 2px 4px rgba(0,0,0,0.8);
+    z-index: 5;
+  }
+  .exam-floater.is-dmg { color: #6BE3A4; }
+  .exam-floater.is-hit { color: #ff6e7f; }
+  @keyframes floater-anim {
+    0% { transform: translate(-50%, 0) scale(0.4); opacity: 0; }
+    20% { transform: translate(-50%, -10px) scale(1.2); opacity: 1; }
+    60% { transform: translate(-50%, -60px) scale(1); opacity: 1; }
+    100% { transform: translate(-50%, -110px) scale(0.9); opacity: 0; }
+  }
+
+  .exam-screen-flash {
+    position: fixed;
+    inset: 0;
+    background: rgba(255,30,50,0.35);
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0;
+    animation: screen-flash-anim 0.45s ease;
+  }
+  @keyframes screen-flash-anim {
+    0% { opacity: 0; }
+    20% { opacity: 1; }
+    100% { opacity: 0; }
+  }
+  .exam-screen-flash.is-victory { background: rgba(242,192,99,0.45); }
+
+  /* Player HP row */
+  .exam-player-row {
+    max-width: 760px;
+    margin: 0 auto 18px;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 14px;
+    align-items: center;
+    padding: 12px 14px;
+    border-radius: 12px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(107,227,164,0.18);
+    box-shadow: 0 0 24px rgba(107,227,164,0.08);
+  }
+  .exam-player-info {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+    min-width: 90px;
+  }
+  .exam-player-name {
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 11px;
+    letter-spacing: 0.22em;
+    color: rgba(107,227,164,0.95);
+    font-weight: 800;
+    text-transform: uppercase;
+  }
+  .exam-player-combo {
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    color: var(--text-tertiary);
+    font-weight: 700;
+  }
+  .exam-player-combo.is-streak { color: #F2C063; text-shadow: 0 0 10px rgba(242,192,99,0.6); }
+  .exam-player-hp-bar {
+    height: 14px;
+    background: rgba(0,0,0,0.55);
+    border: 1px solid rgba(107,227,164,0.4);
+    border-radius: 7px;
+    overflow: hidden;
+    position: relative;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.7);
+  }
+  .exam-player-hp-fill {
+    height: 100%;
+    width: 100%;
+    background: linear-gradient(90deg, #1a5a3a 0%, #6BE3A4 60%, #b5f3cb 100%);
+    box-shadow: 0 0 14px rgba(107,227,164,0.55), inset 0 1px 0 rgba(255,255,255,0.2);
+    transition: width 0.7s cubic-bezier(0.22, 1, 0.36, 1), background 0.4s ease, box-shadow 0.4s ease;
+  }
+  .exam-player-hp-fill.is-low {
+    background: linear-gradient(90deg, #6a4a18 0%, #F2C063 60%, #FFD89E 100%);
+    box-shadow: 0 0 14px rgba(242,192,99,0.55), inset 0 1px 0 rgba(255,255,255,0.2);
+  }
+  .exam-player-hp-fill.is-critical {
+    background: linear-gradient(90deg, #5a0d1a 0%, #cc1f3a 60%, #ff6e7f 100%);
+    box-shadow: 0 0 18px rgba(255,60,80,0.7), inset 0 1px 0 rgba(255,255,255,0.2);
+    animation: player-hp-critical 0.8s ease-in-out infinite;
+  }
+  @keyframes player-hp-critical {
+    0%, 100% { box-shadow: 0 0 18px rgba(255,60,80,0.7), inset 0 1px 0 rgba(255,255,255,0.2); }
+    50% { box-shadow: 0 0 32px rgba(255,60,80,1), inset 0 1px 0 rgba(255,255,255,0.2); }
+  }
+  .exam-player-hp-num {
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-variant-numeric: tabular-nums;
+    font-size: 12px;
+    font-weight: 800;
+    color: #6BE3A4;
+    min-width: 64px;
+    text-align: right;
+  }
+
+  /* Boss claw (enemy attack effect) */
+  .exam-claw {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 4;
+    overflow: hidden;
+  }
+  .exam-claw::before, .exam-claw::after {
+    content: '';
+    position: absolute;
+    top: 30%;
+    left: 50%;
+    width: 6px;
+    height: 220px;
+    border-radius: 4px;
+    background: linear-gradient(180deg, transparent, rgba(255,60,80,0.85) 30%, rgba(255,255,255,0.95) 60%, rgba(255,60,80,0.85) 90%, transparent);
+    box-shadow: 0 0 20px rgba(255,60,80,0.9), 0 0 40px rgba(255,255,255,0.6);
+    transform-origin: top center;
+    opacity: 0;
+  }
+  .exam-claw::before {
+    transform: translate(-50%, 0) rotate(-22deg);
+    animation: claw-slash 0.55s cubic-bezier(.4,0,.6,1) forwards;
+  }
+  .exam-claw::after {
+    transform: translate(-50%, 0) rotate(22deg);
+    animation: claw-slash 0.55s cubic-bezier(.4,0,.6,1) 0.08s forwards;
+  }
+  @keyframes claw-slash {
+    0% { opacity: 0; transform: translate(-50%, -80px) rotate(var(--r, 0deg)) scaleY(0.4); }
+    25% { opacity: 1; }
+    100% { opacity: 0; transform: translate(-50%, 120px) rotate(var(--r, 0deg)) scaleY(1.1); }
+  }
+  .exam-claw::before { --r: -22deg; }
+  .exam-claw::after { --r: 22deg; }
+
+  /* Combo / Critical callout */
+  .exam-combo-callout {
+    position: absolute;
+    top: 18%;
+    left: 50%;
+    transform: translate(-50%, 0);
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 32px;
+    font-weight: 900;
+    letter-spacing: 0.06em;
+    color: #F2C063;
+    text-shadow: 0 0 20px #F2C063, 0 0 40px rgba(242,192,99,0.7), 0 2px 4px rgba(0,0,0,0.8);
+    pointer-events: none;
+    z-index: 6;
+    animation: combo-pop 1.1s cubic-bezier(.22,1,.36,1) forwards;
+  }
+  @keyframes combo-pop {
+    0% { transform: translate(-50%, 0) scale(0.4) rotate(-8deg); opacity: 0; }
+    25% { transform: translate(-50%, -10px) scale(1.3) rotate(2deg); opacity: 1; }
+    60% { transform: translate(-50%, -20px) scale(1) rotate(-1deg); opacity: 1; }
+    100% { transform: translate(-50%, -60px) scale(0.85) rotate(2deg); opacity: 0; }
+  }
+
+  /* Question card incoming animation */
+  .exam-question-card.is-incoming {
+    animation: card-incoming 0.5s cubic-bezier(.22,1,.36,1);
+  }
+  @keyframes card-incoming {
+    0% { transform: translateY(14px); opacity: 0; }
+    100% { transform: translateY(0); opacity: 1; }
+  }
+
+  .exam-q-meta {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    color: var(--text-tertiary);
+    text-transform: uppercase;
+    font-weight: 700;
+  }
+  .exam-q-counter { white-space: nowrap; }
+  .exam-q-progress {
+    flex: 1;
+    height: 4px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .exam-q-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #cc1f3a, #ff6e7f);
+    transition: width 0.5s ease;
+  }
+
+  /* YOU DIED overlay */
+  .exam-you-died {
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: radial-gradient(ellipse at center, rgba(40,4,8,0.85), rgba(0,0,0,0.95));
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    pointer-events: none;
+    animation: you-died-fade 2s cubic-bezier(.22,1,.36,1) forwards;
+  }
+  .exam-you-died-text {
+    font-family: ui-serif, Georgia, serif;
+    font-size: 56px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    color: #b51028;
+    text-shadow: 0 0 40px rgba(255,30,50,0.55), 0 0 80px rgba(255,30,50,0.35);
+    text-transform: uppercase;
+    transform: scale(0.4);
+    animation: you-died-scale 2s cubic-bezier(.22,1,.36,1) forwards;
+  }
+  .exam-you-died-sub {
+    margin-top: 14px;
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 12px;
+    letter-spacing: 0.28em;
+    color: rgba(255,90,110,0.85);
+    text-transform: uppercase;
+    opacity: 0;
+    animation: you-died-sub 2s cubic-bezier(.22,1,.36,1) 0.5s forwards;
+  }
+  @keyframes you-died-fade {
+    0% { opacity: 0; }
+    20% { opacity: 1; }
+    85% { opacity: 1; }
+    100% { opacity: 0; }
+  }
+  @keyframes you-died-scale {
+    0% { transform: scale(0.4); letter-spacing: 0.4em; }
+    35% { transform: scale(1.05); letter-spacing: 0.08em; }
+    100% { transform: scale(1); letter-spacing: 0.08em; }
+  }
+  @keyframes you-died-sub {
+    0% { opacity: 0; }
+    40% { opacity: 1; }
+    85% { opacity: 1; }
+    100% { opacity: 0; }
+  }
+
   .exam-question-card {
     padding: 28px 26px;
     border-radius: 16px;
@@ -3330,6 +3767,407 @@
     80% { transform: translateX(4px); }
   }
   .exam-question-card.is-hit { animation: exam-shake 0.45s ease; }
+
+  /* ─── Battle stage (boss sprite + HP + slash/attack VFX) ────── */
+  .exam-battle-stage {
+    position: relative;
+    margin: 0 auto 22px;
+    padding: 24px 16px 28px;
+    border-radius: 18px;
+    background:
+      radial-gradient(ellipse at 50% 0%, rgba(255,30,60,0.16), transparent 65%),
+      radial-gradient(ellipse at 50% 100%, rgba(255,30,60,0.08), transparent 60%),
+      linear-gradient(180deg, rgba(10,4,8,0.92), rgba(20,4,8,0.92));
+    border: 1px solid rgba(255,60,80,0.25);
+    box-shadow: 0 0 50px rgba(255,30,60,0.18), inset 0 1px 0 rgba(255,255,255,0.05);
+    overflow: hidden;
+  }
+  .exam-battle-stage::before {
+    content: '';
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(circle at 20% 30%, rgba(255,80,100,0.04) 1px, transparent 2px),
+      radial-gradient(circle at 70% 60%, rgba(255,80,100,0.04) 1px, transparent 2px),
+      radial-gradient(circle at 40% 80%, rgba(255,80,100,0.04) 1px, transparent 2px);
+    background-size: 80px 80px, 110px 110px, 90px 90px;
+    opacity: 0.6;
+    pointer-events: none;
+  }
+  .boss-arena {
+    position: relative;
+    width: 100%;
+    height: 220px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 4px;
+  }
+  .boss-sprite-wrap {
+    position: relative;
+    width: 180px;
+    height: 220px;
+    transform-origin: 50% 70%;
+    animation: boss-idle 3.4s ease-in-out infinite;
+    filter: drop-shadow(0 18px 24px rgba(255,30,60,0.4));
+  }
+  @keyframes boss-idle {
+    0%, 100% { transform: translateY(0) rotate(0); }
+    50% { transform: translateY(-10px) rotate(-1deg); }
+  }
+  .boss-sprite-wrap.is-attacking { animation: boss-attack 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); }
+  @keyframes boss-attack {
+    0%   { transform: translateY(0) scale(1); }
+    25%  { transform: translateY(-14px) scale(1.05, 0.95); }
+    55%  { transform: translateY(36px) scale(1.18, 0.9); filter: drop-shadow(0 20px 36px rgba(255,30,60,0.95)); }
+    100% { transform: translateY(0) scale(1); }
+  }
+  .boss-sprite-wrap.is-hurt { animation: boss-hurt 0.5s ease; }
+  @keyframes boss-hurt {
+    0%   { transform: translateX(0); filter: brightness(1); }
+    20%  { transform: translateX(10px); filter: drop-shadow(0 0 14px #fff) brightness(3); }
+    40%  { transform: translateX(-10px); filter: drop-shadow(0 0 14px #fff) brightness(2.4); }
+    60%  { transform: translateX(8px); filter: brightness(1.5); }
+    100% { transform: translateX(0); filter: brightness(1); }
+  }
+  .boss-sprite-wrap.is-dying { animation: boss-dying 1.4s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+  @keyframes boss-dying {
+    0%   { transform: scale(1) rotate(0); opacity: 1; filter: brightness(1); }
+    20%  { transform: scale(1.1) rotate(-3deg); filter: brightness(3); }
+    50%  { transform: scale(0.92) rotate(4deg); filter: brightness(2) blur(1px); }
+    80%  { transform: scale(0.6) rotate(-2deg); opacity: 0.4; filter: blur(4px) brightness(0.8); }
+    100% { transform: scale(0.2) rotate(0); opacity: 0; filter: blur(8px); }
+  }
+  .boss-sprite-svg { width: 100%; height: 100%; display: block; }
+  .boss-sprite-svg .boss-eye {
+    filter: drop-shadow(0 0 6px #ff3050) drop-shadow(0 0 12px #ff3050);
+    animation: boss-eye-flicker 2.8s ease-in-out infinite;
+  }
+  @keyframes boss-eye-flicker {
+    0%, 46%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+    54% { opacity: 1; }
+  }
+
+  /* Boss HP */
+  .boss-hp-block {
+    position: relative; z-index: 2;
+    max-width: 520px; margin: 0 auto 10px;
+    text-align: center;
+  }
+  .boss-hp-name {
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 11px; letter-spacing: 0.28em;
+    color: rgba(255,90,110,0.9);
+    text-transform: uppercase; font-weight: 800;
+    margin-bottom: 6px;
+  }
+  .boss-hp-bar {
+    position: relative;
+    height: 14px;
+    background: rgba(0,0,0,0.55);
+    border: 1px solid rgba(255,60,80,0.45);
+    border-radius: 6px;
+    overflow: hidden;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.06), 0 0 14px rgba(255,30,60,0.3);
+  }
+  .boss-hp-fill {
+    position: absolute; inset: 0;
+    background: linear-gradient(90deg, #ff2a44 0%, #ff5e7a 50%, #ff2a44 100%);
+    box-shadow: 0 0 12px rgba(255,60,80,0.7), inset 0 1px 0 rgba(255,255,255,0.18);
+    transition: width 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+    transform-origin: 0 50%;
+  }
+  .boss-hp-text {
+    margin-top: 6px;
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 11px;
+    color: rgba(255,255,255,0.75);
+    letter-spacing: 0.12em;
+  }
+
+  /* Slash VFX (player attack) */
+  .boss-slash {
+    position: absolute;
+    top: 38%; left: -10%;
+    width: 130%; height: 6px;
+    background: linear-gradient(90deg, transparent, #fff 40%, #fff 60%, transparent);
+    box-shadow: 0 0 20px #fff, 0 0 40px #6BE3A4;
+    transform: translateX(-100%) rotate(-12deg);
+    opacity: 0;
+    pointer-events: none;
+  }
+  .boss-slash.is-firing { animation: boss-slash-fire 0.5s ease-out forwards; }
+  @keyframes boss-slash-fire {
+    0%   { transform: translateX(-100%) rotate(-12deg); opacity: 0; }
+    20%  { opacity: 1; }
+    100% { transform: translateX(100%) rotate(-12deg); opacity: 0; }
+  }
+
+  /* Floating damage numbers */
+  .boss-damage-num {
+    position: absolute;
+    top: 28%; left: 50%;
+    transform: translate(-50%, 0);
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-weight: 800; font-size: 30px;
+    color: #fff;
+    text-shadow: 0 0 12px #6BE3A4, 0 0 22px #6BE3A4;
+    pointer-events: none;
+    animation: boss-damage-rise 0.95s ease-out forwards;
+  }
+  .boss-damage-num.is-crit {
+    color: #FFE4B0;
+    text-shadow: 0 0 14px #F2C063, 0 0 26px #F2C063;
+    font-size: 40px;
+  }
+  @keyframes boss-damage-rise {
+    0%   { transform: translate(-50%, 0) scale(0.6); opacity: 0; }
+    20%  { transform: translate(-50%, -10px) scale(1.25); opacity: 1; }
+    100% { transform: translate(-50%, -90px) scale(1); opacity: 0; }
+  }
+
+  /* Red screen flash when boss attacks player */
+  .boss-attack-flash {
+    position: fixed; inset: 0;
+    background: radial-gradient(ellipse at 50% 40%, rgba(255,30,60,0.55), transparent 70%);
+    pointer-events: none;
+    opacity: 0;
+    z-index: 9990;
+  }
+  .boss-attack-flash.is-firing { animation: boss-flash-fire 0.55s ease-out forwards; }
+  @keyframes boss-flash-fire {
+    0% { opacity: 0; } 20% { opacity: 1; } 100% { opacity: 0; }
+  }
+
+  /* Screen shake when boss attacks */
+  .exam-stage.is-shaken { animation: exam-screen-shake 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97); }
+  @keyframes exam-screen-shake {
+    10%, 90% { transform: translate3d(-2px, 0, 0); }
+    20%, 80% { transform: translate3d(4px, 0, 0); }
+    30%, 50%, 70% { transform: translate3d(-6px, 0, 0); }
+    40%, 60% { transform: translate3d(6px, 0, 0); }
+  }
+
+  /* Heart loss pulse */
+  .exam-heart.is-just-lost { animation: heart-burst 0.55s ease-out forwards; }
+  @keyframes heart-burst {
+    0%   { transform: scale(1); }
+    30%  { transform: scale(1.7); box-shadow: 0 0 22px #ff6e7f; }
+    100% { transform: scale(1); background: #2a1418; box-shadow: none; }
+  }
+
+  /* Player HP block (bottom of arena) */
+  .exam-player-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    max-width: 460px;
+    margin: 18px auto 4px;
+    padding: 0 4px;
+  }
+  .exam-player-label {
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 10px;
+    letter-spacing: 0.22em;
+    color: rgba(180,220,255,0.85);
+    text-transform: uppercase;
+    font-weight: 800;
+    min-width: 40px;
+    text-align: left;
+  }
+  .exam-player-hp-bar {
+    flex: 1;
+    height: 14px;
+    background: rgba(0,0,0,0.55);
+    border: 1px solid rgba(120,200,255,0.45);
+    border-radius: 6px;
+    overflow: hidden;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.06), 0 0 14px rgba(80,180,255,0.18);
+    position: relative;
+  }
+  .exam-player-hp-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #54f0c0 0%, #6BE3A4 50%, #b5fdd2 100%);
+    box-shadow: 0 0 12px rgba(107,227,164,0.7), inset 0 1px 0 rgba(255,255,255,0.2);
+    transition: width 0.55s cubic-bezier(0.22, 1, 0.36, 1), background 0.4s ease;
+    width: 100%;
+  }
+  .exam-player-hp-fill.is-low {
+    background: linear-gradient(90deg, #ff5e7a 0%, #ff8e8e 50%, #ffd0d0 100%);
+    box-shadow: 0 0 14px rgba(255,90,110,0.8), inset 0 1px 0 rgba(255,255,255,0.2);
+    animation: player-hp-pulse 0.9s ease-in-out infinite;
+  }
+  @keyframes player-hp-pulse {
+    0%, 100% { box-shadow: 0 0 14px rgba(255,90,110,0.8), inset 0 1px 0 rgba(255,255,255,0.2); }
+    50% { box-shadow: 0 0 28px rgba(255,90,110,1), inset 0 1px 0 rgba(255,255,255,0.2); }
+  }
+  .exam-player-hp-num {
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-variant-numeric: tabular-nums;
+    font-size: 12px;
+    font-weight: 800;
+    color: #b5fdd2;
+    min-width: 64px;
+    text-align: right;
+  }
+  .exam-player-hp-fill.is-low ~ .exam-player-hp-num { color: #ff9eb0; }
+
+  /* Combo + Crit floaters */
+  .exam-combo {
+    position: absolute;
+    top: 8px; right: 12px;
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    color: #FFD89E;
+    text-shadow: 0 0 12px rgba(242,192,99,0.7);
+    z-index: 4;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  .exam-combo.is-visible { opacity: 1; animation: combo-pop 0.5s ease-out; }
+  @keyframes combo-pop {
+    0% { transform: scale(0.6); opacity: 0; }
+    35% { transform: scale(1.25); opacity: 1; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  .exam-combo .combo-x { color: #fff; margin: 0 2px; }
+  .exam-combo .combo-n { font-size: 18px; color: #F2C063; }
+
+  /* Crit popup over boss */
+  .boss-crit-banner {
+    position: absolute;
+    top: 18%; left: 50%;
+    transform: translate(-50%, 0);
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 22px; font-weight: 800;
+    letter-spacing: 0.22em;
+    color: #FFE4B0;
+    text-shadow: 0 0 14px #F2C063, 0 0 28px #F2C063;
+    pointer-events: none;
+    animation: crit-banner 0.95s ease-out forwards;
+    z-index: 5;
+  }
+  @keyframes crit-banner {
+    0% { transform: translate(-50%, 10px) scale(0.5) rotate(-6deg); opacity: 0; }
+    25% { transform: translate(-50%, 0) scale(1.4) rotate(-3deg); opacity: 1; }
+    60% { transform: translate(-50%, -8px) scale(1) rotate(0deg); opacity: 1; }
+    100% { transform: translate(-50%, -28px) scale(0.95); opacity: 0; }
+  }
+
+  /* Explosion particle layer for boss death */
+  .boss-explosion {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 3;
+  }
+  .boss-explosion-ring {
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    border: 3px solid #FFE4B0;
+    box-shadow: 0 0 28px #F2C063, inset 0 0 22px #FFD89E;
+    transform: translate(-50%, -50%) scale(0);
+    animation: boss-explosion-ring 1.1s cubic-bezier(0.2, 0.8, 0.3, 1) forwards;
+  }
+  @keyframes boss-explosion-ring {
+    0% { transform: translate(-50%, -50%) scale(0); opacity: 1; }
+    60% { transform: translate(-50%, -50%) scale(7); opacity: 0.8; }
+    100% { transform: translate(-50%, -50%) scale(12); opacity: 0; }
+  }
+
+  /* "YOU DIED" overlay */
+  .you-died-overlay {
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse at 50% 50%, rgba(70,0,0,0.85), rgba(0,0,0,0.95) 75%);
+    z-index: 9998;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    animation: you-died-fade 2.4s ease forwards;
+  }
+  @keyframes you-died-fade {
+    0% { opacity: 0; backdrop-filter: blur(0); }
+    100% { opacity: 1; backdrop-filter: blur(6px); }
+  }
+  .you-died-text {
+    font-family: "Times New Roman", "Cinzel", Georgia, serif;
+    font-size: 64px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: #8a0010;
+    text-shadow:
+      0 0 22px rgba(255,30,60,0.55),
+      0 0 40px rgba(255,30,60,0.4),
+      0 4px 14px rgba(0,0,0,0.9);
+    transform: scale(0.4);
+    opacity: 0;
+    animation: you-died-text 2.6s cubic-bezier(0.2, 0.8, 0.3, 1) forwards;
+    font-style: italic;
+    text-align: center;
+  }
+  @keyframes you-died-text {
+    0% { transform: scale(0.4); opacity: 0; letter-spacing: 0.4em; }
+    30% { transform: scale(1.05); opacity: 1; letter-spacing: 0.08em; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  @media (max-width: 640px) {
+    .you-died-text { font-size: 40px; }
+  }
+
+  /* Victory overlay */
+  .you-won-overlay {
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse at 50% 50%, rgba(70,40,0,0.75), rgba(0,0,0,0.92) 75%);
+    z-index: 9997;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    animation: you-won-fade 1.6s ease forwards;
+  }
+  @keyframes you-won-fade {
+    0% { opacity: 0; }
+    100% { opacity: 1; backdrop-filter: blur(2px); }
+  }
+  .you-won-text {
+    font-family: "Times New Roman", Georgia, serif;
+    font-size: 60px;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    color: #FFE4B0;
+    text-shadow:
+      0 0 22px rgba(242,192,99,0.85),
+      0 0 50px rgba(242,192,99,0.6),
+      0 4px 14px rgba(0,0,0,0.7);
+    opacity: 0;
+    animation: you-won-text 2s cubic-bezier(0.2, 0.8, 0.3, 1) forwards;
+    text-align: center;
+    line-height: 1.05;
+  }
+  @keyframes you-won-text {
+    0% { transform: scale(0.5); opacity: 0; }
+    30% { transform: scale(1.08); opacity: 1; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  @media (max-width: 640px) {
+    .you-won-text { font-size: 40px; }
+  }
+
+  /* Zoom punch on critical hits */
+  .exam-arena.is-zoom-punch { animation: zoom-punch 0.45s ease; }
+  @keyframes zoom-punch {
+    0%, 100% { transform: scale(1); }
+    35% { transform: scale(1.03); }
+  }
 
   /* Exam result */
   .exam-result {
@@ -8282,15 +9120,133 @@
     renderSkilltree();
   }
 
+  function _bossSvgMarkup() {
+    return ''
+      + '<svg class="exam-boss-svg" viewBox="0 0 200 240" xmlns="http://www.w3.org/2000/svg">'
+      +   '<defs>'
+      +     '<filter id="bossGlow" x="-60%" y="-60%" width="220%" height="220%">'
+      +       '<feGaussianBlur stdDeviation="3.5" result="b"/>'
+      +       '<feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>'
+      +     '</filter>'
+      +     '<radialGradient id="bossBody" cx="50%" cy="35%" r="70%">'
+      +       '<stop offset="0%" stop-color="#3a1320"/>'
+      +       '<stop offset="60%" stop-color="#180408"/>'
+      +       '<stop offset="100%" stop-color="#0a0205"/>'
+      +     '</radialGradient>'
+      +     '<radialGradient id="bossSkull" cx="50%" cy="40%" r="60%">'
+      +       '<stop offset="0%" stop-color="#dad2c4"/>'
+      +       '<stop offset="70%" stop-color="#7a6f60"/>'
+      +       '<stop offset="100%" stop-color="#2c2620"/>'
+      +     '</radialGradient>'
+      +   '</defs>'
+      // Aura / shadow
+      +   '<ellipse cx="100" cy="225" rx="70" ry="10" fill="#000" opacity="0.55"/>'
+      // Horns
+      +   '<path d="M 55 60 Q 38 18 30 0 Q 52 22 70 50 Z" fill="#1a070d" stroke="#3a1622" stroke-width="1.5"/>'
+      +   '<path d="M 145 60 Q 162 18 170 0 Q 148 22 130 50 Z" fill="#1a070d" stroke="#3a1622" stroke-width="1.5"/>'
+      // Body / hood
+      +   '<path d="M 30 230 Q 28 130 55 95 Q 100 65 145 95 Q 172 130 170 230 Z" fill="url(#bossBody)" stroke="#3a1622" stroke-width="2"/>'
+      // Hood inner shadow
+      +   '<path d="M 60 100 Q 100 80 140 100 Q 138 150 100 155 Q 62 150 60 100 Z" fill="#0a0205" opacity="0.7"/>'
+      // Skull face
+      +   '<ellipse cx="100" cy="115" rx="44" ry="50" fill="url(#bossSkull)" stroke="#1a0a0e" stroke-width="1.5"/>'
+      // Cheekbones
+      +   '<path d="M 65 130 Q 80 145 100 142 Q 120 145 135 130" fill="none" stroke="#2c2620" stroke-width="1.5" opacity="0.6"/>'
+      // Eye sockets
+      +   '<ellipse cx="82" cy="108" rx="12" ry="14" fill="#000"/>'
+      +   '<ellipse cx="118" cy="108" rx="12" ry="14" fill="#000"/>'
+      // Glowing eyes
+      +   '<circle class="exam-boss-eye" cx="82" cy="110" r="5" fill="#ff3050" filter="url(#bossGlow)"/>'
+      +   '<circle class="exam-boss-eye" cx="118" cy="110" r="5" fill="#ff3050" filter="url(#bossGlow)"/>'
+      // Nose hollow
+      +   '<path d="M 96 130 Q 100 138 104 130 Q 100 142 96 130 Z" fill="#000"/>'
+      // Teeth / mouth
+      +   '<path d="M 72 148 L 76 162 L 80 148 L 84 164 L 88 148 L 92 166 L 96 148 L 100 166 L 104 148 L 108 166 L 112 148 L 116 164 L 120 148 L 124 162 L 128 148 L 72 148 Z" fill="#e8e0d2" stroke="#1a0a0e" stroke-width="1"/>'
+      // Crown spikes on hood
+      +   '<path d="M 95 78 L 100 62 L 105 78 Z" fill="#1a070d" stroke="#3a1622" stroke-width="1"/>'
+      +   '<path d="M 78 84 L 82 70 L 86 84 Z" fill="#1a070d" stroke="#3a1622" stroke-width="1"/>'
+      +   '<path d="M 114 84 L 118 70 L 122 84 Z" fill="#1a070d" stroke="#3a1622" stroke-width="1"/>'
+      + '</svg>';
+  }
+
+  function _examCorrectsSoFar(data) {
+    let c = 0;
+    for (const a of (data.answers || [])) if (a.correct) c++;
+    return c;
+  }
+
+  function _examBossHpPct(data, total) {
+    const corrects = _examCorrectsSoFar(data);
+    return Math.max(0, 100 - Math.round((corrects / total) * 100));
+  }
+
+  function _bossHpPctFor(data) {
+    if (!data) return 100;
+    const total = MODULE_EXAMS[data.moduleId].questions.length;
+    return Math.max(0, 100 - Math.round((_examCorrectsSoFar(data) / total) * 100));
+  }
+
+  function _playerHpPctFor(data) {
+    if (!data) return 100;
+    const max = MODULE_EXAMS[data.moduleId].maxWrong;
+    const totalHits = max + 1;
+    return Math.max(0, 100 - Math.round((data.wrongs / totalHits) * 100));
+  }
+
+  function _updateBossHp() {
+    const data = _examAnswers;
+    if (!data || !data.refs) return;
+    const pct = _bossHpPctFor(data);
+    data.refs.bossHpFill.style.width = pct + '%';
+    data.refs.bossHpNum.textContent = pct + ' / 100';
+  }
+
+  function _updatePlayerHp() {
+    const data = _examAnswers;
+    if (!data || !data.refs) return;
+    const pct = _playerHpPctFor(data);
+    data.refs.playerHpFill.style.width = pct + '%';
+    data.refs.playerHpNum.textContent = pct + ' / 100';
+    data.refs.playerHpFill.classList.toggle('is-low', pct <= 50 && pct > 25);
+    data.refs.playerHpFill.classList.toggle('is-critical', pct <= 25);
+  }
+
+  function _spawnFloater(parent, text, kind) {
+    const f = document.createElement('div');
+    f.className = 'exam-floater ' + (kind === 'dmg' ? 'is-dmg' : 'is-hit');
+    f.style.left = (45 + Math.random() * 10) + '%';
+    f.style.top = (kind === 'dmg' ? 38 : 60) + '%';
+    f.textContent = text;
+    parent.appendChild(f);
+    setTimeout(() => f.remove(), 1200);
+  }
+
+  function _screenFlash(victory) {
+    const f = document.createElement('div');
+    f.className = 'exam-screen-flash' + (victory ? ' is-victory' : '');
+    document.body.appendChild(f);
+    setTimeout(() => f.remove(), 460);
+  }
+
+  function _spawnComboCallout(parent, combo) {
+    const el = document.createElement('div');
+    el.className = 'exam-combo-callout';
+    el.textContent = (combo >= 5 ? 'CRITICAL ×' : 'COMBO ×') + combo;
+    parent.appendChild(el);
+    setTimeout(() => el.remove(), 1200);
+  }
+
   function _renderExamView(content) {
     const data = _examAnswers;
     if (!data) { _stView = 'checklist'; return renderSkilltree(); }
     const exam = MODULE_EXAMS[data.moduleId];
     if (!exam) { _stView = 'checklist'; return renderSkilltree(); }
-    const q = exam.questions[data.qIdx];
-    const total = exam.questions.length;
-    const maxWrong = exam.maxWrong;
-    const livesLeft = Math.max(0, (maxWrong + 1) - data.wrongs);
+
+    // If scene is still mounted (e.g. tab re-render), just advance the UI.
+    if (data.refs && data.refs.scene && document.body.contains(data.refs.scene) && content.contains(data.refs.scene)) {
+      _advanceExamUI();
+      return;
+    }
 
     content.innerHTML = '';
 
@@ -8312,67 +9268,120 @@
     topbar.appendChild(back);
     stage.appendChild(topbar);
 
-    const header = document.createElement('div');
-    header.className = 'exam-header';
-    header.innerHTML =
-      '<div class="exam-eyebrow">Boss Final</div>' +
-      '<div class="exam-title"></div>';
-    header.querySelector('.exam-title').textContent = exam.title;
-    stage.appendChild(header);
+    // ── Boss arena ──
+    const arena = document.createElement('div');
+    arena.className = 'exam-arena';
+    arena.innerHTML =
+      '<div class="exam-boss-name">Boss Final</div>' +
+      '<div class="exam-boss-subname"></div>' +
+      '<div class="exam-boss-stage">' + _bossSvgMarkup() + '</div>' +
+      '<div class="exam-boss-hp-row">' +
+        '<div class="exam-boss-hp-label">BOSS</div>' +
+        '<div class="exam-boss-hp-bar"><div class="exam-boss-hp-fill"></div></div>' +
+        '<div class="exam-boss-hp-num"></div>' +
+      '</div>';
+    arena.querySelector('.exam-boss-subname').textContent = exam.title;
+    stage.appendChild(arena);
 
-    const meta = document.createElement('div');
-    meta.className = 'exam-meta-row';
-    const lives = document.createElement('div');
-    lives.className = 'exam-lives';
-    for (let i = 0; i < (maxWrong + 1); i++) {
-      const h = document.createElement('span');
-      h.className = 'exam-heart' + (i < (maxWrong + 1) - livesLeft ? ' is-lost' : '');
-      lives.appendChild(h);
-    }
-    meta.appendChild(lives);
-    const progressWrap = document.createElement('div');
-    progressWrap.className = 'exam-progress';
-    const progressFill = document.createElement('div');
-    progressFill.className = 'exam-progress-fill';
-    progressFill.style.width = ((data.qIdx / total) * 100) + '%';
-    progressWrap.appendChild(progressFill);
-    meta.appendChild(progressWrap);
-    const counter = document.createElement('div');
-    counter.textContent = (data.qIdx + 1) + ' / ' + total;
-    meta.appendChild(counter);
-    stage.appendChild(meta);
+    // ── Player row ──
+    const player = document.createElement('div');
+    player.className = 'exam-player-row';
+    player.innerHTML =
+      '<div class="exam-player-info">' +
+        '<div class="exam-player-name">TÚ</div>' +
+        '<div class="exam-player-combo">COMBO ×<span data-role="combo">0</span></div>' +
+      '</div>' +
+      '<div class="exam-player-hp-bar"><div class="exam-player-hp-fill"></div></div>' +
+      '<div class="exam-player-hp-num"></div>';
+    stage.appendChild(player);
 
+    // ── Question card ──
     const card = document.createElement('div');
     card.className = 'exam-question-card';
+    const meta = document.createElement('div');
+    meta.className = 'exam-q-meta';
+    meta.innerHTML =
+      '<div class="exam-q-counter"></div>' +
+      '<div class="exam-q-progress"><div class="exam-q-progress-fill"></div></div>';
+    card.appendChild(meta);
     const qText = document.createElement('div');
     qText.className = 'exam-q-text';
-    qText.textContent = q.q;
     card.appendChild(qText);
-
     const opts = document.createElement('div');
     opts.className = 'exam-options';
+    card.appendChild(opts);
+    stage.appendChild(card);
+
+    content.appendChild(stage);
+
+    data.refs = {
+      scene: stage,
+      arena,
+      bossSvg: arena.querySelector('.exam-boss-svg'),
+      bossHpFill: arena.querySelector('.exam-boss-hp-fill'),
+      bossHpNum: arena.querySelector('.exam-boss-hp-num'),
+      bossStage: arena.querySelector('.exam-boss-stage'),
+      playerRow: player,
+      playerCombo: player.querySelector('.exam-player-combo'),
+      comboNum: player.querySelector('[data-role="combo"]'),
+      playerHpFill: player.querySelector('.exam-player-hp-fill'),
+      playerHpNum: player.querySelector('.exam-player-hp-num'),
+      qText,
+      qCounter: meta.querySelector('.exam-q-counter'),
+      qProgressFill: meta.querySelector('.exam-q-progress-fill'),
+      opts,
+      card
+    };
+    data.combo = data.combo || 0;
+
+    _updateBossHp();
+    _updatePlayerHp();
+    _advanceExamUI();
+  }
+
+  function _advanceExamUI() {
+    const data = _examAnswers;
+    if (!data || !data.refs) return;
+    const exam = MODULE_EXAMS[data.moduleId];
+    const total = exam.questions.length;
+    const q = exam.questions[data.qIdx];
+
+    data.refs.qCounter.textContent = 'Pregunta ' + (data.qIdx + 1) + ' / ' + total;
+    data.refs.qProgressFill.style.width = ((data.qIdx / total) * 100) + '%';
+    data.refs.qText.textContent = q.q;
+    data.refs.comboNum.textContent = data.combo || 0;
+    data.refs.playerCombo.classList.toggle('is-streak', (data.combo || 0) >= 3);
+
+    const opts = data.refs.opts;
+    opts.innerHTML = '';
     const LETTERS = ['A', 'B', 'C', 'D'];
     q.options.forEach((optText, i) => {
       const btn = document.createElement('button');
       btn.type = 'button';
       btn.className = 'exam-option';
       btn.dataset.optIdx = String(i);
-      btn.innerHTML =
-        '<span class="exam-option-letter">' + LETTERS[i] + '</span>' +
-        '<span class="exam-option-text"></span>';
-      btn.querySelector('.exam-option-text').textContent = optText;
-      btn.addEventListener('click', () => _submitExamAnswer(i, card, opts));
+      const letter = document.createElement('span');
+      letter.className = 'exam-option-letter';
+      letter.textContent = LETTERS[i];
+      const text = document.createElement('span');
+      text.className = 'exam-option-text';
+      text.textContent = optText;
+      btn.appendChild(letter);
+      btn.appendChild(text);
+      btn.addEventListener('click', () => _submitExamAnswer(i));
       opts.appendChild(btn);
     });
-    card.appendChild(opts);
-    stage.appendChild(card);
 
-    content.appendChild(stage);
+    // Card slide-in
+    data.refs.card.classList.remove('is-incoming');
+    void data.refs.card.offsetWidth;
+    data.refs.card.classList.add('is-incoming');
+    data.locked = false;
   }
 
-  function _submitExamAnswer(optIdx, cardEl, optsEl) {
+  function _submitExamAnswer(optIdx) {
     const data = _examAnswers;
-    if (!data || data.locked) return;
+    if (!data || data.locked || !data.refs) return;
     data.locked = true;
     const exam = MODULE_EXAMS[data.moduleId];
     const q = exam.questions[data.qIdx];
@@ -8380,45 +9389,151 @@
     const isCorrect = optIdx === correctIdx;
     data.answers.push({ qIdx: data.qIdx, picked: optIdx, correct: isCorrect });
 
-    const buttons = optsEl.querySelectorAll('.exam-option');
+    const opts = data.refs.opts;
+    const buttons = opts.querySelectorAll('.exam-option');
     buttons.forEach(b => { b.disabled = true; });
-    const correctBtn = optsEl.querySelector('[data-opt-idx="' + correctIdx + '"]');
-    const pickedBtn = optsEl.querySelector('[data-opt-idx="' + optIdx + '"]');
+    const correctBtn = opts.querySelector('[data-opt-idx="' + correctIdx + '"]');
+    const pickedBtn = opts.querySelector('[data-opt-idx="' + optIdx + '"]');
+
+    const prevBossPct = _bossHpPctFor(data);
+    const prevPlayerPct = _playerHpPctFor(data);
+
     if (isCorrect) {
       pickedBtn.classList.add('is-correct');
-      try { chime('check'); } catch (e) {}
-      if (navigator.vibrate) navigator.vibrate(10);
+      data.combo = (data.combo || 0) + 1;
+      _playerAttacksBoss(data, prevBossPct);
     } else {
       pickedBtn.classList.add('is-wrong');
       if (correctBtn) correctBtn.classList.add('is-correct');
       data.wrongs++;
-      cardEl.classList.add('is-hit');
-      try { chime('wrong'); } catch (e) {}
-      if (navigator.vibrate) navigator.vibrate([18, 40, 22]);
-      // Update lives UI live
-      const lives = document.querySelector('.exam-lives');
-      if (lives) {
-        const hearts = lives.querySelectorAll('.exam-heart');
-        const lost = data.wrongs;
-        hearts.forEach((h, i) => {
-          h.classList.toggle('is-lost', i < lost);
-        });
-      }
+      data.combo = 0;
+      _bossAttacksPlayer(data, prevPlayerPct);
     }
 
-    const delay = isCorrect ? 700 : 1200;
+    data.refs.comboNum.textContent = data.combo || 0;
+    data.refs.playerCombo.classList.toggle('is-streak', (data.combo || 0) >= 3);
+
+    const delay = isCorrect ? 950 : 1500;
     setTimeout(() => {
       const total = exam.questions.length;
-      const failed = data.wrongs > exam.maxWrong;
-      const finished = (data.qIdx + 1) >= total;
-      if (failed || finished) {
-        _finalizeExam(!failed);
+      const playerDead = data.wrongs > exam.maxWrong;
+      const bossDead = _examCorrectsSoFar(data) >= total;
+      if (playerDead) {
+        _bossKillsPlayer(data);
+      } else if (bossDead) {
+        _playerKillsBoss(data);
       } else {
         data.qIdx++;
-        data.locked = false;
-        renderSkilltree();
+        _advanceExamUI();
       }
     }, delay);
+  }
+
+  function _playerAttacksBoss(data, prevBossPct) {
+    // Slash effect over boss
+    const slash = document.createElement('div');
+    slash.className = 'exam-slash';
+    data.refs.bossStage.appendChild(slash);
+    setTimeout(() => slash.remove(), 600);
+
+    // Boss hit animation
+    const svg = data.refs.bossSvg;
+    if (svg) {
+      svg.classList.remove('is-hit');
+      void svg.getBoundingClientRect();
+      svg.classList.add('is-hit');
+      setTimeout(() => svg.classList.remove('is-hit'), 600);
+    }
+
+    // Damage floater (delta)
+    setTimeout(() => {
+      const newPct = _bossHpPctFor(data);
+      const dmg = Math.max(1, prevBossPct - newPct);
+      _spawnFloater(data.refs.bossStage, '-' + dmg, 'dmg');
+      _updateBossHp();
+    }, 60);
+
+    // Combo callout
+    if ((data.combo || 0) >= 3) {
+      _spawnComboCallout(data.refs.arena, data.combo);
+    }
+
+    try { chime('check'); } catch (e) {}
+    if (navigator.vibrate) navigator.vibrate(10);
+  }
+
+  function _bossAttacksPlayer(data, prevPlayerPct) {
+    const svg = data.refs.bossSvg;
+    if (svg) {
+      svg.classList.remove('is-attacking');
+      void svg.getBoundingClientRect();
+      svg.classList.add('is-attacking');
+      setTimeout(() => svg.classList.remove('is-attacking'), 600);
+    }
+    // Claw effect
+    const claw = document.createElement('div');
+    claw.className = 'exam-claw';
+    data.refs.arena.appendChild(claw);
+    setTimeout(() => claw.remove(), 700);
+
+    // Screen shake & flash
+    data.refs.arena.classList.remove('is-shake');
+    void data.refs.arena.getBoundingClientRect();
+    data.refs.arena.classList.add('is-shake');
+    setTimeout(() => data.refs.arena.classList.remove('is-shake'), 600);
+    _screenFlash(false);
+
+    // Damage floater + player HP update
+    setTimeout(() => {
+      const newPct = _playerHpPctFor(data);
+      const dmg = Math.max(1, prevPlayerPct - newPct);
+      _spawnFloater(data.refs.arena, '-' + dmg, 'hit');
+      _updatePlayerHp();
+    }, 60);
+
+    try { chime('wrong'); } catch (e) {}
+    if (navigator.vibrate) navigator.vibrate([18, 40, 22]);
+  }
+
+  function _playerKillsBoss(data) {
+    const svg = data.refs.bossSvg;
+    if (svg) {
+      svg.classList.remove('is-hit', 'is-attacking');
+      svg.classList.add('is-dying');
+    }
+    _screenFlash(true);
+    setTimeout(() => {
+      try {
+        spawnConfetti({ left: 0, top: -20, width: window.innerWidth, height: window.innerHeight * 0.6 }, {
+          count: 130,
+          colors: ['#F2C063', '#FFD89E', '#FFE4B0', '#FFFFFF', '#FFC857', '#FF9F1C']
+        });
+      } catch (e) {}
+    }, 350);
+    try { chime('finale'); } catch (e) {}
+    if (navigator.vibrate) navigator.vibrate([20, 60, 40, 60, 60, 80, 100]);
+    setTimeout(() => _finalizeExam(true), 1700);
+  }
+
+  function _bossKillsPlayer(data) {
+    const svg = data.refs.bossSvg;
+    if (svg) {
+      svg.classList.remove('is-hit');
+      svg.classList.add('is-attacking');
+    }
+    _screenFlash(false);
+    setTimeout(() => _screenFlash(false), 250);
+    setTimeout(() => {
+      const overlay = document.createElement('div');
+      overlay.className = 'exam-you-died';
+      overlay.innerHTML =
+        '<div class="exam-you-died-text">El jefe te ha matado</div>' +
+        '<div class="exam-you-died-sub">Vuelve cuando reaparezca</div>';
+      document.body.appendChild(overlay);
+      try { chime('wrong'); } catch (e) {}
+      setTimeout(() => overlay.remove(), 2000);
+    }, 350);
+    setTimeout(() => _finalizeExam(false), 2200);
   }
 
   function _finalizeExam(passed) {
