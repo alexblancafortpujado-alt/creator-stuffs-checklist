@@ -2990,84 +2990,301 @@
     100% { box-shadow: 0 12px 40px rgba(0,0,0,0.45); }
   }
 
-  /* Heroes Academy rank widget */
+  /* Heroes Academy rank showcase — cinematic */
   .rank-widget {
-    display: flex;
-    align-items: center;
-    gap: 18px;
-    padding: 16px 18px;
-    margin-bottom: 18px;
-    border-radius: 14px;
-    background:
-      radial-gradient(ellipse at 12% 50%, rgba(255,255,255,0.06), transparent 60%),
-      linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
-    border: 1px solid rgba(255,255,255,0.08);
-    box-shadow: 0 0 28px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.05);
-  }
-  .rank-widget-img-wrap {
+    --rank-glow: rgba(255,255,255,0.20);
+    --rank-1: #e8e8e8;
+    --rank-2: #b8b8b8;
+    --rank-3: #707070;
+    --rank-deep: #1a1a1a;
     position: relative;
-    width: 64px; height: 64px;
-    flex: 0 0 64px;
-    border-radius: 50%;
+    overflow: hidden;
+    margin: 0 auto 22px;
+    padding: 32px 24px 26px;
+    border-radius: 22px;
     background:
-      radial-gradient(circle at 50% 35%, rgba(255,255,255,0.16), rgba(255,255,255,0) 60%),
-      rgba(0,0,0,0.35);
-    display: flex; align-items: center; justify-content: center;
-    box-shadow: 0 0 22px var(--rank-glow, rgba(255,255,255,0.15));
-    transition: box-shadow 0.4s ease;
+      radial-gradient(ellipse at 50% 28%, color-mix(in srgb, var(--rank-glow) 60%, transparent) 0%, transparent 55%),
+      radial-gradient(ellipse at 50% 100%, color-mix(in srgb, var(--rank-glow) 28%, transparent) 0%, transparent 65%),
+      linear-gradient(180deg, #0c0a12 0%, #07060b 60%, color-mix(in srgb, var(--rank-deep) 60%, #07060b) 100%);
+    border: 1px solid color-mix(in srgb, var(--rank-glow) 50%, rgba(255,255,255,0.06));
+    box-shadow:
+      0 0 60px color-mix(in srgb, var(--rank-glow) 35%, transparent),
+      0 18px 60px rgba(0,0,0,0.55),
+      inset 0 1px 0 rgba(255,255,255,0.06),
+      inset 0 0 80px rgba(0,0,0,0.4);
+    text-align: center;
   }
-  .rank-widget-img {
-    width: 56px; height: 56px;
-    object-fit: contain;
-    image-rendering: pixelated;
-    filter: drop-shadow(0 4px 10px rgba(0,0,0,0.55));
+  /* Rotating ray fan behind the emblem */
+  .rank-widget::before {
+    content: '';
+    position: absolute;
+    top: -40%; left: 50%;
+    width: 760px; height: 760px;
+    transform: translate(-50%, 0);
+    background:
+      conic-gradient(
+        from 0deg,
+        transparent 0deg,
+        color-mix(in srgb, var(--rank-glow) 65%, transparent) 6deg,
+        transparent 18deg,
+        transparent 38deg,
+        color-mix(in srgb, var(--rank-glow) 50%, transparent) 44deg,
+        transparent 56deg,
+        transparent 96deg,
+        color-mix(in srgb, var(--rank-glow) 60%, transparent) 102deg,
+        transparent 116deg,
+        transparent 156deg,
+        color-mix(in srgb, var(--rank-glow) 45%, transparent) 162deg,
+        transparent 176deg
+      );
+    mask-image: radial-gradient(circle at 50% 50%, black 28%, transparent 64%);
+    -webkit-mask-image: radial-gradient(circle at 50% 50%, black 28%, transparent 64%);
+    opacity: 0.55;
+    animation: rank-rays-spin 24s linear infinite;
+    pointer-events: none;
+    z-index: 0;
   }
-  .rank-widget-text { flex: 1; min-width: 0; }
+  @keyframes rank-rays-spin {
+    to { transform: translate(-50%, 0) rotate(360deg); }
+  }
+  /* Subtle scanline overlay */
+  .rank-widget::after {
+    content: '';
+    position: absolute; inset: 0;
+    background:
+      repeating-linear-gradient(
+        180deg,
+        transparent 0,
+        transparent 5px,
+        rgba(255,255,255,0.012) 5px,
+        rgba(255,255,255,0.012) 6px
+      );
+    pointer-events: none;
+    mix-blend-mode: screen;
+    z-index: 1;
+  }
+
   .rank-widget-eyebrow {
-    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
-    font-size: 10.5px;
-    letter-spacing: 0.24em;
-    color: var(--text-tertiary);
-    text-transform: uppercase;
-    font-weight: 800;
-    margin-bottom: 4px;
-  }
-  .rank-widget-name {
-    font-size: 22px;
-    font-weight: 800;
-    letter-spacing: -0.015em;
-    color: #fff;
-    margin-bottom: 2px;
-    text-shadow: 0 0 14px var(--rank-glow, transparent);
-  }
-  .rank-widget-sub {
-    font-size: 12.5px;
-    color: var(--text-tertiary);
-    letter-spacing: 0.02em;
-  }
-  .rank-widget-progress {
-    flex: 0 0 auto;
-    text-align: right;
+    position: relative;
+    z-index: 2;
     font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
     font-size: 11px;
-    color: var(--text-tertiary);
-    letter-spacing: 0.08em;
-  }
-  .rank-widget-progress-num {
-    display: block;
-    font-size: 18px;
-    color: var(--text-primary);
+    letter-spacing: 0.42em;
+    color: color-mix(in srgb, var(--rank-glow) 70%, #fff 30%);
+    text-transform: uppercase;
     font-weight: 800;
-    letter-spacing: -0.01em;
-    margin-bottom: 2px;
+    margin-bottom: 18px;
+    text-shadow: 0 0 14px var(--rank-glow);
   }
-  /* Rank-specific glows */
-  .rank-widget[data-rank="base"]       { --rank-glow: rgba(180,180,180,0.20); }
-  .rank-widget[data-rank="esmeralda"]  { --rank-glow: rgba(80,255,160,0.45); }
-  .rank-widget[data-rank="azurita"]    { --rank-glow: rgba(80,180,255,0.45); }
-  .rank-widget[data-rank="amatista"]   { --rank-glow: rgba(184,155,233,0.50); }
-  .rank-widget[data-rank="ruby"]       { --rank-glow: rgba(255,60,80,0.55); }
-  .rank-widget[data-rank="superheroe"] { --rank-glow: rgba(242,192,99,0.65); }
+  .rank-widget-eyebrow .rank-spark { display: inline-block; margin: 0 8px; opacity: 0.7; }
+
+  .rank-widget-emblem-wrap {
+    position: relative;
+    width: 200px; height: 200px;
+    margin: 0 auto 14px;
+    z-index: 2;
+    animation: rank-emblem-float 5.5s ease-in-out infinite;
+  }
+  @keyframes rank-emblem-float {
+    0%, 100% { transform: translateY(0) rotate(-1.5deg); }
+    50%      { transform: translateY(-10px) rotate(1.5deg); }
+  }
+  /* Pulsing aura behind the emblem */
+  .rank-widget-aura {
+    position: absolute;
+    inset: -30px;
+    border-radius: 50%;
+    background:
+      radial-gradient(circle at 50% 50%,
+        color-mix(in srgb, var(--rank-glow) 90%, transparent) 0%,
+        color-mix(in srgb, var(--rank-glow) 50%, transparent) 30%,
+        transparent 70%);
+    filter: blur(8px);
+    animation: rank-aura-pulse 3.6s ease-in-out infinite;
+    z-index: 0;
+  }
+  @keyframes rank-aura-pulse {
+    0%, 100% { transform: scale(0.92); opacity: 0.65; }
+    50%      { transform: scale(1.08); opacity: 1; }
+  }
+  /* Inner pedestal disc behind the emblem */
+  .rank-widget-disc {
+    position: absolute;
+    inset: 18px;
+    border-radius: 50%;
+    background:
+      radial-gradient(circle at 50% 30%, rgba(255,255,255,0.22), rgba(255,255,255,0) 60%),
+      radial-gradient(circle at 50% 90%, color-mix(in srgb, var(--rank-glow) 45%, transparent), transparent 70%),
+      rgba(0,0,0,0.55);
+    box-shadow:
+      inset 0 0 28px rgba(0,0,0,0.7),
+      inset 0 1px 0 rgba(255,255,255,0.08);
+    z-index: 1;
+  }
+  .rank-widget-emblem {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    image-rendering: pixelated;
+    z-index: 2;
+    filter:
+      drop-shadow(0 6px 18px rgba(0,0,0,0.7))
+      drop-shadow(0 0 22px color-mix(in srgb, var(--rank-glow) 80%, transparent));
+  }
+  /* Sparkles around the emblem */
+  .rank-widget-spark-dot {
+    position: absolute;
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 0 10px #fff, 0 0 18px color-mix(in srgb, var(--rank-glow) 80%, white 20%);
+    pointer-events: none;
+    opacity: 0;
+    animation: rank-spark-twinkle 3.6s ease-in-out infinite;
+    z-index: 3;
+  }
+  @keyframes rank-spark-twinkle {
+    0%, 100%   { opacity: 0; transform: scale(0.4); }
+    20%, 60%   { opacity: 1; transform: scale(1); }
+    40%, 80%   { opacity: 0.4; transform: scale(0.7); }
+  }
+
+  .rank-widget-name {
+    position: relative;
+    z-index: 2;
+    font-size: 44px;
+    font-weight: 900;
+    letter-spacing: 0.03em;
+    line-height: 1;
+    margin: 6px auto 8px;
+    text-transform: uppercase;
+    background: linear-gradient(180deg, var(--rank-1) 0%, var(--rank-2) 60%, var(--rank-3) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter:
+      drop-shadow(0 2px 0 rgba(0,0,0,0.5))
+      drop-shadow(0 0 22px color-mix(in srgb, var(--rank-glow) 80%, transparent));
+  }
+  .rank-widget-sub {
+    position: relative;
+    z-index: 2;
+    font-size: 13px;
+    color: rgba(255,255,255,0.65);
+    letter-spacing: 0.04em;
+    margin-bottom: 22px;
+    max-width: 420px;
+    margin-left: auto;
+    margin-right: auto;
+    line-height: 1.4;
+  }
+
+  /* Progress bar to next rank */
+  .rank-widget-progress-block {
+    position: relative;
+    z-index: 2;
+    max-width: 480px;
+    margin: 0 auto;
+  }
+  .rank-widget-progress-bar {
+    position: relative;
+    height: 12px;
+    border-radius: 6px;
+    background: rgba(0,0,0,0.55);
+    border: 1px solid color-mix(in srgb, var(--rank-glow) 40%, rgba(255,255,255,0.08));
+    overflow: hidden;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.7);
+  }
+  .rank-widget-progress-fill {
+    position: absolute; inset: 0;
+    width: 0%;
+    background: linear-gradient(90deg,
+      color-mix(in srgb, var(--rank-glow) 70%, #000 30%) 0%,
+      color-mix(in srgb, var(--rank-glow) 100%, #fff 0%) 50%,
+      color-mix(in srgb, var(--rank-glow) 90%, #fff 60%) 100%);
+    box-shadow:
+      0 0 14px var(--rank-glow),
+      inset 0 1px 0 rgba(255,255,255,0.3);
+    transition: width 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+    transform-origin: 0 50%;
+  }
+  .rank-widget-progress-fill::after {
+    content: '';
+    position: absolute;
+    top: 0; right: 0; bottom: 0;
+    width: 30%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.45), transparent);
+    animation: rank-progress-shimmer 2.4s linear infinite;
+  }
+  @keyframes rank-progress-shimmer {
+    0%   { transform: translateX(-100%); opacity: 0; }
+    20%  { opacity: 1; }
+    80%  { opacity: 1; }
+    100% { transform: translateX(160%); opacity: 0; }
+  }
+  .rank-widget-progress-meta {
+    margin-top: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    color: rgba(255,255,255,0.6);
+    text-transform: uppercase;
+  }
+  .rank-widget-progress-meta-num {
+    color: #fff;
+    font-weight: 800;
+    font-size: 13px;
+    text-shadow: 0 0 10px var(--rank-glow);
+  }
+  .rank-widget-next {
+    margin-top: 14px;
+    font-size: 12px;
+    color: rgba(255,255,255,0.55);
+    letter-spacing: 0.06em;
+  }
+  .rank-widget-next strong {
+    color: color-mix(in srgb, var(--rank-glow) 80%, #fff 20%);
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    text-shadow: 0 0 10px var(--rank-glow);
+  }
+  .rank-widget-next.is-final {
+    color: color-mix(in srgb, var(--rank-glow) 70%, #fff 30%);
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+  }
+
+  /* Per-rank palette */
+  .rank-widget[data-rank="base"]       { --rank-glow: rgba(180,180,180,0.40); --rank-1: #f0f0f0; --rank-2: #b8b8b8; --rank-3: #6e6e6e; --rank-deep: #1a1a1a; }
+  .rank-widget[data-rank="esmeralda"]  { --rank-glow: rgba(80,235,160,0.62);  --rank-1: #d1ffe6; --rank-2: #4ade80; --rank-3: #166534; --rank-deep: #062318; }
+  .rank-widget[data-rank="azurita"]    { --rank-glow: rgba(96,165,250,0.62);  --rank-1: #dbeafe; --rank-2: #60a5fa; --rank-3: #1e40af; --rank-deep: #061d3a; }
+  .rank-widget[data-rank="amatista"]   { --rank-glow: rgba(192,132,252,0.65); --rank-1: #f3e8ff; --rank-2: #c084fc; --rank-3: #6b21a8; --rank-deep: #1e0a36; }
+  .rank-widget[data-rank="ruby"]       { --rank-glow: rgba(255,90,110,0.70);  --rank-1: #ffe4e6; --rank-2: #ff6e7f; --rank-3: #9f1239; --rank-deep: #2a060c; }
+  .rank-widget[data-rank="superheroe"] { --rank-glow: rgba(251,191,36,0.78);  --rank-1: #fff7d4; --rank-2: #fbbf24; --rank-3: #b45309; --rank-deep: #2a1a05; }
+
+  /* Rank-up celebration pulse (added briefly when rank changes) */
+  .rank-widget.is-rank-up {
+    animation: rank-up-pulse 1.4s cubic-bezier(0.2, 0.8, 0.3, 1);
+  }
+  @keyframes rank-up-pulse {
+    0%   { transform: scale(1); box-shadow: 0 0 60px color-mix(in srgb, var(--rank-glow) 35%, transparent), 0 18px 60px rgba(0,0,0,0.55); }
+    25%  { transform: scale(1.025); box-shadow: 0 0 120px color-mix(in srgb, var(--rank-glow) 100%, transparent), 0 18px 60px rgba(0,0,0,0.55); }
+    100% { transform: scale(1); box-shadow: 0 0 60px color-mix(in srgb, var(--rank-glow) 35%, transparent), 0 18px 60px rgba(0,0,0,0.55); }
+  }
+
+  @media (max-width: 640px) {
+    .rank-widget { padding: 24px 16px 22px; }
+    .rank-widget-emblem-wrap { width: 150px; height: 150px; }
+    .rank-widget-name { font-size: 32px; letter-spacing: 0.02em; }
+    .rank-widget-sub { font-size: 12px; }
+    .rank-widget-eyebrow { font-size: 10px; letter-spacing: 0.32em; }
+  }
 
   .st-module-tab-trophy {
     margin-left: 4px;
@@ -8967,29 +9184,111 @@
     return 'Bloqueado · mata primero al boss de: ' + pending.join(', ');
   }
 
+  function _nextRankProgress(rankId) {
+    // Returns { nextDef, current, target, label } or null if at max.
+    const order = RANK_DEFS.map(r => r.id);
+    const idx = order.indexOf(rankId);
+    if (idx < 0 || idx >= RANK_DEFS.length - 1) return null;
+    const nextDef = RANK_DEFS[idx + 1];
+    if (rankId === 'base') {
+      return { nextDef, current: _bossDefeated('modo-creativo') ? 1 : 0, target: 1, label: 'Mata al boss de Modo Creativo' };
+    }
+    if (rankId === 'esmeralda') {
+      const c = RANK_TIER_2_IDS.filter(_bossDefeated).length;
+      return { nextDef, current: Math.min(1, c), target: 1, label: 'Mata cualquier curso del Camino Esmeralda' };
+    }
+    if (rankId === 'azurita') {
+      const c = RANK_TIER_3_IDS.filter(_bossDefeated).length;
+      return { nextDef, current: Math.min(1, c), target: 1, label: 'Mata cualquier curso del Camino Azurita' };
+    }
+    if (rankId === 'amatista') {
+      const c = RANK_ALL_BOSS_IDS.filter(_bossDefeated).length;
+      return { nextDef, current: c, target: RANK_ALL_BOSS_IDS.length, label: 'Mata a todos los jefes para invocar a Umbra' };
+    }
+    if (rankId === 'ruby') {
+      return { nextDef, current: _bossDefeated('umbra') ? 1 : 0, target: 1, label: 'Vence a Umbra · reto de 7 días' };
+    }
+    return null;
+  }
+
+  let _lastRenderedRank = null;
   function renderRankWidget() {
     const wrap = document.getElementById('rankWidget');
     if (!wrap) return;
     const rankId = computeUserRank();
     const def = RANK_DEFS.find(r => r.id === rankId) || RANK_DEFS[0];
+    const next = _nextRankProgress(rankId);
     const defeated = RANK_ALL_BOSS_IDS.filter(_bossDefeated).length;
     const totalBosses = RANK_ALL_BOSS_IDS.length;
+
+    // Sparkle dots — random positions around the emblem
+    const sparkleCount = 8;
+    const sparkles = [];
+    for (let i = 0; i < sparkleCount; i++) {
+      const angle = (i / sparkleCount) * Math.PI * 2 + Math.random() * 0.6;
+      const dist = 105 + Math.random() * 28;
+      const x = Math.round(50 + Math.cos(angle) * (dist / 200) * 100);
+      const y = Math.round(50 + Math.sin(angle) * (dist / 200) * 100);
+      const delay = (Math.random() * 3.6).toFixed(2);
+      sparkles.push(
+        '<span class="rank-widget-spark-dot" style="left:' + x + '%;top:' + y + '%;animation-delay:' + delay + 's"></span>'
+      );
+    }
+
     wrap.dataset.rank = rankId;
+
+    let nextHtml;
+    if (next) {
+      nextHtml =
+        '<div class="rank-widget-progress-block">' +
+          '<div class="rank-widget-progress-bar">' +
+            '<div class="rank-widget-progress-fill" style="width:' + Math.round((next.current / next.target) * 100) + '%"></div>' +
+          '</div>' +
+          '<div class="rank-widget-progress-meta">' +
+            '<span class="rank-widget-progress-label"></span>' +
+            '<span class="rank-widget-progress-meta-num">' + defeated + ' / ' + totalBosses + ' jefes</span>' +
+          '</div>' +
+          '<div class="rank-widget-next">Próximo rango → <strong></strong></div>' +
+        '</div>';
+    } else {
+      nextHtml =
+        '<div class="rank-widget-progress-block">' +
+          '<div class="rank-widget-progress-bar">' +
+            '<div class="rank-widget-progress-fill" style="width:100%"></div>' +
+          '</div>' +
+          '<div class="rank-widget-next is-final">★ Has alcanzado la cima ★</div>' +
+        '</div>';
+    }
+
     wrap.innerHTML =
-      '<div class="rank-widget-img-wrap">' +
-        '<img class="rank-widget-img" src="' + def.img + '" alt="' + def.name + '" draggable="false" />' +
+      '<div class="rank-widget-eyebrow">' +
+        '<span class="rank-spark">✦</span>Tu rango<span class="rank-spark">✦</span>' +
       '</div>' +
-      '<div class="rank-widget-text">' +
-        '<div class="rank-widget-eyebrow">Tu rango</div>' +
-        '<div class="rank-widget-name"></div>' +
-        '<div class="rank-widget-sub"></div>' +
+      '<div class="rank-widget-emblem-wrap">' +
+        '<div class="rank-widget-aura"></div>' +
+        '<div class="rank-widget-disc"></div>' +
+        '<img class="rank-widget-emblem" src="' + def.img + '" alt="" draggable="false" />' +
+        sparkles.join('') +
       '</div>' +
-      '<div class="rank-widget-progress">' +
-        '<span class="rank-widget-progress-num">' + defeated + ' / ' + totalBosses + '</span>' +
-        'jefes caídos' +
-      '</div>';
+      '<div class="rank-widget-name"></div>' +
+      '<div class="rank-widget-sub"></div>' +
+      nextHtml;
+
     wrap.querySelector('.rank-widget-name').textContent = def.name;
     wrap.querySelector('.rank-widget-sub').textContent = def.subtitle;
+    if (next) {
+      wrap.querySelector('.rank-widget-progress-label').textContent = next.label;
+      wrap.querySelector('.rank-widget-next strong').textContent = next.nextDef.name.replace(/^Rango\s+/, '');
+    }
+
+    // Rank-up flash (only on actual change, not first paint)
+    if (_lastRenderedRank !== null && _lastRenderedRank !== rankId) {
+      wrap.classList.remove('is-rank-up');
+      void wrap.offsetWidth;
+      wrap.classList.add('is-rank-up');
+      setTimeout(() => wrap.classList.remove('is-rank-up'), 1500);
+    }
+    _lastRenderedRank = rankId;
   }
 
   function computeChapterStats(module, chIdx, state) {
