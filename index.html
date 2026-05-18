@@ -6286,6 +6286,37 @@
   }
   .access-add-btn:hover { background: rgba(107,227,164,0.22); color: #fff; }
 
+  .rank-debug-row {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-top: 6px;
+  }
+  .rank-debug-btn {
+    padding: 8px 14px;
+    border-radius: 8px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    color: var(--text-secondary);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.15s ease;
+  }
+  .rank-debug-btn:hover {
+    background: rgba(255,255,255,0.08);
+    color: #fff;
+    border-color: rgba(255,255,255,0.18);
+  }
+  .rank-debug-btn.is-active {
+    background: rgba(242,192,99,0.18);
+    border-color: rgba(242,192,99,0.55);
+    color: #F2C063;
+    box-shadow: 0 0 14px rgba(242,192,99,0.18);
+  }
+
   /* ─── Paywall ───────────────────────────────────────────────── */
   .paywall-overlay {
     position: fixed;
@@ -7123,6 +7154,12 @@
           <input type="email" id="accessAddInput" placeholder="email@ejemplo.com" autocomplete="off" />
           <button type="button" id="accessAddBtn" class="access-add-btn">+ Añadir</button>
         </div>
+      </div>
+
+      <div class="access-card">
+        <div class="access-card-eyebrow">🛠 Debug · forzar rango</div>
+        <div class="access-card-sub">Solo para pruebas visuales. Override del rango calculado por bosses.</div>
+        <div class="rank-debug-row" id="rankDebugRow"></div>
       </div>
     </div>
   </div>
@@ -10332,7 +10369,22 @@
     return getModuleExamState(moduleId).passed === true;
   }
 
+  // Debug-only override: admin can force a rank from the Admin tab to
+  // preview UI states. storeGet returns null when no override is set.
+  const FORCE_RANK_KEY = 'debug_force_rank_v1';
+  function getForcedRank() {
+    const v = storeGet(FORCE_RANK_KEY);
+    if (!v) return null;
+    return RANK_DEFS.some(r => r.id === v) ? v : null;
+  }
+  function setForcedRank(rankId) {
+    if (!rankId) storeDelete(FORCE_RANK_KEY);
+    else storeSet(FORCE_RANK_KEY, rankId);
+  }
+
   function computeUserRank() {
+    const forced = getForcedRank();
+    if (forced) return forced;
     if (_bossDefeated('umbra'))                       return 'superheroe';
     if (RANK_ALL_BOSS_IDS.every(_bossDefeated))       return 'ruby';
     if (RANK_TIER_3_IDS.some(_bossDefeated))          return 'amatista';
@@ -13388,6 +13440,28 @@
     console.info('[access] paywall shown · reason:', reason);
   }
 
+  function renderRankDebugRow() {
+    const row = document.getElementById('rankDebugRow');
+    if (!row) return;
+    const current = getForcedRank() || '';
+    const buttons = [{ id: '', label: '⚡ Auto' }].concat(
+      RANK_DEFS.map(r => ({ id: r.id, label: r.name.replace(/^Rango\s+/, '') }))
+    );
+    row.innerHTML = buttons.map(b =>
+      '<button type="button" class="rank-debug-btn' +
+        (current === b.id ? ' is-active' : '') +
+      '" data-rank="' + _esc(b.id) + '">' + _esc(b.label) + '</button>'
+    ).join('');
+    row.querySelectorAll('.rank-debug-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        setForcedRank(btn.dataset.rank || null);
+        renderRankDebugRow();
+        if (typeof renderRankWidget === 'function') renderRankWidget();
+        if (typeof applyRankAvatarFrame === 'function') applyRankAvatarFrame();
+      });
+    });
+  }
+
   function wireAccessAdminUI() {
     // CSV upload
     const inp = document.getElementById('accessCsvInput');
@@ -13459,6 +13533,7 @@
       });
     }
     renderAccessAdminPanel();
+    renderRankDebugRow();
   }
 
   // ─── Display name ────────────────────────────────────────────────
