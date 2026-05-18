@@ -6628,12 +6628,12 @@
     height: calc(100% + 18px);
     pointer-events: none;
     z-index: 2;
-    filter: drop-shadow(0 0 8px var(--rank-glow));
-    animation: rank-frame-breathe 4.5s ease-in-out infinite;
+    filter: drop-shadow(0 0 3px var(--rank-glow));
+    animation: rank-frame-breathe 5s ease-in-out infinite;
   }
   @keyframes rank-frame-breathe {
-    0%, 100% { filter: drop-shadow(0 0 6px  var(--rank-glow)); }
-    50%      { filter: drop-shadow(0 0 14px var(--rank-glow)); }
+    0%, 100% { filter: drop-shadow(0 0 2px var(--rank-glow)); }
+    50%      { filter: drop-shadow(0 0 5px var(--rank-glow)); }
   }
   /* Tighten the Clerk avatar so it sits clean inside the frame. */
   .rank-avatar-frame .cl-userButtonAvatarBox,
@@ -6642,12 +6642,12 @@
     height: 36px !important;
   }
   /* Per-rank glow colors (match the rank-widget palette) */
-  .rank-avatar-frame[data-rank="base"]       { --rank-glow: rgba(180,180,180,0.40); }
-  .rank-avatar-frame[data-rank="esmeralda"]  { --rank-glow: rgba(80,235,160,0.65); }
-  .rank-avatar-frame[data-rank="azurita"]    { --rank-glow: rgba(96,165,250,0.65); }
-  .rank-avatar-frame[data-rank="amatista"]   { --rank-glow: rgba(192,132,252,0.70); }
-  .rank-avatar-frame[data-rank="ruby"]       { --rank-glow: rgba(255,90,110,0.75); }
-  .rank-avatar-frame[data-rank="superheroe"] { --rank-glow: rgba(251,191,36,0.85); }
+  .rank-avatar-frame[data-rank="base"]       { --rank-glow: rgba(180,180,180,0.15); }
+  .rank-avatar-frame[data-rank="esmeralda"]  { --rank-glow: rgba(80,235,160,0.22); }
+  .rank-avatar-frame[data-rank="azurita"]    { --rank-glow: rgba(96,165,250,0.22); }
+  .rank-avatar-frame[data-rank="amatista"]   { --rank-glow: rgba(192,132,252,0.24); }
+  .rank-avatar-frame[data-rank="ruby"]       { --rank-glow: rgba(255,90,110,0.26); }
+  .rank-avatar-frame[data-rank="superheroe"] { --rank-glow: rgba(251,191,36,0.30); }
 
   /* Clerk popover dark-theme contrast fixes */
   .cl-userButtonPopoverCard,
