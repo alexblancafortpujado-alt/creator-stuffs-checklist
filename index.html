@@ -875,6 +875,65 @@
     grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
     gap: 16px;
   }
+
+  /* Grouped grid: 3 fixed cols (one per checklist in each step) */
+  .ck-group {
+    margin-bottom: 36px;
+  }
+  .ck-group:last-child { margin-bottom: 0; }
+  .ck-group-header {
+    margin: 0 0 14px;
+  }
+  .ck-group-paso {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 4px;
+  }
+  .ck-group-title {
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+    letter-spacing: -0.01em;
+  }
+  .ck-group-subtitle {
+    color: var(--text-tertiary);
+    font-weight: 400;
+    margin-left: 4px;
+  }
+  .ck-group .checklist-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  @media (max-width: 720px) {
+    .ck-group .checklist-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  @media (max-width: 480px) {
+    .ck-group .checklist-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  /* Placeholder card for a checklist not yet built ("coming soon") */
+  .checklist-card.is-coming-soon {
+    cursor: not-allowed;
+    opacity: 0.45;
+  }
+  .checklist-card.is-coming-soon:hover {
+    transform: none;
+    box-shadow: none;
+  }
+  .checklist-card-soon {
+    font-size: 11px;
+    color: var(--text-tertiary);
+    font-weight: 600;
+    letter-spacing: 0.10em;
+    text-transform: uppercase;
+  }
   .checklist-card {
     appearance: none;
     background: none;
@@ -7533,7 +7592,7 @@
     <div class="section-title" id="checklistSectionTitle">Checklist</div>
 
     <!-- Grid view: list of all checklists as folder cards -->
-    <div class="checklist-grid" id="checklistGrid"></div>
+    <div class="checklist-groups" id="checklistGrid"></div>
 
     <!-- Detail view: rendered when a folder is clicked -->
     <div class="checklist-detail" id="checklistDetail" style="display:none;">
@@ -18528,17 +18587,44 @@
   }
 
   // ─── Checklist folder grid ────────────────────────────────────────
-  // 6 folders user-facing. Order here = order on screen. The id is the
-  // storage key under user_state ("checklist_done.<id>") so changing
-  // an id resets a user's progress for that checklist.
-  const CHECKLISTS = [
-    { id: 'onboarding',        name: 'Onboarding' },
-    { id: 'mapea-tu-imperio',  name: 'Mapea tu imperio' },
-    { id: 'estrategia',        name: 'Estrategia' },
-    { id: 'contenido-outlier', name: 'Contenido Outlier' },
-    { id: 'feedback-loop',     name: 'Feedback Loop' },
-    { id: 'equipo',            name: 'Equipo' },
+  // The Checklist tab is organised into 3 "Paso" groups, each containing
+  // 3 folders. Order here = order on screen. The folder id is also the
+  // storage key under user_state ("checklist_done.<id>") so renaming
+  // an id resets a user's progress on that checklist.
+  const CHECKLIST_GROUPS = [
+    {
+      paso: 'Paso 1',
+      title: 'Contenido',
+      subtitle: 'crea tu estrategia',
+      checklists: [
+        { id: 'onboarding',       name: 'Onboarding' },
+        { id: 'mapea-tu-imperio', name: 'Mapea tu imperio' },
+        { id: 'estrategia',       name: 'Estrategia' },
+      ],
+    },
+    {
+      paso: 'Paso 2',
+      title: 'Crecimiento',
+      subtitle: 'haz mejor contenido',
+      checklists: [
+        { id: 'crea-videos-outliers', name: 'Crea videos outliers' },
+        { id: 'feedback-loop',        name: 'Feedback loop' },
+        { id: 'equipo',               name: 'Equipo' },
+      ],
+    },
+    {
+      paso: 'Paso 3',
+      title: 'Cash',
+      subtitle: 'leverage',
+      checklists: [
+        { id: 'nutricion',   name: 'Nutrición' },
+        { id: 'sponsors',    name: 'Sponsors' },
+        { id: 'coming-soon', name: 'Coming soon…', comingSoon: true },
+      ],
+    },
   ];
+  // Flat list for lookups by id.
+  const CHECKLISTS = CHECKLIST_GROUPS.flatMap(g => g.checklists);
 
   // Per-checklist content. Items are rendered in order. Three kinds:
   //   { type: 'group',     title }              → step header, not clickable
@@ -18547,7 +18633,14 @@
   //   { type: 'checklist', title }              → checkbox that toggles + counts toward %
   // Items with type 'notion' or 'link' and a null url render as muted/disabled.
   const CHECKLIST_CONTENT = {
-    'onboarding':        [],
+    'onboarding':            [],
+    'estrategia':            [],
+    'crea-videos-outliers':  [],
+    'feedback-loop':         [],
+    'equipo':                [],
+    'nutricion':             [],
+    'sponsors':              [],
+    'coming-soon':           [],
     'mapea-tu-imperio': [
       { type: 'notion',    title: 'El mayor problema que todo creador de contenido tiene', url: 'https://steadfast-chance-fc7.notion.site/El-mayor-problema-que-todo-creador-tiene-3494ff25b33f80f3998cfd179851ad6a?source=copy_link' },
       { type: 'checklist', title: 'Entender la metáfora del Ferrari sin GPS' },
@@ -18571,10 +18664,6 @@
       { type: 'checklist', title: 'Instalar Claude Code' },
       { type: 'checklist', title: 'Descargar y abrir Dani Carrero AI' },
     ],
-    'estrategia':        [],
-    'contenido-outlier': [],
-    'feedback-loop':     [],
-    'equipo':            [],
   };
 
   // Inline icons — small SVGs so they inherit currentColor.
@@ -18599,24 +18688,44 @@
     return { done, total: checkItems.length, pct: Math.round((done / checkItems.length) * 100) };
   }
 
-  function renderChecklistGrid() {
-    const grid = document.getElementById('checklistGrid');
-    if (!grid) return;
-    grid.innerHTML = CHECKLISTS.map(c => {
-      const p = getChecklistProgress(c.id);
+  function renderChecklistCard(c) {
+    if (c.comingSoon) {
       return ''
-        + '<button class="checklist-card" type="button" data-checklist="' + c.id + '">'
+        + '<div class="checklist-card is-coming-soon" aria-disabled="true">'
         +   '<div class="checklist-card-thumb" role="img" aria-label="Carpeta"></div>'
         +   '<div class="checklist-card-foot">'
         +     '<div class="checklist-card-name">' + escapeHtml(c.name) + '</div>'
-        +     '<div class="checklist-card-progress">'
-        +       '<div class="checklist-card-progress-bar"><div class="checklist-card-progress-fill" style="width:' + p.pct + '%"></div></div>'
-        +       '<div class="checklist-card-progress-text">' + p.pct + '%</div>'
-        +     '</div>'
+        +     '<div class="checklist-card-soon">Próximamente</div>'
         +   '</div>'
-        + '</button>';
-    }).join('');
-    grid.querySelectorAll('.checklist-card').forEach(card => {
+        + '</div>';
+    }
+    const p = getChecklistProgress(c.id);
+    return ''
+      + '<button class="checklist-card" type="button" data-checklist="' + c.id + '">'
+      +   '<div class="checklist-card-thumb" role="img" aria-label="Carpeta"></div>'
+      +   '<div class="checklist-card-foot">'
+      +     '<div class="checklist-card-name">' + escapeHtml(c.name) + '</div>'
+      +     '<div class="checklist-card-progress">'
+      +       '<div class="checklist-card-progress-bar"><div class="checklist-card-progress-fill" style="width:' + p.pct + '%"></div></div>'
+      +       '<div class="checklist-card-progress-text">' + p.pct + '%</div>'
+      +     '</div>'
+      +   '</div>'
+      + '</button>';
+  }
+
+  function renderChecklistGrid() {
+    const container = document.getElementById('checklistGrid');
+    if (!container) return;
+    container.innerHTML = CHECKLIST_GROUPS.map(g => ''
+      + '<div class="ck-group">'
+      +   '<div class="ck-group-header">'
+      +     '<div class="ck-group-paso">' + escapeHtml(g.paso) + '</div>'
+      +     '<h3 class="ck-group-title">' + escapeHtml(g.title) + ' <span class="ck-group-subtitle">— ' + escapeHtml(g.subtitle) + '</span></h3>'
+      +   '</div>'
+      +   '<div class="checklist-grid">' + g.checklists.map(renderChecklistCard).join('') + '</div>'
+      + '</div>'
+    ).join('');
+    container.querySelectorAll('.checklist-card:not(.is-coming-soon)').forEach(card => {
       card.addEventListener('click', () => openChecklistDetail(card.dataset.checklist));
     });
   }
