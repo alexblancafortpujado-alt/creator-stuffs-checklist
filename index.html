@@ -937,12 +937,12 @@
     transform: none;
     box-shadow: none;
   }
-  .checklist-card-soon {
-    font-size: 11px;
-    color: var(--text-tertiary);
-    font-weight: 600;
-    letter-spacing: 0.10em;
-    text-transform: uppercase;
+  /* "Próximamente" label sits in the same slot as the 0% number on real cards
+     so the card visually matches the rest — no weird uppercase block. */
+  .checklist-card.is-coming-soon .checklist-card-progress-text {
+    min-width: 0;
+    letter-spacing: 0.02em;
+    text-transform: none;
   }
   .checklist-card {
     appearance: none;
@@ -1315,8 +1315,9 @@
   }
   .ck-row.ck-check .ck-row-trailing { display: none; }
 
-  /* Group / step header — not a button, just a divider with label */
-  .ck-group {
+  /* Step header inside an open checklist (Paso 1:, Paso 2: …) — divider with label.
+     Renamed from .ck-group to avoid colliding with the outer .ck-group wrapper. */
+  .ck-step {
     display: flex;
     align-items: center;
     gap: 12px;
@@ -1327,7 +1328,7 @@
     letter-spacing: 0.16em;
     text-transform: uppercase;
   }
-  .ck-group::after {
+  .ck-step::after {
     content: '';
     flex: 1;
     height: 1px;
@@ -18705,7 +18706,10 @@
         +   '<div class="checklist-card-thumb" role="img" aria-label="Carpeta"></div>'
         +   '<div class="checklist-card-foot">'
         +     '<div class="checklist-card-name">' + escapeHtml(c.name) + '</div>'
-        +     '<div class="checklist-card-soon">Próximamente</div>'
+        +     '<div class="checklist-card-progress">'
+        +       '<div class="checklist-card-progress-bar"><div class="checklist-card-progress-fill" style="width:0%"></div></div>'
+        +       '<div class="checklist-card-progress-text">Próximamente</div>'
+        +     '</div>'
         +   '</div>'
         + '</div>';
     }
@@ -18769,7 +18773,7 @@
     container.innerHTML = items.map((item, idx) => {
       const safeTitle = escapeHtml(item.title);
       if (item.type === 'group') {
-        return '<div class="ck-group">' + safeTitle + '</div>';
+        return '<div class="ck-step">' + safeTitle + '</div>';
       }
       if (item.type === 'checklist') {
         const isDone = !!doneMap[item.title];
