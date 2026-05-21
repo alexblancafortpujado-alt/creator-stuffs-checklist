@@ -7823,8 +7823,10 @@
   const RING_R = 52;
   const RING_C = 2 * Math.PI * RING_R;
   const ringFill = document.getElementById('ringFill');
-  ringFill.style.strokeDasharray = RING_C;
-  ringFill.style.strokeDashoffset = RING_C;
+  if (ringFill) {
+    ringFill.style.strokeDasharray = RING_C;
+    ringFill.style.strokeDashoffset = RING_C;
+  }
 
   const PALETTE = [
     [0,    [255, 216, 158]],
@@ -7862,6 +7864,7 @@
   }
 
   function updateDayBar() {
+    if (!document.getElementById('ringFill')) return; // day-ring removed in Creator Stuffs reset
     const now = new Date();
     const hours = now.getHours() + now.getMinutes() / 60 + now.getSeconds() / 3600;
     const wakeHour = getWakeHour();
@@ -18077,21 +18080,11 @@
       if (typeof refreshFragmentsChip === 'function') refreshFragmentsChip();
     } catch (e) { console.error('[fragments] init failed', e); }
 
-    renderDashName();
-    runRollover();
-    runStreakCheck();
-    loadToday();
-    loadTomorrow();
-    renderStreak();
-    updateDayBar();
-    setInterval(updateDayBar, 60 * 1000);
-    wireWakeHourEditor();
-    startTicker();
-    loadHabits();
-    setupCalendarGrid();
-    renderCalendar();
-    setInterval(() => { if (calView === 'day' || calView === 'week') renderCalendar(); }, 60 * 1000);
-    renderPortalV2();
+    // Dashboard / Habits / Calendar / Portal / Boss Fight UI was removed
+    // in the Creator Stuffs reset — their init functions (loadToday, loadHabits,
+    // renderCalendar, etc.) reference DOM elements that no longer exist and
+    // would crash. Re-enable selectively when those features come back.
+    try { renderDashName(); } catch (e) { /* dashName element removed; ignore */ }
     try {
       let saved = localStorage.getItem('active_tab_v1');
       // Legacy tab names from the Heroes App fork — demote to checklist.
