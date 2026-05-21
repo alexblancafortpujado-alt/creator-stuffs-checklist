@@ -3,18 +3,21 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-<title>Heroes App</title>
-<link rel="icon" type="image/png" sizes="any" href="app-icon-v3.png" />
-<link rel="shortcut icon" type="image/png" href="app-icon-v3.png" />
-<link rel="apple-touch-icon" sizes="180x180" href="app-icon-v3.png" />
+<title>Creator Stuffs Checklist</title>
 <style>
   :root {
-    --text-primary: #FAFAFA;
-    --text-secondary: #B8B6B0;
-    --text-tertiary: #76746E;
-    --success: #6BE3A4;
-    --warning: #F2C063;
-    --danger: #FF6B6B;
+    --bg: #0B0D12;
+    --surface: #11141B;
+    --border: rgba(255,255,255,0.08);
+    --text-primary: #ECEEF2;
+    --text-secondary: #9CA3AF;
+    --text-tertiary: #6B7280;
+    --accent: #3B82F6;
+    --accent-hover: #60A5FA;
+    --accent-soft: rgba(59,130,246,0.12);
+    --success: #34D399;
+    --warning: #FBBF24;
+    --danger: #F87171;
   }
 
   * { box-sizing: border-box; }
@@ -22,7 +25,7 @@
   html, body {
     margin: 0;
     padding: 0;
-    background: #050506;
+    background: var(--bg);
     color: var(--text-primary);
     font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     -webkit-font-smoothing: antialiased;
@@ -44,11 +47,7 @@
     inset: 0;
     pointer-events: none;
     z-index: -2;
-    background:
-      radial-gradient(circle at 82% 14%, rgba(224, 118, 88, 0.16), transparent 55%),
-      radial-gradient(circle at 18% 90%, rgba(180, 180, 200, 0.06), transparent 55%);
-    filter: blur(40px);
-    animation: bg-drift 36s ease-in-out infinite alternate;
+    background: var(--bg);
   }
 
   body::after {
@@ -70,14 +69,11 @@
 
   /* Page title */
   .dash-title {
-    font-size: 28px;
-    font-weight: 700;
-    letter-spacing: -0.025em;
+    font-size: 22px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
     margin: 0 0 14px 0;
-    background: linear-gradient(180deg, #FFFFFF 0%, #C7C4BC 120%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
+    color: var(--text-primary);
     color: transparent;
   }
 
@@ -857,9 +853,20 @@
   }
   .tab-btn:hover { color: var(--text-secondary); }
   .tab-btn.is-active {
-    background: rgba(255,255,255,0.08);
-    color: var(--text-primary);
-    box-shadow: 0 1px 0 rgba(255,255,255,0.05) inset;
+    background: var(--accent-soft);
+    color: var(--accent-hover);
+    box-shadow: inset 0 0 0 1px rgba(59,130,246,0.25);
+  }
+
+  /* Empty-state placeholders for tabs awaiting content */
+  .placeholder-empty {
+    padding: 56px 24px;
+    text-align: center;
+    color: var(--text-tertiary);
+    font-size: 13.5px;
+    border: 1px dashed var(--border);
+    border-radius: 12px;
+    background: var(--surface);
   }
   .tab-panel { display: none; }
   .tab-panel.is-active { display: block; animation: tab-fade 0.35s ease; }
@@ -6588,10 +6595,7 @@
   .auth-gate {
     position: fixed;
     inset: 0;
-    background:
-      radial-gradient(circle at 82% 14%, rgba(224, 118, 88, 0.16), transparent 55%),
-      radial-gradient(circle at 18% 90%, rgba(180, 180, 200, 0.06), transparent 55%),
-      #050506;
+    background: var(--bg);
     z-index: 9999;
     display: flex;
     align-items: center;
@@ -6608,14 +6612,10 @@
     width: 100%;
   }
   .auth-gate-title {
-    font-size: 32px;
-    font-weight: 800;
-    letter-spacing: -0.025em;
-    background: linear-gradient(180deg, #FFFFFF 0%, #C7C4BC 120%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-    color: transparent;
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--text-primary);
   }
   .auth-gate-sub {
     font-size: 13px;
@@ -7111,290 +7111,41 @@
 
 <div class="auth-gate" id="authGate">
   <div class="auth-gate-inner">
-    <div class="auth-gate-title">Heroes App</div>
-    <div class="auth-gate-sub">Sign in to access your dashboard.</div>
+    <div class="auth-gate-title">Creator Stuffs</div>
+    <div class="auth-gate-sub">Inicia sesión para acceder a la checklist.</div>
     <div id="clerkSignIn"></div>
   </div>
 </div>
 
 <div class="dash-title-row">
-  <h1 class="dash-title">Bienvenido, <span class="dash-name" id="dashName" title="Haz click para cambiar tu nombre">…</span></h1>
-  <button type="button" class="fragments-chip" id="fragmentsChip" title="Tus fragmentos">
-    <img class="fragments-chip-icon" src="fragmentos.png" alt="" draggable="false" />
-    <span class="fragments-chip-num" id="fragmentsChipNum">0</span>
-  </button>
-  <div class="rank-avatar-frame" id="rankAvatarFrame" data-rank="base" title="Tu rango actual">
-    <img class="rank-avatar-frame-img" alt="" draggable="false" />
-    <div id="clerkUserButton"></div>
-  </div>
+  <h1 class="dash-title">Creator Stuffs</h1>
+  <div id="clerkUserButton"></div>
 </div>
 
 <nav class="tab-nav" id="tabNav" aria-label="Sections">
-  <button class="tab-btn is-active" data-tab="dashboard" type="button">Dashboard</button>
-  <button class="tab-btn" data-tab="habits" type="button">Habits</button>
-  <button class="tab-btn" data-tab="calendar" type="button">Calendar</button>
-  <button class="tab-btn" data-tab="portal" type="button">Portal</button>
-  <button class="tab-btn" data-tab="bossfight" type="button">Boss Fight</button>
-  <button class="tab-btn" data-tab="skilltree" type="button">Checklist</button>
+  <button class="tab-btn is-active" data-tab="checklist" type="button">Checklist</button>
+  <button class="tab-btn" data-tab="sops" type="button">SOPs</button>
   <button class="tab-btn tab-btn-admin" data-tab="admin" type="button">Admin</button>
 </nav>
 
-<div class="tab-panel is-active" data-tab="dashboard">
 
-<!-- Component 2: Goal Ticker — removed (kept buggin' out, see commit log) -->
 
-<!-- Component 3: Day Ring -->
-<div class="day-ring-wrap">
-  <div class="day-ring">
-    <svg viewBox="0 0 120 120" aria-hidden="true">
-      <defs>
-        <filter id="ringGlow" x="-20%" y="-20%" width="140%" height="140%">
-          <feGaussianBlur stdDeviation="1.5" result="blur"/>
-          <feMerge>
-            <feMergeNode in="blur"/>
-            <feMergeNode in="SourceGraphic"/>
-          </feMerge>
-        </filter>
-      </defs>
-      <circle class="ring-track" cx="60" cy="60" r="52"></circle>
-      <circle class="ring-fill" id="ringFill" cx="60" cy="60" r="52"
-              transform="rotate(-90 60 60)"
-              filter="url(#ringGlow)"></circle>
-    </svg>
-    <div class="day-ring-text">
-      <div class="day-ring-pct" id="ringPct">—</div>
-      <div class="day-ring-phase" id="ringPhase">SLEEPING</div>
-      <div class="day-ring-clock" id="ringClock">—</div>
-    </div>
-  </div>
-  <div class="day-ring-side">
-    <div class="day-ring-status" id="ringStatus">😴 Still sleeping</div>
-    <div class="day-ring-remaining" id="ringRemaining">—</div>
-    <div class="day-ring-hours" id="ringHours" role="button" tabindex="0" title="Click para cambiar tu hora de levantarte">8:00 AM</div>
-  </div>
-</div>
 
-<!-- Component 4: To Do List -->
-<div class="section">
-  <div class="section-title">To Do List</div>
 
-  <!-- TODAY -->
-  <div class="gm-card" id="todayCard">
-    <div class="gm-header">
-      <div class="gm-header-left">
-        <div class="gm-eyebrow" id="todayLabel">Today —</div>
-        <div class="gm-progress-row">
-          <span class="gm-progress-num" id="gmProgressNum">0</span>
-          <span class="gm-progress-total" id="gmProgressTotal">/ 0</span>
-          <span class="gm-progress-label" id="gmProgressLabel">no goals yet</span>
-        </div>
-      </div>
-      <div class="gm-streak" id="gmStreak">
-        <span class="gm-streak-bolt">⚡</span>
-        <span class="gm-streak-num" id="gmStreakNum">0</span>
-        <span class="gm-streak-label">day streak</span>
-      </div>
-    </div>
-
-    <div class="gm-bar" id="gmBar"></div>
-
-    <ul id="goalList" class="goal-list gm-list"></ul>
-    <div id="emptyState" class="empty-state">No goals for today yet — add one below.</div>
-
-    <button class="gm-push-btn" id="gmPushBtn" style="display:none;">Push remaining to tomorrow</button>
-
-    <div class="goal-input-wrap gm-input-wrap">
-      <input type="text" id="goalInput" placeholder="Add a goal for today…" autocomplete="off" />
-      <button class="gm-add-btn" id="goalAddBtn">+ Add</button>
-      <button class="gm-polish-btn" id="goalPolishBtn">✨ Polish</button>
-      <div class="gm-status" id="polishStatus"></div>
-    </div>
-  </div>
-
-  <!-- TOMORROW -->
-  <div class="gm-card gm-card-tomorrow" id="tomorrowCard">
-    <div class="gm-header">
-      <div class="gm-header-left">
-        <div class="gm-eyebrow" id="tomorrowLabel">Plan tomorrow —</div>
-        <div class="gm-eyebrow-sub">Write tonight, locked until 6 AM.</div>
-      </div>
-      <div class="gm-tomorrow-count" id="gmTomorrowCount">0 PLANNED</div>
-    </div>
-
-    <ul id="tomorrowList" class="goal-list gm-list"></ul>
-    <div id="tomorrowEmpty" class="empty-state">Nothing planned for tomorrow yet</div>
-
-    <div class="goal-input-wrap gm-input-wrap">
-      <input type="text" id="tomorrowInput" placeholder="Add a goal for tomorrow…" autocomplete="off" />
-      <button class="gm-add-btn" id="tomorrowAddBtn">+ Add</button>
-      <button class="gm-polish-btn" id="tomorrowPolishBtn">✨ Polish</button>
-      <div class="gm-status" id="tomorrowStatus"></div>
-    </div>
-  </div>
-</div>
-
-</div><!-- /tab-panel dashboard -->
-
-<div class="tab-panel" data-tab="habits">
-  <div class="section">
-    <div class="section-title">Habit Tracker</div>
-    <div id="habitList"></div>
-    <div id="habitEmpty" class="empty-state" style="margin-bottom: 14px;">No habits yet — add your first one below.</div>
-    <div class="gm-card" style="padding: 16px;">
-      <div class="goal-input-wrap gm-input-wrap" style="border-top: none; padding-top: 0; margin-top: 0;">
-        <input type="text" id="habitInput" placeholder="Add a daily habit (e.g. Meditate 10 min)…" autocomplete="off" />
-        <button class="gm-add-btn" id="habitAddBtn" type="button">+ Add</button>
-        <div class="gm-status" id="habitStatus"></div>
-      </div>
-    </div>
-  </div>
-</div><!-- /tab-panel habits -->
-
-<div class="tab-panel" data-tab="calendar">
-  <div class="section">
-    <div class="section-title">Calendar</div>
-    <div class="cal-toolbar">
-      <button class="cal-nav-btn" id="calPrevBtn" type="button" title="Previous">‹</button>
-      <button class="cal-nav-btn" id="calNextBtn" type="button" title="Next">›</button>
-      <div class="cal-date-display" id="calDate">—</div>
-      <button class="cal-today-btn" id="calTodayBtn" type="button">Today</button>
-      <div class="cal-view-switch" role="tablist">
-        <button class="cal-view-btn is-active" data-view="day" type="button">Day</button>
-        <button class="cal-view-btn" data-view="week" type="button">Week</button>
-        <button class="cal-view-btn" data-view="month" type="button">Month</button>
-      </div>
-    </div>
-    <div class="cal-scroll" id="calScroll">
-      <div class="cal-grid" id="calViewDay">
-        <div class="cal-hours-col" id="calHoursCol"></div>
-        <div class="cal-events-col" id="calEventsCol"></div>
-      </div>
-      <div class="cal-week-grid" id="calViewWeek" style="display:none;">
-        <div class="cal-week-header" id="calWeekHeader"></div>
-        <div class="cal-week-body">
-          <div class="cal-hours-col" id="calWeekHoursCol"></div>
-          <div class="cal-week-days" id="calWeekDays"></div>
-        </div>
-      </div>
-      <div class="cal-month-grid" id="calViewMonth" style="display:none;">
-        <div class="cal-month-headers" id="calMonthHeaders"></div>
-        <div class="cal-month-cells" id="calMonthCells"></div>
-      </div>
-    </div>
-    <div class="cal-hint">Click an empty slot to add. Drag events to move, drag the bottom edge to resize. In month view, click a day to jump to it.</div>
-  </div>
-</div><!-- /tab-panel calendar -->
-
-<div class="tab-panel" data-tab="portal">
-  <div class="section">
-    <div class="section-title">Portal</div>
-
-    <div class="pv2-block">
-      <div class="pv2-eyebrow-row">
-        <div class="pv2-eyebrow">— Mood board</div>
-        <button class="pv2-mood-export-btn" id="pv2MoodExportBtn" type="button">Descargar PNG</button>
-      </div>
-      <div class="pv2-board" id="pv2BoardInspiration"></div>
-    </div>
-
-    <div class="pv2-block">
-      <div class="pv2-eyebrow">— 10 creencias clave</div>
-      <textarea class="pv2-textarea" id="pv2Beliefs" placeholder="1. …&#10;2. …&#10;3. …" spellcheck="true"></textarea>
-    </div>
-
-    <div class="pv2-block">
-      <div class="pv2-eyebrow">— Slides</div>
-      <div class="pv2-slides-list" id="pv2Slides"></div>
-    </div>
-
-    <div class="pv2-block">
-      <div class="pv2-eyebrow">— Portal</div>
-      <textarea class="pv2-textarea" id="pv2PortalText" placeholder="Tu portal…" spellcheck="true"></textarea>
-    </div>
-
-    <div class="pv2-block">
-      <div class="pv2-eyebrow">— Anti-slides</div>
-      <div class="pv2-slides-list" id="pv2Antislides"></div>
-    </div>
-
-    <div class="pv2-block">
-      <div class="pv2-eyebrow">— Anti-portal</div>
-      <textarea class="pv2-textarea" id="pv2AntiportalText" placeholder="Tu anti-portal…" spellcheck="true"></textarea>
-    </div>
-  </div>
-</div><!-- /tab-panel portal -->
-
-<div class="tab-panel" data-tab="skilltree">
+<div class="tab-panel is-active" data-tab="checklist">
   <div class="section">
     <div class="section-title">Checklist</div>
-    <div class="rank-widget" id="rankWidget"></div>
-    <div class="st-module-tabs" id="stModuleTabs"></div>
-    <div id="stContent"></div>
+    <div class="placeholder-empty">El contenido de la checklist aparecerá aquí.</div>
   </div>
-</div><!-- /tab-panel skilltree -->
+</div><!-- /tab-panel checklist -->
 
-<!-- Skilltree v2 (Gate of Fates) removed — was buggy on Safari and
-     redundant with the Checklist tab + rank widget. -->
-
-<div class="tab-panel" data-tab="bossfight">
+<div class="tab-panel" data-tab="sops">
   <div class="section">
-    <div class="section-title">Boss Fight</div>
-
-    <div class="boss-wrap">
-      <!-- Empty / Summon state -->
-      <div class="boss-empty" id="bossEmpty">
-        <div class="boss-empty-title">Ningún boss invocado</div>
-        <div class="boss-empty-sub">¿Cuál es tu cuello de botella?</div>
-        <input id="bossSummonInput" class="boss-summon-input" placeholder="ej. Procrastinación, Miedo al fracaso…" autocomplete="off" />
-        <button id="bossSummonBtn" class="boss-summon-btn" type="button">Invocar Boss</button>
-      </div>
-
-      <!-- Active boss state -->
-      <div class="boss-active" id="bossActive" style="display:none;">
-        <div class="boss-stage" id="bossStage">
-          <div class="boss-name-row">
-            <span class="boss-rank">— BOSS</span>
-            <span class="boss-name" id="bossName">—</span>
-            <span class="boss-since" id="bossSince"></span>
-          </div>
-          <div class="boss-hp-row">
-            <div class="boss-hp-label">HP</div>
-            <div class="boss-hp-bar"><div class="boss-hp-fill" id="bossHpFill"></div></div>
-            <div class="boss-hp-num" id="bossHpNum">100 / 100</div>
-          </div>
-          <div class="boss-fx-layer" id="bossFxLayer"></div>
-          <div class="boss-defeat-banner" id="bossDefeatBanner"><div class="boss-defeat-banner-text">Boss Defeated</div></div>
-          <div class="boss-visual" id="bossVisual">
-            <img src="boss-cuello-de-botella.png" alt="Boss" draggable="false" />
-          </div>
-        </div>
-
-        <div class="boss-input-card">
-          <select id="bossNoteType" class="boss-note-type" title="Tipo de apunte">
-            <option value="belief">Creencia limitante</option>
-            <option value="learning">Aprendizaje</option>
-            <option value="solution">Solución</option>
-          </select>
-          <textarea id="bossNoteText" class="boss-note-text" rows="1" placeholder="Escribe un apunte y ataca…   (⌘/Ctrl + Enter)" spellcheck="true"></textarea>
-          <button id="bossAttackBtn" class="boss-attack-btn" type="button">Atacar</button>
-        </div>
-
-        <div class="boss-notes-list" id="bossNotesList"></div>
-
-        <div class="boss-defeat-row">
-          <button id="bossExportBtn" class="boss-export-btn" type="button">Exportar conocimiento</button>
-          <button id="bossDefeatBtn" class="boss-defeat-btn" type="button">Derrotar Boss</button>
-        </div>
-      </div>
-
-      <!-- Graveyard -->
-      <div class="boss-graveyard">
-        <div class="pv2-eyebrow">— Cementerio</div>
-        <div class="boss-graveyard-list" id="bossGraveyardList"></div>
-      </div>
-    </div>
+    <div class="section-title">SOPs</div>
+    <div class="placeholder-empty">Los SOPs aparecerán aquí.</div>
   </div>
-</div><!-- /tab-panel bossfight -->
+</div><!-- /tab-panel sops -->
+
 
 <div class="tab-panel" data-tab="admin">
   <div class="section">
@@ -7404,9 +7155,6 @@
       <div class="admin-meta-row">
         <span class="admin-count" id="adminCount">— students</span>
         <span class="admin-refresh-time" id="adminRefreshTime">never</span>
-        <button class="admin-reset-boss-btn" id="adminResetBossBtn" type="button" title="Reset your Boss Fight state (lets you fight again)">⚔ Reset boss</button>
-        <button class="admin-reset-boss-btn" id="adminResetRankBtn" type="button" title="Reset your rank (boss state + forced rank) to start from zero">⭐ Reset rango</button>
-        <button class="admin-reset-boss-btn" id="adminCompleteAllBtn" type="button" title="Solo admin: marca todas las checklists como completadas para testing">✓ Completar todo</button>
         <button class="admin-refresh-btn" id="adminRefreshBtn" type="button" title="Refresh">⟳</button>
       </div>
     </div>
@@ -7458,129 +7206,28 @@
         </div>
       </div>
 
-      <div class="access-card">
-        <div class="access-card-eyebrow">💎 Fragmentos <span id="fragmentsAdminCount" class="access-pill">0</span></div>
-        <div class="access-card-sub">Moneda comunitaria. 10 fragmentos = 1 mensualidad gratis. Cada cambio queda registrado.</div>
-
-        <div class="fragments-admin-add">
-          <input type="email" id="fragmentsAdminEmail" placeholder="email@ejemplo.com" autocomplete="off" />
-          <input type="number" id="fragmentsAdminDelta" placeholder="±N" value="1" step="1" />
-          <input type="text" id="fragmentsAdminReason" placeholder="motivo (ej. Reto semanal)" autocomplete="off" />
-          <button type="button" class="access-add-btn" id="fragmentsAdminApply">Aplicar</button>
-        </div>
-
-        <div class="access-list" id="fragmentsUsersList"></div>
-
-        <div class="fragments-pending-claims" id="fragmentsPendingClaims" style="display:none;">
-          <div class="access-card-eyebrow" style="margin-top:14px;">⏳ Canjes pendientes <span id="fragmentsPendingCount" class="access-pill">0</span></div>
-          <div class="access-card-sub">Usuarios que han canjeado 10 fragmentos y esperan su mensualidad gratis.</div>
-          <div class="access-list" id="fragmentsPendingList"></div>
-        </div>
-
-        <div class="fragments-admin-log">
-          <div class="access-card-eyebrow" style="margin-top:14px;">📜 Audit log</div>
-          <div class="access-list" id="fragmentsAdminLog"></div>
-        </div>
-      </div>
-
-      <div class="access-card">
-        <div class="access-card-eyebrow">🛠 Debug · forzar rango</div>
-        <div class="access-card-sub">Solo para pruebas visuales. Override del rango calculado por bosses.</div>
-        <div class="rank-debug-row" id="rankDebugRow"></div>
-      </div>
     </div>
   </div>
 </div><!-- /tab-panel admin -->
 
-<!-- Fragmentos modal — user-facing balance + progress + redeem -->
-<div class="fragments-overlay" id="fragmentsOverlay" style="display:none;">
-  <div class="fragments-modal">
-    <button class="fragments-close" id="fragmentsClose" type="button" aria-label="Cerrar">×</button>
-    <div class="fragments-eyebrow">✦ Tus Fragmentos ✦</div>
-    <div class="fragments-hero">
-      <img class="fragments-hero-icon" src="fragmentos.png" alt="" draggable="false" />
-      <div class="fragments-hero-num">
-        <span class="fragments-hero-balance" id="fragmentsModalBalance">0</span>
-        <span class="fragments-hero-target">/ <span id="fragmentsModalTarget">10</span></span>
-      </div>
-    </div>
-    <div class="fragments-progress-bar"><div class="fragments-progress-fill" id="fragmentsModalProgressFill"></div></div>
-    <div class="fragments-progress-meta" id="fragmentsModalMeta">Te faltan 10 fragmentos para una mensualidad gratis</div>
-    <button class="fragments-redeem-btn" id="fragmentsRedeemBtn" disabled>Canjear 10 fragmentos por 1 mensualidad gratis</button>
-    <div class="fragments-redeem-note" id="fragmentsRedeemNote" style="display:none;">
-      ✓ Canje solicitado. Te contactaremos por Skool para darte la mensualidad gratis.
-    </div>
-    <div class="fragments-history-title">Historial reciente</div>
-    <div class="fragments-history" id="fragmentsModalHistory"></div>
-  </div>
-</div>
 
 <!-- Paywall overlay — shown when access gate denies a user -->
 <div class="paywall-overlay" id="paywallOverlay" style="display:none;">
   <div class="paywall-card">
-    <div class="paywall-eyebrow">✦ Heroes Academy ✦</div>
-    <div class="paywall-title">Tu suscripción no está activa</div>
+    <div class="paywall-eyebrow">Creator Stuffs</div>
+    <div class="paywall-title">Tu cuenta no tiene acceso</div>
     <div class="paywall-sub">
-      Para usar HeroesApp necesitas estar al día con tu mensualidad en Skool.
-      Si acabas de pagar, dale unos minutos a que sincronice.
+      Tu email no está en la lista de miembros activos. Si crees que es un error, contáctanos.
     </div>
-    <a class="paywall-cta" id="paywallCta" href="https://www.skool.com/heroesacademy" target="_blank" rel="noopener">Renovar en Skool →</a>
     <div class="paywall-footer">
       <span>¿Crees que es un error?</span>
-      <a href="mailto:heroesacademysoporte@gmail.com">Escríbenos →</a>
+      <a href="mailto:hola@creatorstuffs.com">Escríbenos →</a>
     </div>
     <button class="paywall-signout" id="paywallSignout" type="button">Cerrar sesión</button>
   </div>
 </div>
 
-<div class="cal-modal-bg" id="calModalBg" style="display:none;">
-  <div class="cal-modal" role="dialog" aria-modal="true">
-    <div class="cal-modal-title" id="calModalHeading">New event</div>
-    <input type="text" class="cal-modal-input" id="calModalTitle" placeholder="What are you doing?" autocomplete="off" />
-    <div class="cal-modal-row">
-      <label>Start
-        <select id="calModalStart"></select>
-      </label>
-      <label>End
-        <select id="calModalEnd"></select>
-      </label>
-    </div>
-    <div class="cal-modal-section-label">Color</div>
-    <div class="cal-color-row" id="calModalColors"></div>
-    <label class="cal-modal-habit-toggle">
-      <input type="checkbox" id="calModalHabit" />
-      <div class="cal-modal-habit-toggle-text">
-        <div class="cal-modal-habit-toggle-title">Hábito</div>
-        <div class="cal-modal-habit-toggle-sub">Se repite todos los días desde hoy</div>
-      </div>
-      <span class="cal-modal-habit-switch"></span>
-    </label>
-    <div class="cal-modal-actions">
-      <button class="cal-modal-delete" id="calModalDelete" type="button">Delete</button>
-      <div class="cal-modal-actions-right">
-        <button class="cal-modal-cancel" id="calModalCancel" type="button">Cancel</button>
-        <button class="cal-modal-save" id="calModalSave" type="button">Save</button>
-      </div>
-    </div>
-  </div>
-</div>
 
-<div class="pv2-text-overlay" id="pv2TextOverlay" style="display:none;" role="dialog" aria-modal="true">
-  <div class="pv2-text-overlay-header">
-    <span class="pv2-text-overlay-title" id="pv2TextOverlayTitle">Texto</span>
-    <button class="pv2-text-overlay-close" id="pv2TextOverlayClose" type="button">Cerrar ✕</button>
-  </div>
-  <div class="pv2-text-overlay-slot" id="pv2TextOverlaySlot"></div>
-</div>
-
-<div class="pv2-lightbox" id="pv2Lightbox" style="display:none;" role="dialog" aria-modal="true">
-  <button class="pv2-lightbox-close" id="pv2LightboxClose" type="button" aria-label="Cerrar">Cerrar ✕</button>
-  <div class="pv2-lightbox-stage" id="pv2LightboxStage">
-    <img class="pv2-lightbox-img" id="pv2LightboxImg" alt="" draggable="false" />
-  </div>
-  <div class="pv2-lightbox-hint">Scroll para zoom · Arrastra para mover · Esc para cerrar</div>
-  <div class="pv2-lightbox-zoom" id="pv2LightboxZoom">100%</div>
-</div>
 
 
 <script>
@@ -18388,7 +18035,7 @@
       requestAnimationFrame(() => scrollCalendarToNow());
     } else if (name === 'portal') {
       renderPortalV2();
-    } else if (name === 'skilltree') {
+    } else if (name === 'checklist') {
       renderSkilltree();
     } else if (name === 'bossfight') {
       renderBossFight();
@@ -18447,8 +18094,9 @@
     renderPortalV2();
     try {
       let saved = localStorage.getItem('active_tab_v1');
-      // Old "skilltree-v2" tab was removed — silently demote to checklist.
-      if (saved === 'skilltree-v2') saved = 'skilltree';
+      // Legacy tab names from the Heroes App fork — demote to checklist.
+      const LEGACY_TABS = ['skilltree', 'skilltree-v2', 'dashboard', 'habits', 'calendar', 'portal', 'bossfight'];
+      if (LEGACY_TABS.indexOf(saved) >= 0) saved = 'checklist';
       if (saved) setActiveTab(saved);
       else if (document.querySelector('.tab-panel.is-active')?.dataset.tab === 'calendar') {
         requestAnimationFrame(() => scrollCalendarToNow());

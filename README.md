@@ -1,33 +1,27 @@
-# Heroes App
+# Creator Stuffs Checklist
 
-Personal dashboard for habit tracking, goals, calendar, sleep visualization and inspiration.
-Single self-contained `index.html` with Clerk auth and Supabase per-user storage.
+Checklist + SOPs para Creator Stuffs.
 
 ## Stack
 
-- Static HTML + vanilla JS (no build step)
-- [Clerk](https://clerk.com) for auth (JS SDK loaded from CDN)
-- [Supabase](https://supabase.com) Postgres for per-user state (single `user_state` key-value table with RLS)
-- Hosted on [Vercel](https://vercel.com)
+- HTML estático + JS vanilla (sin build step)
+- [Clerk](https://clerk.com) para auth (JS SDK desde CDN)
+- [Supabase](https://supabase.com) Postgres para estado por usuario (RLS + JWT bridge con Clerk)
+- Hosted en [Vercel](https://vercel.com)
 
-## Local development
+## Desarrollo local
 
 ```bash
-cd /Users/againstoddssl/Documents/ClaudeBro
+cd /Users/againstoddssl/Documents/CreatorsStuffsChecklist
 python3 -m http.server 4321
 ```
 
-Open <http://localhost:4321/index.html>.
+Abre <http://localhost:4321/index.html>.
 
-## How storage works
+## Despliegue
 
-All app state (habits, goals, calendar, sleep CSV, portal notes/images) is stored in `localStorage` keys.
-The wrapper `storeGet`/`storeSet`/`storeDelete`/`storeListKeys` reads from an in-memory cache
-backed by `public.user_state` (one row per (user_id, key)).
+Edita `index.html`, commit, push a `main` → Vercel auto-despliega en ~30 s.
 
-`STORAGE_MODE` at the top of the inline `<script>` toggles between `'local'` (legacy localStorage)
-and `'supabase'` (cloud sync via Clerk JWT).
+## Schema de Supabase
 
-## Updating
-
-Edit `index.html`, commit, push to `main` — Vercel auto-deploys in ~30 sec.
+Las tablas y RLS policies están en [supabase-schema.sql](supabase-schema.sql). Pegar en SQL Editor de Supabase para bootstrap.
