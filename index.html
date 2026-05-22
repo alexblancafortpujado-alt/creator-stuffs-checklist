@@ -7706,6 +7706,7 @@
   src="https://mighty-baboon-32.clerk.accounts.dev/npm/@clerk/clerk-js@5/dist/clerk.browser.js"
   type="text/javascript"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
 </head>
 <body class="auth-pending">
 
@@ -19020,6 +19021,19 @@
     });
   }
 
+  // Celebratory confetti burst when a checklist crosses 100% completion.
+  // Two side bursts + a wider top burst for some shape, plus a richer
+  // haptic pattern so mobile users feel it too.
+  function celebrateCompletion() {
+    if (typeof confetti !== 'function') return;
+    const palette = ['#3B82F6', '#60A5FA', '#34D399', '#FBBF24', '#F87171', '#A78BFA'];
+    const base = { ticks: 120, gravity: 1, decay: 0.94, startVelocity: 32, colors: palette };
+    confetti(Object.assign({}, base, { particleCount: 80, spread: 75, origin: { x: 0.15, y: 0.75 }, angle: 60 }));
+    confetti(Object.assign({}, base, { particleCount: 80, spread: 75, origin: { x: 0.85, y: 0.75 }, angle: 120 }));
+    setTimeout(() => confetti(Object.assign({}, base, { particleCount: 60, spread: 130, origin: { x: 0.5, y: 0.55 } })), 220);
+    if (navigator.vibrate) { try { navigator.vibrate([20, 40, 60, 40, 80]); } catch (e) {} }
+  }
+
   function updateChecklistDetailProgress(id) {
     const p = getChecklistProgress(id);
     const fill = document.getElementById('checklistDetailProgressFill');
@@ -19150,6 +19164,7 @@
         const idx = parseInt(row.dataset.idx, 10);
         const it = items[idx];
         const map = checklistDoneMap(id);
+        const oldPct = getChecklistProgress(id).pct;
         const newDone = !map[it.title];
         if (newDone) map[it.title] = true;
         else delete map[it.title];
@@ -19161,6 +19176,9 @@
         }
         if (navigator.vibrate) { try { navigator.vibrate(newDone ? 12 : 6); } catch (e) {} }
         updateChecklistDetailProgress(id);
+        // Celebrate when this toggle crosses into 100%.
+        const newPct = getChecklistProgress(id).pct;
+        if (newPct === 100 && oldPct < 100) celebrateCompletion();
       });
     });
 
