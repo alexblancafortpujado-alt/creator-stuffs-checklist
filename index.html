@@ -1367,14 +1367,31 @@
     height: 1px;
     background: linear-gradient(90deg, rgba(var(--overlay-rgb),0.08), transparent);
   }
-  /* Sub-step header — for "Práctica:" sub-sections inside a Paso. Smaller and
-     in mixed case so it reads as a label, not a section divider. */
-  .ck-substep {
-    padding: 14px 2px 2px;
+  /* "Práctica:" rows look like Notion/Link rows but with a sword icon and
+     no hover/click state — they're informational labels for an exercise
+     that the checkboxes below complete. */
+  .ck-row.ck-practice {
+    cursor: default;
+  }
+  .ck-row.ck-practice:hover {
+    background: var(--surface);
+    border-color: var(--border);
+  }
+  .ck-row.ck-practice:active { transform: none; }
+  .ck-row.ck-practice .ck-row-trailing { display: none; }
+  .ck-row.ck-practice .ck-row-icon { color: var(--accent); }
+
+  /* Free-floating explanatory note — for paragraphs the PDF includes
+     between items that aren't actionable on their own. */
+  .ck-note {
+    padding: 12px 14px;
     color: var(--text-secondary);
-    font-size: 12.5px;
-    font-weight: 600;
-    letter-spacing: 0;
+    font-size: 13px;
+    line-height: 1.55;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 8px;
   }
   .tab-panel { display: none; }
   .tab-panel.is-active { display: block; animation: tab-fade 0.35s ease; }
@@ -18747,7 +18764,6 @@
   // Items with type 'notion' or 'link' and a null url render as muted/disabled.
   const CHECKLIST_CONTENT = {
     'onboarding':            [],
-    'crea-videos-outliers':  [],
     'feedback-loop':         [],
     'equipo':                [],
     'nutricion':             [],
@@ -18793,10 +18809,10 @@
       { type: 'checklist', title: 'Escoger entre especificarlo mucho o poco' },
       { type: 'checklist', title: 'Entender los 28 cubos de un Avatar' },
       { type: 'checklist', title: 'Entender cómo hacer una inmersión de nicho' },
-      { type: 'subgroup',  title: 'Práctica: Crea tu Avatar V1' },
+      { type: 'practice',  title: 'Práctica: Crea tu Avatar V1' },
       { type: 'checklist', title: 'Hacer una primera inmersión' },
       { type: 'checklist', title: 'Dar feedback y refinar hasta tener Avatar V1' },
-      { type: 'subgroup',  title: 'Práctica: Actualiza tu Avatar' },
+      { type: 'practice',  title: 'Práctica: Actualiza tu Avatar' },
       { type: 'checklist', title: 'Hacer una segunda inmersión' },
       { type: 'checklist', title: 'Enviar nuevo conocimiento a la IA' },
       { type: 'checklist', title: 'Dar feedback y refinar hasta tener Avatar V1.2' },
@@ -18814,7 +18830,7 @@
       { type: 'checklist', title: 'Entender que es un formato' },
       { type: 'checklist', title: 'Entender la importancia de determinar los formatos' },
       { type: 'checklist', title: 'Entender que hace a un formato ganador' },
-      { type: 'subgroup',  title: 'Práctica: Crea tus formatos' },
+      { type: 'practice',  title: 'Práctica: Crea tus formatos' },
       { type: 'checklist', title: 'Responder profundamente las preguntas de la IA' },
       { type: 'checklist', title: 'Dar feedback y refinar hasta tener tu Formato V1' },
 
@@ -18823,7 +18839,7 @@
       { type: 'notion',    title: 'Narrativa', url: 'https://steadfast-chance-fc7.notion.site/Narrativa-3484ff25b33f8004919ae56843a51b15?source=copy_link' },
       { type: 'checklist', title: 'Entender que es la narrativa y por que importa' },
       { type: 'checklist', title: 'Descubrir diferentes ejemplos de narrativas' },
-      { type: 'subgroup',  title: 'Práctica: Crea tu Narrativa V1' },
+      { type: 'practice',  title: 'Práctica: Crea tu Narrativa V1' },
       { type: 'checklist', title: 'Responder las preguntas de la IA' },
       { type: 'checklist', title: 'Dar feedback profundo hasta tener la Narrativa V1' },
 
@@ -18833,7 +18849,7 @@
       { type: 'checklist', title: 'Entender que es la branding y por que importa' },
       { type: 'checklist', title: 'Entender que son las asociaciones' },
       { type: 'checklist', title: 'Descubrir diferentes ejemplos de brandings excelentes' },
-      { type: 'subgroup',  title: 'Práctica: Crea tu Branding V1' },
+      { type: 'practice',  title: 'Práctica: Crea tu Branding V1' },
       { type: 'checklist', title: 'Responder las preguntas de la IA' },
       { type: 'checklist', title: 'Dar feedback profundo hasta tener el Branding V1' },
 
@@ -18843,9 +18859,27 @@
       { type: 'checklist', title: 'Entender que es la comunidad y por que importa' },
       { type: 'checklist', title: 'Entender la importancia de crear una religion' },
       { type: 'checklist', title: 'Descubrir diferentes ejemplos de comunidades cohesionadas' },
-      { type: 'subgroup',  title: 'Práctica: Crea tu Comunidad V1' },
+      { type: 'practice',  title: 'Práctica: Crea tu Comunidad V1' },
       { type: 'checklist', title: 'Responder las preguntas de la IA' },
       { type: 'checklist', title: 'Dar feedback profundo hasta tener la Comunidad V1' },
+    ],
+    'crea-videos-outliers': [
+      { type: 'notion',    title: 'Youtube = Gambling', url: 'https://steadfast-chance-fc7.notion.site/Youtube-Gambling-34e4ff25b33f800ca4c8ce878ac90c5a?source=copy_link' },
+      { type: 'checklist', title: 'Entender que youtube es apostar' },
+      { type: 'checklist', title: 'Entender que hay formas de hacer las apuestas mejores para nosotros' },
+
+      { type: 'notion',    title: 'Ingredientes', url: 'https://steadfast-chance-fc7.notion.site/Ingredientes-3464ff25b33f803f992cfc6c82b1c0fa?source=copy_link' },
+      { type: 'checklist', title: 'Entender la metáfora de los ingredientes' },
+      { type: 'checklist', title: 'Entender los 10 ingredientes centrales' },
+      { type: 'checklist', title: 'Entender la metáfora de la fábrica de vídeos' },
+
+      { type: 'video',     title: 'El proceso que uso para crear contenido', url: 'https://www.skool.com/creatorsstuffs/classroom/cc9ac057?md=6d5ef421138b47808ea44da78234b1d5' },
+      { type: 'checklist', title: 'Entender todos los sistema que montaremos y cómo se unen entre si' },
+
+      { type: 'video',     title: 'ContentOS', url: 'https://www.skool.com/creatorsstuffs/classroom/cc9ac057?md=5803d4d6cd6b48c985613235cc354594' },
+      { type: 'checklist', title: 'Montar el ContentOS' },
+
+      { type: 'note',      title: 'Crear sub carpetas que sean cómo un proceso: Idea → Packaging → Scripting → Grabación → Edición → Subida. Dentro de cada sub carpeta habrá otra checklist.' },
     ],
   };
 
@@ -18853,6 +18887,7 @@
   const ICON_NOTION = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h12l4 4v12a0 0 0 0 1 0 0H4z"/><path d="M16 4v4h4"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="14" y2="17"/></svg>';
   const ICON_LINK   = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1"/><path d="M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/></svg>';
   const ICON_VIDEO  = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><polygon points="10 8 16 12 10 16" fill="currentColor" stroke="none"/></svg>';
+  const ICON_SWORD  = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="14.5 17.5 3 6 3 3 6 3 17.5 14.5"/><line x1="13" y1="19" x2="19" y2="13"/><line x1="16" y1="16" x2="20" y2="20"/><line x1="19" y1="21" x2="21" y2="19"/></svg>';
   const ICON_ARROW  = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="13 6 19 12 13 18"/></svg>';
 
   function escapeHtml(s) {
@@ -18949,8 +18984,15 @@
       if (item.type === 'group') {
         return '<div class="ck-step">' + safeTitle + '</div>';
       }
-      if (item.type === 'subgroup') {
-        return '<div class="ck-substep">' + safeTitle + '</div>';
+      if (item.type === 'practice') {
+        return ''
+          + '<div class="ck-row ck-practice" aria-disabled="true">'
+          +   '<span class="ck-row-icon">' + ICON_SWORD + '</span>'
+          +   '<span class="ck-row-title">' + safeTitle + '</span>'
+          + '</div>';
+      }
+      if (item.type === 'note') {
+        return '<div class="ck-note">' + safeTitle + '</div>';
       }
       if (item.type === 'checklist') {
         const isDone = !!doneMap[item.title];
