@@ -1404,7 +1404,19 @@
   }
   .ck-row.ck-practice:active { transform: none; }
   .ck-row.ck-practice .ck-row-trailing { display: none; }
-  .ck-row.ck-practice .ck-row-icon { color: var(--accent); }
+  /* Sword inherits the same colour as the Notion / Vídeo / Link icons */
+  .ck-row.ck-practice .ck-row-icon { color: var(--text-secondary); }
+
+  /* Subtle tint on the entire practice cluster (the sword row + every check
+     underneath it until the next non-check item). Conveys "this section is
+     action, not theory" without shouting. */
+  .ck-row.ck-practice,
+  .ck-row.is-in-practice {
+    background: rgba(var(--overlay-rgb), 0.04);
+  }
+  .ck-row.is-in-practice:hover {
+    background: rgba(var(--overlay-rgb), 0.07);
+  }
 
   /* Free-floating explanatory note — for paragraphs the PDF includes
      between items that aren't actionable on their own. */
@@ -19004,12 +19016,18 @@
       return;
     }
 
+    // Track whether we're currently rendering checks that belong to a
+    // practice cluster, so they pick up the same tinted background as the
+    // practice row above them. Reset to false by any non-check item.
+    let inPractice = false;
     container.innerHTML = items.map((item, idx) => {
       const safeTitle = escapeHtml(item.title);
       if (item.type === 'group') {
+        inPractice = false;
         return '<div class="ck-step">' + safeTitle + '</div>';
       }
       if (item.type === 'practice') {
+        inPractice = true;
         return ''
           + '<div class="ck-row ck-practice" aria-disabled="true">'
           +   '<span class="ck-row-icon">' + ICON_SWORD + '</span>'
@@ -19017,17 +19035,20 @@
           + '</div>';
       }
       if (item.type === 'note') {
+        inPractice = false;
         return '<div class="ck-note">' + safeTitle + '</div>';
       }
       if (item.type === 'checklist') {
         const isDone = !!doneMap[item.title];
+        const practiceCls = inPractice ? ' is-in-practice' : '';
         return ''
-          + '<button class="ck-row ck-check' + (isDone ? ' is-done' : '') + '" type="button" data-idx="' + idx + '">'
+          + '<button class="ck-row ck-check' + (isDone ? ' is-done' : '') + practiceCls + '" type="button" data-idx="' + idx + '">'
           +   '<span class="ck-row-icon"><span class="ck-checkbox"><span class="ck-checkbox-tick">✓</span></span></span>'
           +   '<span class="ck-row-title">' + safeTitle + '</span>'
           + '</button>';
       }
-      // notion, link, or video
+      // notion, link, or video — any of these starts a new theory cluster
+      inPractice = false;
       const hasUrl = !!item.url;
       const icon = item.type === 'notion' ? ICON_NOTION
                  : item.type === 'video'  ? ICON_VIDEO
