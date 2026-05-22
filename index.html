@@ -18640,6 +18640,17 @@
   // Flat list for lookups by id.
   const CHECKLISTS = CHECKLIST_GROUPS.flatMap(g => g.checklists);
 
+  // Per-checklist folder artwork. Anything missing falls back to folder.png.
+  const FOLDER_IMAGES = {
+    'onboarding':           'onboarding-folder.png',
+    'mapea-tu-imperio':     'mapea-tu-imperio-folder.png',
+    'estrategia':           'estrategia-folder.png',
+    'crea-videos-outliers': 'videos-outliers-folder.png',
+    'feedback-loop':        'feedback-loop-folder.png',
+    'equipo':               'crea-y-gestiona-equipo.png',
+  };
+  function folderImageFor(id) { return FOLDER_IMAGES[id] || 'folder.png'; }
+
   // Per-checklist content. Items are rendered in order. Three kinds:
   //   { type: 'group',     title }              → step header, not clickable
   //   { type: 'notion',    title, url }         → opens Notion link in new tab
@@ -18703,10 +18714,11 @@
   }
 
   function renderChecklistCard(c) {
+    const thumbStyle = 'background-image:url(\'' + folderImageFor(c.id) + '\')';
     if (c.comingSoon) {
       return ''
         + '<div class="checklist-card is-coming-soon" aria-disabled="true">'
-        +   '<div class="checklist-card-thumb" role="img" aria-label="Carpeta"></div>'
+        +   '<div class="checklist-card-thumb" role="img" aria-label="Carpeta" style="' + thumbStyle + '"></div>'
         +   '<div class="checklist-card-foot">'
         +     '<div class="checklist-card-name">' + escapeHtml(c.name) + '</div>'
         +     '<div class="checklist-card-progress">'
@@ -18719,7 +18731,7 @@
     const p = getChecklistProgress(c.id);
     return ''
       + '<button class="checklist-card" type="button" data-checklist="' + c.id + '">'
-      +   '<div class="checklist-card-thumb" role="img" aria-label="Carpeta"></div>'
+      +   '<div class="checklist-card-thumb" role="img" aria-label="Carpeta" style="' + thumbStyle + '"></div>'
       +   '<div class="checklist-card-foot">'
       +     '<div class="checklist-card-name">' + escapeHtml(c.name) + '</div>'
       +     '<div class="checklist-card-progress">'
