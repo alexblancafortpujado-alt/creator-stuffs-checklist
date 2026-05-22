@@ -1430,6 +1430,21 @@
     border-left: 3px solid var(--accent);
     border-radius: 8px;
   }
+
+  /* Inline grid of sub-folder cards (e.g. Ideación / Packaging / Scripting…
+     inside "Crea vídeos outliers"). Same card chassis as the main grid. */
+  .checklist-subgrid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+    margin-top: 22px;
+  }
+  @media (max-width: 720px) {
+    .checklist-subgrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+  @media (max-width: 480px) {
+    .checklist-subgrid { grid-template-columns: 1fr; }
+  }
   .tab-panel { display: none; }
   .tab-panel.is-active { display: block; animation: tab-fade 0.35s ease; }
   @keyframes tab-fade {
@@ -18802,6 +18817,14 @@
   const CHECKLIST_CONTENT = {
     'onboarding':            [],
     'feedback-loop':         [],
+    // Sub-checklists inside "Crea vídeos outliers" — empty until the
+    // client provides each protocol's steps.
+    'ideacion':              [],
+    'packaging':             [],
+    'scripting':             [],
+    'grabacion':             [],
+    'edicion':               [],
+    'subida':                [],
     'equipo':                [],
     'nutricion':             [],
     'sponsors':              [],
@@ -18916,7 +18939,14 @@
       { type: 'video',     title: 'ContentOS', url: 'https://www.skool.com/creatorsstuffs/classroom/cc9ac057?md=5803d4d6cd6b48c985613235cc354594' },
       { type: 'checklist', title: 'Montar el ContentOS' },
 
-      { type: 'note',      title: 'Crear sub carpetas que sean cómo un proceso: Idea → Packaging → Scripting → Grabación → Edición → Subida. Dentro de cada sub carpeta habrá otra checklist.' },
+      // Production protocol — each sub-folder is its own checklist. Order
+      // matters: idea → packaging → scripting → grabación → edición → subida.
+      { type: 'subfolder', id: 'ideacion',  name: 'Ideación' },
+      { type: 'subfolder', id: 'packaging', name: 'Packaging' },
+      { type: 'subfolder', id: 'scripting', name: 'Scripting' },
+      { type: 'subfolder', id: 'grabacion', name: 'Grabación' },
+      { type: 'subfolder', id: 'edicion',   name: 'Edición' },
+      { type: 'subfolder', id: 'subida',    name: 'Subida' },
     ],
   };
 
@@ -18986,7 +19016,12 @@
       + '</div>'
     ).join('');
     container.querySelectorAll('.checklist-card:not(.is-coming-soon)').forEach(card => {
-      card.addEventListener('click', () => openChecklistDetail(card.dataset.checklist));
+      card.addEventListener('click', () => {
+        // Fresh navigation from the main grid — reset the stack to a single
+        // entry. Subfolder clicks (inside a detail view) push instead.
+        _checklistStack = [card.dataset.checklist];
+        openChecklistDetail(card.dataset.checklist);
+      });
     });
   }
 
@@ -18998,16 +19033,55 @@
     if (text) text.textContent = p.pct + '%';
   }
 
-  function openChecklistDetail(id) {
+  // Navigation stack: every entry is a checklist id currently open.
+  // [parent, sub] when the user has drilled from a parent into a subfolder.
+  // closeChecklistDetail() pops one level — back to the previous detail if
+  // any, otherwise back to the main grid.
+  let _checklistStack = [];
+
+  function checklistMeta(id) {
     const c = CHECKLISTS.find(x => x.id === id);
-    if (!c) return;
+    if (c) return c;
+    // Sub-folder: look for a "subfolder" item with this id anywhere in
+    // CHECKLIST_CONTENT and use its name.
+    for (const items of Object.values(CHECKLIST_CONTENT)) {
+      for (const it of items) {
+        if (it.type === 'subfolder' && it.id === id) return { id, name: it.name };
+      }
+    }
+    return null;
+  }
+
+  function renderSubfolderCard(item) {
+    const p = getChecklistProgress(item.id);
+    const thumbStyle = 'background-image:url(\'' + folderImageFor(item.id) + '\')';
+    return ''
+      + '<button class="checklist-card" type="button" data-checklist="' + item.id + '">'
+      +   '<div class="checklist-card-thumb" role="img" aria-label="Carpeta" style="' + thumbStyle + '"></div>'
+      +   '<div class="checklist-card-foot">'
+      +     '<div class="checklist-card-name">' + escapeHtml(item.name) + '</div>'
+      +     '<div class="checklist-card-progress">'
+      +       '<div class="checklist-card-progress-bar"><div class="checklist-card-progress-fill" style="width:' + p.pct + '%"></div></div>'
+      +       '<div class="checklist-card-progress-text">' + p.pct + '%</div>'
+      +     '</div>'
+      +   '</div>'
+      + '</button>';
+  }
+
+  function openChecklistDetail(id) {
+    const meta = checklistMeta(id);
+    if (!meta) return;
     const items = CHECKLIST_CONTENT[id] || [];
     const doneMap = checklistDoneMap(id);
 
     document.getElementById('checklistGrid').style.display = 'none';
     document.getElementById('checklistDetail').style.display = 'block';
-    document.getElementById('checklistDetailTitle').textContent = c.name;
-    document.getElementById('checklistSectionTitle').textContent = 'Checklist · ' + c.name;
+    document.getElementById('checklistDetailTitle').textContent = meta.name;
+    // Breadcrumb from the nav stack: "Checklist · parent · child".
+    const crumbs = ['Checklist'].concat(
+      _checklistStack.map(sid => { const m = checklistMeta(sid); return m ? m.name : null; }).filter(Boolean)
+    );
+    document.getElementById('checklistSectionTitle').textContent = crumbs.join(' · ');
 
     const container = document.getElementById('checklistItems');
     if (items.length === 0) {
@@ -19016,53 +19090,61 @@
       return;
     }
 
-    // Track whether we're currently rendering checks that belong to a
-    // practice cluster, so they pick up the same tinted background as the
-    // practice row above them. Reset to false by any non-check item.
+    // Manual loop so we can group consecutive subfolder items into one grid.
+    let html = '';
     let inPractice = false;
-    container.innerHTML = items.map((item, idx) => {
+    let i = 0;
+    while (i < items.length) {
+      const item = items[i];
+      if (item.type === 'subfolder') {
+        html += '<div class="checklist-subgrid">';
+        while (i < items.length && items[i].type === 'subfolder') {
+          html += renderSubfolderCard(items[i]);
+          i++;
+        }
+        html += '</div>';
+        inPractice = false;
+        continue;
+      }
       const safeTitle = escapeHtml(item.title);
       if (item.type === 'group') {
         inPractice = false;
-        return '<div class="ck-step">' + safeTitle + '</div>';
-      }
-      if (item.type === 'practice') {
+        html += '<div class="ck-step">' + safeTitle + '</div>';
+      } else if (item.type === 'practice') {
         inPractice = true;
-        return ''
-          + '<div class="ck-row ck-practice" aria-disabled="true">'
-          +   '<span class="ck-row-icon">' + ICON_SWORD + '</span>'
-          +   '<span class="ck-row-title">' + safeTitle + '</span>'
-          + '</div>';
-      }
-      if (item.type === 'note') {
+        html += '<div class="ck-row ck-practice" aria-disabled="true">'
+              +   '<span class="ck-row-icon">' + ICON_SWORD + '</span>'
+              +   '<span class="ck-row-title">' + safeTitle + '</span>'
+              + '</div>';
+      } else if (item.type === 'note') {
         inPractice = false;
-        return '<div class="ck-note">' + safeTitle + '</div>';
-      }
-      if (item.type === 'checklist') {
+        html += '<div class="ck-note">' + safeTitle + '</div>';
+      } else if (item.type === 'checklist') {
         const isDone = !!doneMap[item.title];
         const practiceCls = inPractice ? ' is-in-practice' : '';
-        return ''
-          + '<button class="ck-row ck-check' + (isDone ? ' is-done' : '') + practiceCls + '" type="button" data-idx="' + idx + '">'
-          +   '<span class="ck-row-icon"><span class="ck-checkbox"><span class="ck-checkbox-tick">✓</span></span></span>'
-          +   '<span class="ck-row-title">' + safeTitle + '</span>'
-          + '</button>';
+        html += '<button class="ck-row ck-check' + (isDone ? ' is-done' : '') + practiceCls + '" type="button" data-idx="' + i + '">'
+              +   '<span class="ck-row-icon"><span class="ck-checkbox"><span class="ck-checkbox-tick">✓</span></span></span>'
+              +   '<span class="ck-row-title">' + safeTitle + '</span>'
+              + '</button>';
+      } else {
+        // notion / link / video — start a new theory cluster
+        inPractice = false;
+        const hasUrl = !!item.url;
+        const icon = item.type === 'notion' ? ICON_NOTION
+                   : item.type === 'video'  ? ICON_VIDEO
+                   : ICON_LINK;
+        const cls  = 'ck-row ck-' + item.type + (hasUrl ? '' : ' is-disabled');
+        html += '<' + (hasUrl ? 'a' : 'div') + ' class="' + cls + '"'
+              +   (hasUrl ? ' href="' + escapeHtml(item.url) + '" target="_blank" rel="noopener noreferrer"' : '')
+              +   ' data-idx="' + i + '">'
+              +   '<span class="ck-row-icon">' + icon + '</span>'
+              +   '<span class="ck-row-title">' + safeTitle + '</span>'
+              +   '<span class="ck-row-trailing">' + ICON_ARROW + '</span>'
+              + '</' + (hasUrl ? 'a' : 'div') + '>';
       }
-      // notion, link, or video — any of these starts a new theory cluster
-      inPractice = false;
-      const hasUrl = !!item.url;
-      const icon = item.type === 'notion' ? ICON_NOTION
-                 : item.type === 'video'  ? ICON_VIDEO
-                 : ICON_LINK;
-      const cls  = 'ck-row ck-' + item.type + (hasUrl ? '' : ' is-disabled');
-      return ''
-        + '<' + (hasUrl ? 'a' : 'div') + ' class="' + cls + '"'
-        +   (hasUrl ? ' href="' + escapeHtml(item.url) + '" target="_blank" rel="noopener noreferrer"' : '')
-        +   ' data-idx="' + idx + '">'
-        +   '<span class="ck-row-icon">' + icon + '</span>'
-        +   '<span class="ck-row-title">' + safeTitle + '</span>'
-        +   '<span class="ck-row-trailing">' + ICON_ARROW + '</span>'
-        + '</' + (hasUrl ? 'a' : 'div') + '>';
-    }).join('');
+      i++;
+    }
+    container.innerHTML = html;
 
     container.querySelectorAll('.ck-row.ck-check').forEach(row => {
       row.addEventListener('click', () => {
@@ -19073,16 +19155,21 @@
         if (newDone) map[it.title] = true;
         else delete map[it.title];
         if (typeof storeSet === 'function') storeSet('checklist_done.' + id, map);
-        // Re-run the bounce/burst animations every click by removing then
-        // re-applying the class on the next frame (CSS animations only fire
-        // on class addition, not on each click while it's already present).
+        // Re-run the bounce/burst animations every click.
         row.classList.remove('is-done');
         if (newDone) {
           requestAnimationFrame(() => requestAnimationFrame(() => row.classList.add('is-done')));
         }
-        // Subtle haptic on supporting mobile devices.
         if (navigator.vibrate) { try { navigator.vibrate(newDone ? 12 : 6); } catch (e) {} }
         updateChecklistDetailProgress(id);
+      });
+    });
+
+    // Sub-folder cards inside this detail view drill one level deeper.
+    container.querySelectorAll('.checklist-subgrid .checklist-card').forEach(card => {
+      card.addEventListener('click', () => {
+        _checklistStack.push(card.dataset.checklist);
+        openChecklistDetail(card.dataset.checklist);
       });
     });
 
@@ -19090,10 +19177,17 @@
   }
 
   function closeChecklistDetail() {
+    // Pop the current level. If something's still on the stack we're inside
+    // a sub-detail, so render the parent. Otherwise we're at the top — close
+    // the detail panel and return to the main grid.
+    _checklistStack.pop();
+    if (_checklistStack.length > 0) {
+      openChecklistDetail(_checklistStack[_checklistStack.length - 1]);
+      return;
+    }
     document.getElementById('checklistDetail').style.display = 'none';
     document.getElementById('checklistGrid').style.display = '';
     document.getElementById('checklistSectionTitle').textContent = 'Checklist';
-    // Re-render grid so the card's progress bar reflects any toggles we made.
     renderChecklistGrid();
   }
 
