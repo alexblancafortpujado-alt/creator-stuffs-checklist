@@ -1367,6 +1367,15 @@
     height: 1px;
     background: linear-gradient(90deg, rgba(var(--overlay-rgb),0.08), transparent);
   }
+  /* Sub-step header — for "Práctica:" sub-sections inside a Paso. Smaller and
+     in mixed case so it reads as a label, not a section divider. */
+  .ck-substep {
+    padding: 14px 2px 2px;
+    color: var(--text-secondary);
+    font-size: 12.5px;
+    font-weight: 600;
+    letter-spacing: 0;
+  }
   .tab-panel { display: none; }
   .tab-panel.is-active { display: block; animation: tab-fade 0.35s ease; }
   @keyframes tab-fade {
@@ -18738,7 +18747,6 @@
   // Items with type 'notion' or 'link' and a null url render as muted/disabled.
   const CHECKLIST_CONTENT = {
     'onboarding':            [],
-    'estrategia':            [],
     'crea-videos-outliers':  [],
     'feedback-loop':         [],
     'equipo':                [],
@@ -18759,20 +18767,92 @@
       { type: 'checklist', title: 'Entender que existe calidad a los problemas' },
       { type: 'checklist', title: 'Entender que es un cuello de botella y un problem solver' },
       { type: 'group',     title: 'Paso 3:' },
-      { type: 'link',      title: 'Recibe tu diagnóstico (link a Calendly, aun no esta montado)', url: null },
-      { type: 'checklist', title: 'Recibe el diagnostico' },
-      { type: 'checklist', title: 'Entiendelo y empieza a actuar.' },
+      { type: 'link',      title: 'Recibe tu diagnóstico', url: 'https://calendly.com/danicarrero/onboarding-creators-stuffs' },
+      { type: 'checklist', title: 'Recibir el diagnostico' },
+      { type: 'checklist', title: 'Entender y empezar a actuar.' },
       { type: 'group',     title: 'Paso 4:' },
-      { type: 'notion',    title: 'Claude Code', url: null },
+      { type: 'video',     title: 'Claude Code', url: 'https://www.skool.com/creatorsstuffs/classroom/04177024?md=cb5edb0d58a647cbb11667b91042841f' },
       { type: 'checklist', title: 'Descargar Visual Studio' },
       { type: 'checklist', title: 'Instalar Claude Code' },
       { type: 'checklist', title: 'Descargar y abrir Dani Carrero AI' },
+    ],
+    'estrategia': [
+      // Intro (no Paso)
+      { type: 'notion',    title: 'El Ikigai del creador', url: 'https://steadfast-chance-fc7.notion.site/El-Ikigai-del-creador-3494ff25b33f802291cdc922b3471ef8?source=copy_link' },
+      { type: 'checklist', title: 'Entender que es una estrategia de contenido' },
+      { type: 'checklist', title: 'Entender que elementos juegan en una estrategia ganadora (ikigai)' },
+      { type: 'video',     title: 'ChannelOS', url: 'https://www.skool.com/creatorsstuffs/classroom/488b9432?md=21acee4436eb4cb9b576f421104aeb23' },
+      { type: 'checklist', title: 'Crea tu OS del canal' },
+      { type: 'checklist', title: 'Añade las carpetas' },
+      { type: 'checklist', title: 'Empieza a rellenarlo' },
+
+      // Paso 1
+      { type: 'group',     title: 'Paso 1: comprende tu avatar' },
+      { type: 'notion',    title: 'Avatar', url: 'https://steadfast-chance-fc7.notion.site/Avatar-3484ff25b33f80388b4dd4867b54d57d?source=copy_link' },
+      { type: 'checklist', title: 'Entender la importancia de tener un Avatar bien definido' },
+      { type: 'checklist', title: 'Escoger entre especificarlo mucho o poco' },
+      { type: 'checklist', title: 'Entender los 28 cubos de un Avatar' },
+      { type: 'checklist', title: 'Entender cómo hacer una inmersión de nicho' },
+      { type: 'subgroup',  title: 'Práctica: Crea tu Avatar V1' },
+      { type: 'checklist', title: 'Hacer una primera inmersión' },
+      { type: 'checklist', title: 'Dar feedback y refinar hasta tener Avatar V1' },
+      { type: 'subgroup',  title: 'Práctica: Actualiza tu Avatar' },
+      { type: 'checklist', title: 'Hacer una segunda inmersión' },
+      { type: 'checklist', title: 'Enviar nuevo conocimiento a la IA' },
+      { type: 'checklist', title: 'Dar feedback y refinar hasta tener Avatar V1.2' },
+
+      // Paso 2
+      { type: 'group',     title: 'Paso 2: comprende el algoritmo' },
+      { type: 'notion',    title: 'El bufet libre', url: 'https://steadfast-chance-fc7.notion.site/El-bufet-libre-3494ff25b33f80debda3e9398f953013?source=copy_link' },
+      { type: 'checklist', title: 'Entender cómo funciona el modelo de negocio de youtube' },
+      { type: 'checklist', title: 'Entender cómo lo vive un usuario' },
+      { type: 'checklist', title: 'Entender cómo YouTube decide si mostrar o no tus videos' },
+
+      // Paso 3
+      { type: 'group',     title: 'Paso 3: define tus buckets' },
+      { type: 'notion',    title: 'Formato Ganador', url: 'https://steadfast-chance-fc7.notion.site/Formato-ganador-3494ff25b33f8078974af39e997ce072?source=copy_link' },
+      { type: 'checklist', title: 'Entender que es un formato' },
+      { type: 'checklist', title: 'Entender la importancia de determinar los formatos' },
+      { type: 'checklist', title: 'Entender que hace a un formato ganador' },
+      { type: 'subgroup',  title: 'Práctica: Crea tus formatos' },
+      { type: 'checklist', title: 'Responder profundamente las preguntas de la IA' },
+      { type: 'checklist', title: 'Dar feedback y refinar hasta tener tu Formato V1' },
+
+      // Paso 4
+      { type: 'group',     title: 'Paso 4: define tu narrativa' },
+      { type: 'notion',    title: 'Narrativa', url: 'https://steadfast-chance-fc7.notion.site/Narrativa-3484ff25b33f8004919ae56843a51b15?source=copy_link' },
+      { type: 'checklist', title: 'Entender que es la narrativa y por que importa' },
+      { type: 'checklist', title: 'Descubrir diferentes ejemplos de narrativas' },
+      { type: 'subgroup',  title: 'Práctica: Crea tu Narrativa V1' },
+      { type: 'checklist', title: 'Responder las preguntas de la IA' },
+      { type: 'checklist', title: 'Dar feedback profundo hasta tener la Narrativa V1' },
+
+      // Paso 5
+      { type: 'group',     title: 'Paso 5: Crea tu branding' },
+      { type: 'notion',    title: 'Branding', url: 'https://steadfast-chance-fc7.notion.site/Branding-3494ff25b33f8055931eee09f968ba1a?source=copy_link' },
+      { type: 'checklist', title: 'Entender que es la branding y por que importa' },
+      { type: 'checklist', title: 'Entender que son las asociaciones' },
+      { type: 'checklist', title: 'Descubrir diferentes ejemplos de brandings excelentes' },
+      { type: 'subgroup',  title: 'Práctica: Crea tu Branding V1' },
+      { type: 'checklist', title: 'Responder las preguntas de la IA' },
+      { type: 'checklist', title: 'Dar feedback profundo hasta tener el Branding V1' },
+
+      // Paso 6
+      { type: 'group',     title: 'Paso 6: Crea tu comunidad' },
+      { type: 'notion',    title: 'Comunidad', url: 'https://steadfast-chance-fc7.notion.site/Comunidad-35a4ff25b33f80288549e9ab1b558790?source=copy_link' },
+      { type: 'checklist', title: 'Entender que es la comunidad y por que importa' },
+      { type: 'checklist', title: 'Entender la importancia de crear una religion' },
+      { type: 'checklist', title: 'Descubrir diferentes ejemplos de comunidades cohesionadas' },
+      { type: 'subgroup',  title: 'Práctica: Crea tu Comunidad V1' },
+      { type: 'checklist', title: 'Responder las preguntas de la IA' },
+      { type: 'checklist', title: 'Dar feedback profundo hasta tener la Comunidad V1' },
     ],
   };
 
   // Inline icons — small SVGs so they inherit currentColor.
   const ICON_NOTION = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h12l4 4v12a0 0 0 0 1 0 0H4z"/><path d="M16 4v4h4"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="14" y2="17"/></svg>';
   const ICON_LINK   = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1"/><path d="M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/></svg>';
+  const ICON_VIDEO  = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><polygon points="10 8 16 12 10 16" fill="currentColor" stroke="none"/></svg>';
   const ICON_ARROW  = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="13 6 19 12 13 18"/></svg>';
 
   function escapeHtml(s) {
@@ -18869,6 +18949,9 @@
       if (item.type === 'group') {
         return '<div class="ck-step">' + safeTitle + '</div>';
       }
+      if (item.type === 'subgroup') {
+        return '<div class="ck-substep">' + safeTitle + '</div>';
+      }
       if (item.type === 'checklist') {
         const isDone = !!doneMap[item.title];
         return ''
@@ -18877,9 +18960,11 @@
           +   '<span class="ck-row-title">' + safeTitle + '</span>'
           + '</button>';
       }
-      // notion or link
+      // notion, link, or video
       const hasUrl = !!item.url;
-      const icon = item.type === 'notion' ? ICON_NOTION : ICON_LINK;
+      const icon = item.type === 'notion' ? ICON_NOTION
+                 : item.type === 'video'  ? ICON_VIDEO
+                 : ICON_LINK;
       const cls  = 'ck-row ck-' + item.type + (hasUrl ? '' : ' is-disabled');
       return ''
         + '<' + (hasUrl ? 'a' : 'div') + ' class="' + cls + '"'
