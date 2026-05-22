@@ -1367,6 +1367,31 @@
     height: 1px;
     background: linear-gradient(90deg, rgba(var(--overlay-rgb),0.08), transparent);
   }
+  /* Cluster separation: a Notion/Link/Video/Practice row (or a Note
+     callout) introduces a new mini-section in the PDF, usually separated
+     by a blank line from the previous block. Mirror that here with a
+     top margin so each cluster reads as its own group, while the
+     checklists underneath each header stay tight against it. */
+  .ck-row.ck-notion,
+  .ck-row.ck-link,
+  .ck-row.ck-video,
+  .ck-row.ck-practice,
+  .ck-note {
+    margin-top: 18px;
+  }
+  /* No margin for the very first item, or for one right after a Paso
+     divider (which already brings its own spacing). */
+  .checklist-items > :first-child {
+    margin-top: 0;
+  }
+  .ck-step + .ck-row.ck-notion,
+  .ck-step + .ck-row.ck-link,
+  .ck-step + .ck-row.ck-video,
+  .ck-step + .ck-row.ck-practice,
+  .ck-step + .ck-note {
+    margin-top: 0;
+  }
+
   /* "Práctica:" rows look like Notion/Link rows but with a sword icon and
      no hover/click state — they're informational labels for an exercise
      that the checkboxes below complete. */
