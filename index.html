@@ -1431,19 +1431,14 @@
     border-radius: 8px;
   }
 
-  /* Inline grid of sub-folder cards (e.g. Ideación / Packaging / Scripting…
-     inside "Crea vídeos outliers"). Same card chassis as the main grid. */
+  /* Sub-folder list — vertical stack of horizontal cards, same chassis as
+     the SOPs tab, so the user reads "Paso 1, Paso 2, …" as an ordered
+     protocol instead of a freeform grid. */
   .checklist-subgrid {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
     margin-top: 22px;
-  }
-  @media (max-width: 720px) {
-    .checklist-subgrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  }
-  @media (max-width: 480px) {
-    .checklist-subgrid { grid-template-columns: 1fr; }
   }
   .tab-panel { display: none; }
   .tab-panel.is-active { display: block; animation: tab-fade 0.35s ease; }
@@ -19052,19 +19047,21 @@
     return null;
   }
 
-  function renderSubfolderCard(item) {
+  function renderSubfolderCard(item, stepNum) {
     const p = getChecklistProgress(item.id);
     const thumbStyle = 'background-image:url(\'' + folderImageFor(item.id) + '\')';
+    const label = 'Paso ' + stepNum + ': ' + item.name;
     return ''
-      + '<button class="checklist-card" type="button" data-checklist="' + item.id + '">'
-      +   '<div class="checklist-card-thumb" role="img" aria-label="Carpeta" style="' + thumbStyle + '"></div>'
-      +   '<div class="checklist-card-foot">'
-      +     '<div class="checklist-card-name">' + escapeHtml(item.name) + '</div>'
+      + '<button class="sops-card" type="button" data-checklist="' + item.id + '">'
+      +   '<div class="sops-card-thumb" role="img" aria-label="Carpeta" style="' + thumbStyle + '"></div>'
+      +   '<div class="sops-card-content">'
+      +     '<div class="sops-card-name">' + escapeHtml(label) + '</div>'
       +     '<div class="checklist-card-progress">'
       +       '<div class="checklist-card-progress-bar"><div class="checklist-card-progress-fill" style="width:' + p.pct + '%"></div></div>'
       +       '<div class="checklist-card-progress-text">' + p.pct + '%</div>'
       +     '</div>'
       +   '</div>'
+      +   '<div class="sops-card-arrow">' + ICON_ARROW + '</div>'
       + '</button>';
   }
 
@@ -19098,8 +19095,10 @@
       const item = items[i];
       if (item.type === 'subfolder') {
         html += '<div class="checklist-subgrid">';
+        let stepNum = 1;
         while (i < items.length && items[i].type === 'subfolder') {
-          html += renderSubfolderCard(items[i]);
+          html += renderSubfolderCard(items[i], stepNum);
+          stepNum++;
           i++;
         }
         html += '</div>';
@@ -19166,7 +19165,7 @@
     });
 
     // Sub-folder cards inside this detail view drill one level deeper.
-    container.querySelectorAll('.checklist-subgrid .checklist-card').forEach(card => {
+    container.querySelectorAll('.checklist-subgrid .sops-card').forEach(card => {
       card.addEventListener('click', () => {
         _checklistStack.push(card.dataset.checklist);
         openChecklistDetail(card.dataset.checklist);
