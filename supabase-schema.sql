@@ -29,10 +29,17 @@ drop policy if exists "user_state self read"   on public.user_state;
 drop policy if exists "user_state self write"  on public.user_state;
 drop policy if exists "user_state self update" on public.user_state;
 drop policy if exists "user_state self delete" on public.user_state;
+drop policy if exists "user_state admin read"  on public.user_state;
 create policy "user_state self read"   on public.user_state for select using  (user_id = (auth.jwt() ->> 'sub'));
 create policy "user_state self write"  on public.user_state for insert with check (user_id = (auth.jwt() ->> 'sub'));
 create policy "user_state self update" on public.user_state for update using  (user_id = (auth.jwt() ->> 'sub')) with check (user_id = (auth.jwt() ->> 'sub'));
 create policy "user_state self delete" on public.user_state for delete using  (user_id = (auth.jwt() ->> 'sub'));
+-- Extra read policy: admins (hardcoded owner email + anyone in app_admins) can
+-- read every user's rows, so the Admin tab can show per-user checklist progress.
+create policy "user_state admin read" on public.user_state for select using (
+  (auth.jwt() ->> 'email') = 'alexblancafortpujado@gmail.com'
+  OR (auth.jwt() ->> 'email') IN (SELECT email FROM public.app_admins)
+);
 
 
 -- ─── 2. user_fragments ────────────────────────────────────────────────────

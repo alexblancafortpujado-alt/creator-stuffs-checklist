@@ -6999,6 +6999,78 @@
     min-width: 130px;
     text-align: right;
   }
+  /* Per-user collapsible row in the admin progress list */
+  .admin-row-collapsible { padding: 0; }
+  .admin-row-toggle {
+    appearance: none;
+    background: none;
+    border: none;
+    width: 100%;
+    text-align: left;
+    color: inherit;
+    font-family: inherit;
+    cursor: pointer;
+    padding: 16px 18px;
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    align-items: center;
+    gap: 16px;
+    border-radius: 12px;
+    transition: background 0.15s ease;
+  }
+  .admin-row-toggle:hover { background: rgba(255,255,255,0.03); }
+  .admin-row-collapsible .admin-row-header { margin: 0; }
+  .admin-row-collapsible .admin-progress { margin: 0; min-width: 200px; }
+  .admin-row-chevron {
+    color: var(--text-tertiary);
+    font-size: 14px;
+    line-height: 1;
+    transition: transform 0.18s ease;
+  }
+  .admin-row.is-expanded .admin-row-chevron { transform: rotate(180deg); color: var(--accent-hover); }
+  .admin-row-breakdown {
+    padding: 4px 18px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    border-top: 1px solid var(--border);
+    margin-top: 0;
+  }
+  .admin-breakdown-row {
+    display: grid;
+    grid-template-columns: 1fr 140px auto auto;
+    align-items: center;
+    gap: 14px;
+    padding: 6px 0;
+    font-size: 13px;
+  }
+  .admin-breakdown-name {
+    color: var(--text-secondary);
+    font-weight: 500;
+  }
+  .admin-breakdown-num {
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-variant-numeric: tabular-nums;
+    font-size: 11.5px;
+    color: var(--text-tertiary);
+    min-width: 64px;
+    text-align: right;
+  }
+  .admin-breakdown-pct {
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+    font-size: 12.5px;
+    color: var(--text-primary);
+    min-width: 42px;
+    text-align: right;
+  }
+  @media (max-width: 720px) {
+    .admin-row-toggle { grid-template-columns: 1fr; }
+    .admin-row-collapsible .admin-progress { min-width: 0; }
+    .admin-breakdown-row { grid-template-columns: 1fr auto auto; }
+    .admin-breakdown-row .admin-progress-bar { display: none; }
+  }
   .admin-chapters {
     display: flex;
     gap: 6px;
@@ -16987,137 +17059,146 @@
     }
     refreshBtn && refreshBtn.classList.add('is-loading');
 
-    const moduleId = SKILLTREE_MODULES[0].id;
-    const chapterTotals = adminComputeChapterTotals(moduleId);
-    const moduleTotal = chapterTotals.reduce((s, n) => s + n, 0);
+    // Total checklist items per active (non-comingSoon) checklist, computed
+    // from the client-side CHECKLIST_CONTENT — admin sees the same totals
+    // the users see when they open a checklist.
+    const totalsByChecklist = {};
+    for (const c of CHECKLISTS) {
+      if (c.comingSoon) continue;
+      const items = CHECKLIST_CONTENT[c.id] || [];
+      totalsByChecklist[c.id] = items.filter(i => i.type === 'checklist').length;
+    }
+    const grandTotal = Object.values(totalsByChecklist).reduce((s, n) => s + n, 0);
 
     try {
-      const [stateRes, namesRes] = await Promise.all([
-        supabaseClient.from('user_state').select('user_id, value, updated_at').eq('key', 'skilltree_v1'),
-        supabaseClient.from('user_state').select('user_id, value').eq('key', DISPLAY_NAME_KEY)
+      const [progressRes, namesRes, knownRes] = await Promise.all([
+        supabaseClient.from('user_state').select('user_id, key, value, updated_at').like('key', 'checklist_done.%'),
+        supabaseClient.from('user_state').select('user_id, value').eq('key', DISPLAY_NAME_KEY),
+        supabaseClient.from('known_users').select('email, clerk_user_id, display_name, last_seen_at')
       ]);
-      if (stateRes.error) throw stateRes.error;
-      if (namesRes.error) console.warn('[admin] display_name load failed:', namesRes.error.message);
+      if (progressRes.error) throw progressRes.error;
+      if (namesRes.error)    console.warn('[admin] display_name load failed:', namesRes.error.message);
+      if (knownRes.error)    console.warn('[admin] known_users load failed:', knownRes.error.message);
 
-      const namesByUser = {};
+      // Index everyone who's ever signed in.
+      const byUid = {};
+      for (const u of (knownRes.data || [])) {
+        if (!u.clerk_user_id) continue;
+        byUid[u.clerk_user_id] = {
+          userId: u.clerk_user_id,
+          email: u.email || null,
+          displayName: u.display_name || null,
+          lastSeenAt: u.last_seen_at || null,
+          progress: {},  // checklistId -> { done, updatedAt }
+        };
+      }
+      // Custom display names override the Clerk firstName/lastName from known_users.
       for (const r of (namesRes.data || [])) {
-        if (typeof r.value === 'string' && r.value.trim()) namesByUser[r.user_id] = r.value.trim();
+        if (typeof r.value !== 'string' || !r.value.trim()) continue;
+        if (!byUid[r.user_id]) byUid[r.user_id] = { userId: r.user_id, email: null, displayName: null, lastSeenAt: null, progress: {} };
+        byUid[r.user_id].displayName = r.value.trim();
+      }
+      // Layer in checklist progress.
+      for (const row of (progressRes.data || [])) {
+        const uid = row.user_id;
+        if (!byUid[uid]) byUid[uid] = { userId: uid, email: null, displayName: null, lastSeenAt: null, progress: {} };
+        const m = row.key.match(/^checklist_done\.(.+)$/);
+        if (!m) continue;
+        const cid = m[1];
+        const done = Object.values(row.value || {}).filter(v => v === true).length;
+        byUid[uid].progress[cid] = { done, updatedAt: row.updated_at };
+        if (!byUid[uid].lastSeenAt || row.updated_at > byUid[uid].lastSeenAt) {
+          byUid[uid].lastSeenAt = row.updated_at;
+        }
       }
 
       const myId = (window.Clerk && window.Clerk.user) ? window.Clerk.user.id : null;
-      const students = (stateRes.data || []).map(row => {
-        const v = row.value || {};
-        const completed = Object.values(v).filter(x => x === true).length;
-        const perChapter = adminComputeChapterCounts(v, moduleId);
+      const users = Object.values(byUid).map(u => {
+        const perChecklist = {};
+        let totalDone = 0;
+        for (const c of CHECKLISTS) {
+          if (c.comingSoon) continue;
+          const total = totalsByChecklist[c.id] || 0;
+          const done  = (u.progress[c.id] && u.progress[c.id].done) || 0;
+          const pct   = total > 0 ? Math.round((done / total) * 100) : 0;
+          perChecklist[c.id] = { done, total, pct };
+          totalDone += done;
+        }
         return {
-          userId: row.user_id,
-          displayName: namesByUser[row.user_id] || null,
-          completed,
-          percentage: moduleTotal > 0 ? Math.round((completed / moduleTotal) * 100) : 0,
-          perChapter,
-          updatedAt: row.updated_at,
-          isMe: row.user_id === myId
+          userId: u.userId,
+          email: u.email,
+          displayName: u.displayName,
+          lastSeenAt: u.lastSeenAt,
+          perChecklist,
+          totalDone,
+          totalItems: grandTotal,
+          totalPct: grandTotal > 0 ? Math.round((totalDone / grandTotal) * 100) : 0,
+          isMe: u.userId === myId,
         };
-      }).sort((a, b) => b.completed - a.completed);
+      }).sort((a, b) => b.totalDone - a.totalDone || ((b.lastSeenAt || '') > (a.lastSeenAt || '') ? 1 : -1));
 
-      countEl.textContent = students.length + ' student' + (students.length === 1 ? '' : 's');
-      refreshTimeEl.textContent = 'updated ' + adminRelativeTime(new Date().toISOString());
-      renderAdminTable(students, moduleId, chapterTotals, moduleTotal);
+      countEl.textContent = users.length + (users.length === 1 ? ' usuario' : ' usuarios');
+      refreshTimeEl.textContent = 'actualizado hace 0s';
+      renderAdminTable(users);
     } catch (e) {
       console.error('[admin] load failed', e);
-      body.innerHTML = '<div class="admin-error">Failed to load: ' + (e.message || 'unknown error') +
-        '. Make sure the admin RLS policy is set up in Supabase.</div>';
+      body.innerHTML = '<div class="admin-error">No se pudo cargar: ' + (e.message || 'error desconocido') +
+        '. Comprueba que la admin RLS policy esté creada en Supabase (ver supabase-schema.sql).</div>';
     } finally {
       refreshBtn && refreshBtn.classList.remove('is-loading');
     }
   }
 
-  function renderAdminTable(students, moduleId, chapterTotals, moduleTotal) {
+  function renderAdminTable(users) {
     const body = document.getElementById('adminBody');
     if (!body) return;
-    if (students.length === 0) {
-      body.innerHTML = '<div class="admin-empty">No student activity yet.</div>';
+    if (users.length === 0) {
+      body.innerHTML = '<div class="admin-empty">Aún no hay actividad de usuarios.</div>';
       return;
     }
-    const module = SKILLTREE_MODULES.find(m => m.id === moduleId);
-    body.innerHTML = '';
-    for (const st of students) {
-      const row = document.createElement('div');
-      row.className = 'admin-row' + (st.isMe ? ' is-me' : '');
+    const activeChecklists = CHECKLISTS.filter(c => !c.comingSoon);
 
-      const header = document.createElement('div');
-      header.className = 'admin-row-header';
+    body.innerHTML = users.map(u => {
+      const name = u.displayName || u.email || 'Sin nombre';
+      const sub  = (u.displayName && u.email) ? u.email : (u.displayName ? null : null);
+      const breakdownHtml = activeChecklists.map(c => {
+        const p = u.perChecklist[c.id] || { done: 0, total: 0, pct: 0 };
+        return ''
+          + '<div class="admin-breakdown-row">'
+          +   '<span class="admin-breakdown-name">' + escapeHtml(c.name) + '</span>'
+          +   '<div class="admin-progress-bar"><div class="admin-progress-fill" style="width:' + p.pct + '%"></div></div>'
+          +   '<span class="admin-breakdown-num">' + p.done + ' / ' + p.total + '</span>'
+          +   '<span class="admin-breakdown-pct">' + p.pct + '%</span>'
+          + '</div>';
+      }).join('');
+      return ''
+        + '<div class="admin-row admin-row-collapsible' + (u.isMe ? ' is-me' : '') + '" data-uid="' + escapeHtml(u.userId) + '">'
+        +   '<button class="admin-row-toggle" type="button">'
+        +     '<div class="admin-row-header">'
+        +       '<span class="admin-row-name' + (u.displayName ? '' : ' is-unset') + '" title="' + escapeHtml(u.userId) + '">' + escapeHtml(name) + '</span>'
+        +       (sub ? '<span class="admin-row-id">' + escapeHtml(sub) + '</span>' : '')
+        +       (u.isMe ? '<span class="admin-row-badge">YO</span>' : '')
+        +       '<span class="admin-row-activity">' + (u.lastSeenAt ? adminRelativeTime(u.lastSeenAt) : '—') + '</span>'
+        +     '</div>'
+        +     '<div class="admin-progress">'
+        +       '<div class="admin-progress-bar"><div class="admin-progress-fill" style="width:' + u.totalPct + '%"></div></div>'
+        +       '<div class="admin-progress-text">' + u.totalDone + ' / ' + u.totalItems + ' · ' + u.totalPct + '%</div>'
+        +     '</div>'
+        +     '<span class="admin-row-chevron" aria-hidden="true">▾</span>'
+        +   '</button>'
+        +   '<div class="admin-row-breakdown" hidden>' + breakdownHtml + '</div>'
+        + '</div>';
+    }).join('');
 
-      const nameEl = document.createElement('span');
-      nameEl.className = 'admin-row-name' + (st.displayName ? '' : ' is-unset');
-      nameEl.textContent = st.displayName || 'Sin nombre';
-      nameEl.title = st.userId;
-      header.appendChild(nameEl);
-
-      const idEl = document.createElement('span');
-      idEl.className = 'admin-row-id';
-      idEl.title = st.userId;
-      idEl.textContent = adminShortId(st.userId);
-      header.appendChild(idEl);
-
-      if (st.isMe) {
-        const badge = document.createElement('span');
-        badge.className = 'admin-row-badge';
-        badge.textContent = 'YOU';
-        header.appendChild(badge);
-      }
-
-      const activity = document.createElement('span');
-      activity.className = 'admin-row-activity';
-      activity.textContent = adminRelativeTime(st.updatedAt);
-      header.appendChild(activity);
-      row.appendChild(header);
-
-      const prog = document.createElement('div');
-      prog.className = 'admin-progress';
-      const bar = document.createElement('div');
-      bar.className = 'admin-progress-bar';
-      const fill = document.createElement('div');
-      fill.className = 'admin-progress-fill';
-      fill.style.width = st.percentage + '%';
-      bar.appendChild(fill);
-      const txt = document.createElement('div');
-      txt.className = 'admin-progress-text';
-      txt.textContent = st.completed + ' / ' + moduleTotal + ' · ' + st.percentage + '%';
-      prog.appendChild(bar);
-      prog.appendChild(txt);
-      row.appendChild(prog);
-
-      const chaps = document.createElement('div');
-      chaps.className = 'admin-chapters';
-      module.chapters.forEach((ch, ci) => {
-        const chip = document.createElement('div');
-        chip.className = 'admin-chip';
-        const done = st.perChapter[ci] || 0;
-        const total = chapterTotals[ci];
-        if (total > 0 && done === total) chip.classList.add('is-complete');
-        chip.style.setProperty('--ch-color', ch.color);
-        const name = document.createElement('div');
-        name.className = 'admin-chip-name';
-        name.textContent = ch.name;
-        const cbar = document.createElement('div');
-        cbar.className = 'admin-chip-bar';
-        const cfill = document.createElement('div');
-        cfill.className = 'admin-chip-fill';
-        cfill.style.width = (total > 0 ? (done / total) * 100 : 0) + '%';
-        cbar.appendChild(cfill);
-        const cnt = document.createElement('div');
-        cnt.className = 'admin-chip-count';
-        cnt.textContent = done + ' / ' + total;
-        chip.appendChild(name);
-        chip.appendChild(cbar);
-        chip.appendChild(cnt);
-        chaps.appendChild(chip);
+    body.querySelectorAll('.admin-row-toggle').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const row = btn.closest('.admin-row');
+        const bd  = row.querySelector('.admin-row-breakdown');
+        const open = !bd.hasAttribute('hidden');
+        if (open) { bd.setAttribute('hidden', ''); row.classList.remove('is-expanded'); }
+        else      { bd.removeAttribute('hidden');  row.classList.add('is-expanded'); }
       });
-      row.appendChild(chaps);
-
-      body.appendChild(row);
-    }
+    });
   }
 
   function _flashAdminBtn(btn, msg) {
