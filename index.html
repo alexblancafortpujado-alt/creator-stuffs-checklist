@@ -1392,20 +1392,29 @@
     margin-top: 0;
   }
 
-  /* "Práctica:" rows look like Notion/Link rows but with a sword icon and
-     no hover/click state — they're informational labels for an exercise
-     that the checkboxes below complete. */
-  .ck-row.ck-practice {
+  /* "Práctica:" rows. When the practice has a URL it behaves like a Notion
+     row (clickable, trailing arrow, normal hover). When it doesn't, it's
+     just an informational label for the checkboxes below — no hover/click. */
+  .ck-row.ck-practice:not([href]) {
     cursor: default;
   }
-  .ck-row.ck-practice:hover {
-    background: var(--surface);
+  .ck-row.ck-practice:not([href]):hover {
+    background: rgba(var(--overlay-rgb), 0.04);
     border-color: var(--border);
   }
-  .ck-row.ck-practice:active { transform: none; }
-  .ck-row.ck-practice .ck-row-trailing { display: none; }
+  .ck-row.ck-practice:not([href]):active { transform: none; }
+  .ck-row.ck-practice:not([href]) .ck-row-trailing { display: none; }
   /* Sword inherits the same colour as the Notion / Vídeo / Link icons */
   .ck-row.ck-practice .ck-row-icon { color: var(--text-secondary); }
+
+  /* Free-text descriptive paragraph — for the intros under "Paso N:" headers
+     and the lead-ins at the top of a checklist. Plain text, no callout. */
+  .ck-desc {
+    padding: 2px 4px;
+    color: var(--text-secondary);
+    font-size: 13.5px;
+    line-height: 1.55;
+  }
 
   /* Subtle tint on the entire practice cluster (the sword row + every check
      underneath it until the next non-check item). Conveys "this section is
@@ -18815,7 +18824,6 @@
     'feedback-loop':         [],
     // Sub-checklists inside "Crea vídeos outliers" — empty until the
     // client provides each protocol's steps.
-    'ideacion':              [],
     'packaging':             [],
     'scripting':             [],
     'grabacion':             [],
@@ -18826,6 +18834,7 @@
     'sponsors':              [],
     'coming-soon':           [],
     'mapea-tu-imperio': [
+      { type: 'desc',      title: 'Antes de empezar a pensar en estrategia, toca hacer una parada obligatoria: auditar la situación actual de tu canal. Mirar los datos, el contenido, el posicionamiento y la audiencia que tienes hoy.' },
       { type: 'notion',    title: 'El mayor problema que todo creador de contenido tiene', url: 'https://steadfast-chance-fc7.notion.site/El-mayor-problema-que-todo-creador-tiene-3494ff25b33f80f3998cfd179851ad6a?source=copy_link' },
       { type: 'checklist', title: 'Entender la metáfora del Ferrari sin GPS' },
       { type: 'checklist', title: 'Entender la importancia de probar, fallar y autoconocerse' },
@@ -18843,23 +18852,40 @@
       { type: 'checklist', title: 'Recibir el diagnostico' },
       { type: 'checklist', title: 'Entender y empezar a actuar.' },
       { type: 'group',     title: 'Paso 4:' },
+      { type: 'video',     title: '‼️ La herramienta más potente para todo creador', url: 'https://www.skool.com/creatorsstuffs/classroom/04177024?md=196ada399540484e90d43f6d884cc0aa' },
+      { type: 'checklist', title: 'Entender la importancia de descargar y montar esta IA' },
+      { type: 'checklist', title: 'Entender que el sistema no funciona sin este paso' },
       { type: 'video',     title: 'Claude Code', url: 'https://www.skool.com/creatorsstuffs/classroom/04177024?md=cb5edb0d58a647cbb11667b91042841f' },
       { type: 'checklist', title: 'Descargar Visual Studio' },
       { type: 'checklist', title: 'Instalar Claude Code' },
       { type: 'checklist', title: 'Descargar y abrir Dani Carrero AI' },
     ],
     'estrategia': [
-      // Intro (no Paso)
+      // Intro
+      { type: 'desc',      title: 'Ahora que tienes el mapa, llega el momento de construir la brújula:' },
+      { type: 'desc',      title: 'Esto implica definir los cinco pilares fundamentales: el avatar, los formatos, el branding y la narrativa, y la comunidad.' },
+
+      { type: 'video',     title: 'Montando tu GPS', url: 'https://www.skool.com/creatorsstuffs/classroom/488b9432?md=d1876ab4017a48d5819e13bcee59fc60' },
+      { type: 'checklist', title: 'Entender cual es el siguiente paso y como afrontar esta parte de la formación' },
+
+      { type: 'practice',  title: 'Práctica: Monta tu ChannelOS', url: 'https://steadfast-chance-fc7.notion.site/Channel-35d4ff25b33f801596ffc3cf7d85193a?source=copy_link' },
+      { type: 'checklist', title: 'Duplica la página a tu notion' },
+      { type: 'checklist', title: 'Cámbiale el nombre' },
+
+      { type: 'practice',  title: 'Práctica: Cambia las imágenes', url: 'https://drive.google.com/drive/u/1/folders/1oyUsBNOW9aNN2e061zE7BghsHr1aBDj?usp=sharing' },
+      { type: 'checklist', title: 'Pon las carpetas con el color de tu canal' },
+
+      { type: 'video',     title: 'Estrategia IA', url: 'https://www.skool.com/creatorsstuffs/classroom/488b9432?md=4b0c37e3044c49b19f47e360c55def14' },
+      { type: 'checklist', title: 'Entender cómo afrontar los siguientes puntos' },
+      { type: 'checklist', title: 'Entender que deberían de tener al final' },
+
       { type: 'notion',    title: 'El Ikigai del creador', url: 'https://steadfast-chance-fc7.notion.site/El-Ikigai-del-creador-3494ff25b33f802291cdc922b3471ef8?source=copy_link' },
       { type: 'checklist', title: 'Entender que es una estrategia de contenido' },
       { type: 'checklist', title: 'Entender que elementos juegan en una estrategia ganadora (ikigai)' },
-      { type: 'video',     title: 'ChannelOS', url: 'https://www.skool.com/creatorsstuffs/classroom/488b9432?md=21acee4436eb4cb9b576f421104aeb23' },
-      { type: 'checklist', title: 'Crea tu OS del canal' },
-      { type: 'checklist', title: 'Añade las carpetas' },
-      { type: 'checklist', title: 'Empieza a rellenarlo' },
 
       // Paso 1
       { type: 'group',     title: 'Paso 1: comprende tu avatar' },
+      { type: 'desc',      title: 'Antes de construir cualquier estrategia de contenido, necesitas saber exactamente para quién la estás construyendo:' },
       { type: 'notion',    title: 'Avatar', url: 'https://steadfast-chance-fc7.notion.site/Avatar-3484ff25b33f80388b4dd4867b54d57d?source=copy_link' },
       { type: 'checklist', title: 'Entender la importancia de tener un Avatar bien definido' },
       { type: 'checklist', title: 'Escoger entre especificarlo mucho o poco' },
@@ -18875,6 +18901,7 @@
 
       // Paso 2
       { type: 'group',     title: 'Paso 2: comprende el algoritmo' },
+      { type: 'desc',      title: 'Con tu avatar claro, llega el momento de entender las reglas del juego: qué quiere YouTube y cómo dárselo:' },
       { type: 'notion',    title: 'El bufet libre', url: 'https://steadfast-chance-fc7.notion.site/El-bufet-libre-3494ff25b33f80debda3e9398f953013?source=copy_link' },
       { type: 'checklist', title: 'Entender cómo funciona el modelo de negocio de youtube' },
       { type: 'checklist', title: 'Entender cómo lo vive un usuario' },
@@ -18882,6 +18909,7 @@
 
       // Paso 3
       { type: 'group',     title: 'Paso 3: define tus buckets' },
+      { type: 'desc',      title: 'Con el avatar y el algoritmo entendidos, es hora de diseñar los formatos de video, los cuales vas a iterar y afinar cada vez que publiques un vídeo.' },
       { type: 'notion',    title: 'Formato Ganador', url: 'https://steadfast-chance-fc7.notion.site/Formato-ganador-3494ff25b33f8078974af39e997ce072?source=copy_link' },
       { type: 'checklist', title: 'Entender que es un formato' },
       { type: 'checklist', title: 'Entender la importancia de determinar los formatos' },
@@ -18892,6 +18920,8 @@
 
       // Paso 4
       { type: 'group',     title: 'Paso 4: define tu narrativa' },
+      { type: 'desc',      title: 'Con esto ya tendríamos la estrategia de contenido bien diseñada. Ahora, el siguiente paso es: crear tu narrativa.' },
+      { type: 'desc',      title: 'Tu narrativa es tu ángulo único, tu forma particular de mirar el mundo dentro de tu nicho, eso que hace que cuando tu avatar se cruza con tu contenido no piense "otro creador más", sino "este tío habla mi idioma".' },
       { type: 'notion',    title: 'Narrativa', url: 'https://steadfast-chance-fc7.notion.site/Narrativa-3484ff25b33f8004919ae56843a51b15?source=copy_link' },
       { type: 'checklist', title: 'Entender que es la narrativa y por que importa' },
       { type: 'checklist', title: 'Descubrir diferentes ejemplos de narrativas' },
@@ -18901,6 +18931,8 @@
 
       // Paso 5
       { type: 'group',     title: 'Paso 5: Crea tu branding' },
+      { type: 'desc',      title: 'Con la narrativa definida, el siguiente paso es el branding.' },
+      { type: 'desc',      title: 'Esto es: decidir qué asociaciones exactas queremos que la gente tenga cuando piensa en nuestro canal, y alinear todo nuestro contenido y mensaje para construirlas de forma consistente:' },
       { type: 'notion',    title: 'Branding', url: 'https://steadfast-chance-fc7.notion.site/Branding-3494ff25b33f8055931eee09f968ba1a?source=copy_link' },
       { type: 'checklist', title: 'Entender que es la branding y por que importa' },
       { type: 'checklist', title: 'Entender que son las asociaciones' },
@@ -18911,6 +18943,8 @@
 
       // Paso 6
       { type: 'group',     title: 'Paso 6: Crea tu comunidad' },
+      { type: 'desc',      title: 'Con el branding definido, el siguiente paso es construir comunidad.' },
+      { type: 'desc',      title: 'Queremos que cada persona que vea un vídeo no solo consuma contenido, sino que sienta que pertenece a algo más grande que ella misma.' },
       { type: 'notion',    title: 'Comunidad', url: 'https://steadfast-chance-fc7.notion.site/Comunidad-35a4ff25b33f80288549e9ab1b558790?source=copy_link' },
       { type: 'checklist', title: 'Entender que es la comunidad y por que importa' },
       { type: 'checklist', title: 'Entender la importancia de crear una religion' },
@@ -18943,6 +18977,35 @@
       { type: 'subfolder', id: 'grabacion', name: 'Grabación' },
       { type: 'subfolder', id: 'edicion',   name: 'Edición' },
       { type: 'subfolder', id: 'subida',    name: 'Subida' },
+    ],
+    'ideacion': [
+      { type: 'notion',    title: 'Autopsia de una idea outlier', url: 'https://steadfast-chance-fc7.notion.site/Channel-35d4ff25b33f801596ffc3cf7d85193a?source=copy_link' },
+      { type: 'checklist', title: 'Entender que es un idea y por que es tan importante' },
+      { type: 'checklist', title: 'Entender los componentes de una idea' },
+      { type: 'checklist', title: 'Entender como funciona la psique humana a la hora de escoger un vídeo' },
+
+      { type: 'notion',    title: 'Cómo pescar a la mayor (y mejor) cantidad de gente', url: 'https://steadfast-chance-fc7.notion.site/C-mo-pescar-la-mayor-y-mejor-cantidad-de-gente-3484ff25b33f8111a0cee1b579edf751?source=copy_link' },
+      { type: 'checklist', title: 'Entender que es el TMV (techo máximo de visitas)' },
+      { type: 'checklist', title: 'Entender las dos formas de encontrar ideas (inside out/outside in)' },
+
+      { type: 'group',     title: 'Protocolo de ideación:' },
+
+      { type: 'notion',    title: 'Paso 1: Mineria de outliers', url: 'https://steadfast-chance-fc7.notion.site/Paso-1-Miner-a-de-outliers-3484ff25b33f81439920d591027bceed?source=copy_link' },
+      { type: 'checklist', title: 'Entender que es un outlier' },
+      { type: 'checklist', title: 'Entender los diferentes tipos' },
+      { type: 'checklist', title: 'Entender cómo se minan' },
+
+      { type: 'notion',    title: 'Paso 2: Outlier Connection', url: 'https://steadfast-chance-fc7.notion.site/Paso-2-Outlier-connection-3484ff25b33f811297c1cea47712e0d3?source=copy_link' },
+      { type: 'checklist', title: 'Entender que es el outlier connection' },
+      { type: 'checklist', title: 'Entender cómo hacerlo' },
+
+      { type: 'practice',  title: 'Práctica: Monta el sistema de ideación outlier' },
+      { type: 'checklist', title: 'Crea una nueva cuenta de youtube' },
+      { type: 'checklist', title: 'Entrénala con contenido de tu nicho' },
+      { type: 'checklist', title: 'Cada día entre y busca outliers' },
+      { type: 'checklist', title: 'Guarda esos outliers en tu cofre (figma, notion, miro…)' },
+      { type: 'checklist', title: 'Unelos entre si para encontrar nuevas ideas' },
+      { type: 'checklist', title: 'Refínalas y dales un twist con la IA' },
     ],
   };
 
@@ -19125,10 +19188,18 @@
         html += '<div class="ck-step">' + safeTitle + '</div>';
       } else if (item.type === 'practice') {
         inPractice = true;
-        html += '<div class="ck-row ck-practice" aria-disabled="true">'
+        const pUrl = !!item.url;
+        html += '<' + (pUrl ? 'a' : 'div') + ' class="ck-row ck-practice"'
+              +   (pUrl ? ' href="' + escapeHtml(item.url) + '" target="_blank" rel="noopener noreferrer"' : ' aria-disabled="true"')
+              +   '>'
               +   '<span class="ck-row-icon">' + ICON_SWORD + '</span>'
               +   '<span class="ck-row-title">' + safeTitle + '</span>'
-              + '</div>';
+              +   (pUrl ? '<span class="ck-row-trailing">' + ICON_ARROW + '</span>' : '')
+              + '</' + (pUrl ? 'a' : 'div') + '>';
+      } else if (item.type === 'desc') {
+        // Descriptive paragraphs don't belong to any cluster.
+        inPractice = false;
+        html += '<div class="ck-desc">' + safeTitle + '</div>';
       } else if (item.type === 'note') {
         inPractice = false;
         html += '<div class="ck-note">' + safeTitle + '</div>';
