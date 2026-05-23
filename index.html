@@ -1432,6 +1432,16 @@
     background: rgba(var(--overlay-rgb), 0.05);
   }
 
+  /* When every check inside a cluster (Notion/Vídeo/Link/Práctica + the
+     items beneath it) is ticked, the whole block fades to signal
+     "this is done, move on". Hover still brightens slightly so the
+     user can revisit if needed. */
+  .ck-row.is-cluster-done {
+    opacity: 0.45;
+    transition: opacity 0.35s ease;
+  }
+  .ck-row.is-cluster-done:hover { opacity: 0.85; }
+
   /* Free-floating explanatory note — for paragraphs the PDF includes
      between items that aren't actionable on their own. Subtler than
      before: no accent stripe, just a faint tinted block. */
@@ -19173,6 +19183,11 @@
     let html = '';
     let inPractice = false;
     let i = 0;
+    // Track clusters as we render. A cluster = a header row (Notion / Vídeo
+    // / Link / Práctica / Note) + every checklist item beneath it until the
+    // next non-check item. Used after render to dim fully-completed clusters.
+    const clusters = [];
+    let currentCluster = -1;
     while (i < items.length) {
       const item = items[i];
       if (item.type === 'subfolder') {
@@ -19185,17 +19200,23 @@
         }
         html += '</div>';
         inPractice = false;
+        currentCluster = -1;
         continue;
       }
       const safeTitle = escapeHtml(item.title);
+      const cAttr = (ci) => ' data-cluster-idx="' + ci + '"';
       if (item.type === 'group') {
         inPractice = false;
+        currentCluster = -1;
         html += '<div class="ck-step">' + safeTitle + '</div>';
       } else if (item.type === 'practice') {
         inPractice = true;
+        currentCluster = clusters.length;
+        clusters.push({ checkTitles: [] });
         const pUrl = !!item.url;
         html += '<' + (pUrl ? 'a' : 'div') + ' class="ck-row ck-practice"'
               +   (pUrl ? ' href="' + escapeHtml(item.url) + '" target="_blank" rel="noopener noreferrer"' : ' aria-disabled="true"')
+              +   cAttr(currentCluster)
               +   '>'
               +   '<span class="ck-row-icon">' + ICON_SWORD + '</span>'
               +   '<span class="ck-row-title">' + safeTitle + '</span>'
@@ -19204,20 +19225,28 @@
       } else if (item.type === 'desc') {
         // Descriptive paragraphs don't belong to any cluster.
         inPractice = false;
+        currentCluster = -1;
         html += '<div class="ck-desc">' + safeTitle + '</div>';
       } else if (item.type === 'note') {
         inPractice = false;
-        html += '<div class="ck-note">' + safeTitle + '</div>';
+        currentCluster = clusters.length;
+        clusters.push({ checkTitles: [] });
+        html += '<div class="ck-note"' + cAttr(currentCluster) + '>' + safeTitle + '</div>';
       } else if (item.type === 'checklist') {
         const isDone = !!doneMap[item.title];
         const practiceCls = inPractice ? ' is-in-practice' : '';
-        html += '<button class="ck-row ck-check' + (isDone ? ' is-done' : '') + practiceCls + '" type="button" data-idx="' + i + '">'
+        if (currentCluster >= 0) clusters[currentCluster].checkTitles.push(item.title);
+        html += '<button class="ck-row ck-check' + (isDone ? ' is-done' : '') + practiceCls + '" type="button" data-idx="' + i + '"'
+              +   (currentCluster >= 0 ? cAttr(currentCluster) : '')
+              +   '>'
               +   '<span class="ck-row-icon"><span class="ck-checkbox"><span class="ck-checkbox-tick">✓</span></span></span>'
               +   '<span class="ck-row-title">' + safeTitle + '</span>'
               + '</button>';
       } else {
         // notion / link / video — start a new theory cluster
         inPractice = false;
+        currentCluster = clusters.length;
+        clusters.push({ checkTitles: [] });
         const hasUrl = !!item.url;
         const icon = item.type === 'notion' ? ICON_NOTION
                    : item.type === 'video'  ? ICON_VIDEO
@@ -19225,7 +19254,8 @@
         const cls  = 'ck-row ck-' + item.type + (hasUrl ? '' : ' is-disabled');
         html += '<' + (hasUrl ? 'a' : 'div') + ' class="' + cls + '"'
               +   (hasUrl ? ' href="' + escapeHtml(item.url) + '" target="_blank" rel="noopener noreferrer"' : '')
-              +   ' data-idx="' + i + '">'
+              +   ' data-idx="' + i + '"' + cAttr(currentCluster)
+              +   '>'
               +   '<span class="ck-row-icon">' + icon + '</span>'
               +   '<span class="ck-row-title">' + safeTitle + '</span>'
               +   '<span class="ck-row-trailing">' + ICON_ARROW + '</span>'
@@ -19234,6 +19264,20 @@
       i++;
     }
     container.innerHTML = html;
+
+    // Apply is-cluster-done to every row in a cluster whose checks are
+    // all ticked. Empty-checkbox clusters (e.g. a standalone Notion with
+    // no actions beneath) are never marked done.
+    function applyClusterDoneClasses() {
+      for (let ci = 0; ci < clusters.length; ci++) {
+        const c = clusters[ci];
+        const allDone = c.checkTitles.length > 0 && c.checkTitles.every(t => doneMap[t]);
+        container.querySelectorAll('[data-cluster-idx="' + ci + '"]').forEach(el => {
+          el.classList.toggle('is-cluster-done', allDone);
+        });
+      }
+    }
+    applyClusterDoneClasses();
 
     container.querySelectorAll('.ck-row.ck-check').forEach(row => {
       row.addEventListener('click', () => {
@@ -19245,6 +19289,9 @@
         if (newDone) map[it.title] = true;
         else delete map[it.title];
         if (typeof storeSet === 'function') storeSet('checklist_done.' + id, map);
+        // Keep doneMap in sync so applyClusterDoneClasses() sees the new state.
+        doneMap[it.title] = newDone || undefined;
+        if (!newDone) delete doneMap[it.title];
         // Re-run the bounce/burst animations every click.
         row.classList.remove('is-done');
         if (newDone) {
@@ -19252,6 +19299,18 @@
         }
         if (navigator.vibrate) { try { navigator.vibrate(newDone ? 12 : 6); } catch (e) {} }
         updateChecklistDetailProgress(id);
+        // Re-evaluate the cluster this check belongs to (and only that one).
+        const ciRaw = row.dataset.clusterIdx;
+        if (ciRaw != null && ciRaw !== '') {
+          const ci = parseInt(ciRaw, 10);
+          const c = clusters[ci];
+          if (c) {
+            const allDone = c.checkTitles.length > 0 && c.checkTitles.every(t => doneMap[t]);
+            container.querySelectorAll('[data-cluster-idx="' + ci + '"]').forEach(el => {
+              el.classList.toggle('is-cluster-done', allDone);
+            });
+          }
+        }
         // Celebrate when this toggle crosses into 100%.
         const newPct = getChecklistProgress(id).pct;
         if (newPct === 100 && oldPct < 100) celebrateCompletion();
