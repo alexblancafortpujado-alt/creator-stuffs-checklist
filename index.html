@@ -19037,13 +19037,127 @@
   // Items with type 'notion' or 'link' and a null url render as muted/disabled.
   const CHECKLIST_CONTENT = {
     'onboarding':            [],
-    // Sub-checklists inside "Crea vídeos outliers" — empty until the
-    // client provides each protocol's steps.
-    'packaging':             [],
-    'scripting':             [],
+    // Sub-checklists inside "Crea vídeos outliers" — Grabación and Subida
+    // still pending the client's content.
     'grabacion':             [],
-    'edicion':               [],
     'subida':                [],
+    'packaging': [
+      { type: 'desc',      title: 'Ahora que ya tenemos ideas ganadoras sobre la mesa, toca ocuparse de lo que decide si esas ideas llegan a ver la luz o se mueren en el feed: el packaging.' },
+      { type: 'desc',      title: 'Porque por muy buena que sea tu idea, por muy bien producido que esté el vídeo y por mucho valor que aporte dentro, si el packaging no hace su trabajo, nadie va a llegar a descubrirlo.' },
+
+      { type: 'notion',    title: 'La psicología del packaging', url: 'https://steadfast-chance-fc7.notion.site/La-psicologia-del-packaging-3454ff25b33f803e85bcd6d482d79a65?source=copy_link' },
+      { type: 'checklist', title: 'Conocer las 3 formas en que un espectador encuentra un vídeo en YouTube' },
+      { type: 'checklist', title: 'Entender el flujo de atención subconsciente con el que se decide el clic: rejilla de miniaturas → miniatura específica → título → vuelta a la miniatura → clic' },
+      { type: 'checklist', title: 'Paso 1: El gatillazo visual (Visual Stun Gun, solo miniatura)' },
+      { type: 'checklist', title: 'Paso 2: Title Value Hunting (el título)' },
+      { type: 'checklist', title: 'Paso 3: Validación Visual (vuelta a la miniatura)' },
+      { type: 'checklist', title: 'Conocer los 4 puntos de ruptura del flujo (en cualquiera de ellos el espectador sigue haciendo scroll)' },
+
+      { type: 'group',     title: 'Protocolo de packaging:' },
+
+      { type: 'notion',    title: 'Paso 1: curiosity gap', url: 'https://steadfast-chance-fc7.notion.site/Paso-1-Curiosity-gap-3454ff25b33f803aabd3de8382536a87?source=copy_link' },
+      { type: 'checklist', title: 'Entender qué es un curiosity gap' },
+      { type: 'checklist', title: 'Paso 1: Entender al avatar (dolor y deseo)' },
+      { type: 'checklist', title: 'Paso 2: Revelar información parcial (no la solución completa)' },
+      { type: 'checklist', title: 'Paso 3: Dejar que el gap se abra solo' },
+      { type: 'checklist', title: 'Paso 4: Completar el puente (cerrar el gap dentro del vídeo)' },
+
+      { type: 'notion',    title: 'Paso 2: Double punch', url: 'https://steadfast-chance-fc7.notion.site/Paso-2-Double-Punch-3454ff25b33f80969b6fd87627eb3f0c?source=copy_link' },
+      { type: 'checklist', title: 'Entender el concepto de double punch' },
+      { type: 'checklist', title: 'Conocer los 3 golpes del combo' },
+      { type: 'checklist', title: 'Recordar que ni la miniatura ni el título funcionan solos' },
+      { type: 'checklist', title: 'Dominar los 5 elementos de un visual stun gun (la miniatura compite contra todo el feed, así que debe ganar en impacto perceptivo, no en información)' },
+    ],
+    'scripting': [
+      { type: 'desc',      title: 'Ahora que tienes claro el packaging de tu vídeo, el siguiente paso es escribir scripts que retengan y conecten en profundidad con tu avatar.' },
+      { type: 'desc',      title: 'Vamos a hacerlo en dos fases: primero estudiaremos los scripts a nivel general y después profundizaremos en los de contenido de valor, pensados para quienes ya crean (o quieren empezar a crear) este tipo de contenido.' },
+
+      { type: 'notion',    title: 'La psicología de los scripts', url: 'https://steadfast-chance-fc7.notion.site/La-psicolog-a-de-los-scripts-3464ff25b33f804581f9cf8806b194b9?source=copy_link' },
+      { type: 'checklist', title: 'Entender que atraer el clic es solo la mitad del trabajo' },
+      { type: 'checklist', title: 'Entender los 4 pasos de la transferencia de valor' },
+      { type: 'checklist', title: 'Entender que cuanto más valor se transfiere y se queda en su cabeza, más confían en ti como fuente y más vuelven' },
+      { type: 'checklist', title: 'Entender la estructura base de todo vídeo que funciona (inicio, desarrollo y desenlace) porque es cómo el cerebro procesa la información' },
+      { type: 'checklist', title: 'Entender la pirámide invertida de la información (de lo amplio a lo específico): contexto del problema → consecuencias → estrategia → tácticas → ejemplos → otro vídeo' },
+      { type: 'checklist', title: 'Entender el estado de hipnosis' },
+      { type: 'checklist', title: 'Entender la "audiencia de uno"' },
+
+      { type: 'group',     title: 'Protocolo de scripting general:' },
+
+      { type: 'notion',    title: 'Paso 1: YouTube = Historias', url: 'https://steadfast-chance-fc7.notion.site/Paso-1-YouTube-Historias-36a4ff25b33f808395cdd46e129dcfff?source=copy_link' },
+      { type: 'checklist', title: 'Entender que YouTube es el "fuego" moderno' },
+      { type: 'checklist', title: 'Entender que un vídeo con historia vale más que un vídeo con visitas: las visitas se olvidan, las historias permanecen; el objetivo no es informar, es que el espectador sienta algo' },
+      { type: 'checklist', title: 'Entender el porqué neurológico' },
+      { type: 'checklist', title: 'Entender que la identificación nace de la humanidad imperfecta, no de la perfección (Jobs vs. Apple, la "historia imperfecta" de Willyrex)' },
+      { type: 'checklist', title: 'Entender que debes dejar de buscar el vídeo perfecto y empezar a documentar tu historia real' },
+
+      { type: 'notion',    title: 'Paso 2: La introducción', url: 'https://steadfast-chance-fc7.notion.site/Paso-2-La-introducci-n-36a4ff25b33f80bc95badb4f3464c237?source=copy_link' },
+      { type: 'checklist', title: 'Entender que el vídeo no empieza al darle al play sino en la miniatura y el título, así que tu único trabajo es cumplir la expectativa que prometiste' },
+      { type: 'checklist', title: 'Entender el primer ingrediente, el contexto' },
+      { type: 'checklist', title: 'Entender el segundo ingrediente, la brecha de curiosidad' },
+      { type: 'checklist', title: 'Entender el tercer ingrediente, tu propuesta única' },
+      { type: 'checklist', title: 'Entender que la intro gira en torno a un solo objetivo: una única respuesta a "¿qué va a obtener el espectador al final?"' },
+
+      { type: 'notion',    title: 'Paso 3: Storytelling', url: 'https://steadfast-chance-fc7.notion.site/Paso-3-Storytelling-36a4ff25b33f808393f8e38b140b5ac4?source=copy_link' },
+      { type: 'checklist', title: 'Entender que una historia es un viaje emocional, no información empaquetada' },
+      { type: 'checklist', title: 'Entender el comienzo y el final (Paso 1)' },
+      { type: 'checklist', title: 'Entender la cadena causa → consecuencia (Paso 2)' },
+      { type: 'checklist', title: 'Entender las dos tramas (Paso 3)' },
+      { type: 'checklist', title: 'Entender la recompensa emocional (Paso 4)' },
+
+      { type: 'group',     title: 'Protocolo de scripting de valor:' },
+
+      { type: 'notion',    title: 'Paso 1: La intro', url: 'https://steadfast-chance-fc7.notion.site/Paso-1-Intro-3464ff25b33f80a491d9e44bdd31639b?source=copy_link' },
+      { type: 'checklist', title: 'Entender por qué los scripts lo son todo' },
+      { type: 'checklist', title: 'Entender que la intro es el 20% que determina el 80% del resultado' },
+      { type: 'checklist', title: 'Entender el primer paso, confirmar el clic' },
+      { type: 'checklist', title: 'Entender el segundo paso, abrir un loop' },
+      { type: 'checklist', title: 'Entender el tercer paso, tocar un dolor' },
+
+      { type: 'notion',    title: 'Paso 2: Storytelling', url: 'https://steadfast-chance-fc7.notion.site/Paso-2-Storytelling-3464ff25b33f809a9e5dd6e73624013d?source=copy_link' },
+      { type: 'checklist', title: 'Entender que aquí el storytelling no es para entretener sino para coger ideas abstractas y explicarlas de forma concreta y emocional' },
+      { type: 'checklist', title: 'Entender la metáfora' },
+      { type: 'checklist', title: 'Entender la anécdota' },
+      { type: 'checklist', title: 'Entender la historia' },
+      { type: 'checklist', title: 'Entender que la clave no es usar solo una sino combinar las tres' },
+
+      { type: 'notion',    title: 'Paso 3: Valor', url: 'https://steadfast-chance-fc7.notion.site/Paso-3-Valor-3464ff25b33f80cda382c1464b285076?source=copy_link' },
+      { type: 'checklist', title: 'Entender que el objetivo del contenido educativo es ganar autoridad, y que el pilar nº1 es transmitir un conocimiento único y útil que al aplicarlo dé resultados reales' },
+      { type: 'checklist', title: 'Entender la velocidad hacia el valor' },
+      { type: 'checklist', title: 'Entender la pirámide del aprendizaje' },
+      { type: 'checklist', title: 'Entender que el overstuffing es contraproducente' },
+      { type: 'checklist', title: 'Entender el método de dejar solo lo esencial' },
+
+      { type: 'notion',    title: 'Paso 4: Motivación', url: 'https://steadfast-chance-fc7.notion.site/Paso-4-Outro-3464ff25b33f805a97e6f6f1a3d84f76?source=copy_link' },
+      { type: 'checklist', title: 'Entender cuándo y dónde colocar el CTA' },
+      { type: 'checklist', title: 'Entender la motivación por visualización' },
+      { type: 'checklist', title: 'Entender el poder de la palabra "imagina"' },
+      { type: 'checklist', title: 'Entender el cierre encadenado' },
+      { type: 'checklist', title: 'Entender la metáfora de la tubería' },
+
+      { type: 'practice',  title: 'Práctica: Probar el sistema de Alekai para crear scripts', url: 'https://www.skool.com/creatorsstuffs/classroom/cc9ac057?md=8519c2d289774fe6a6044cc0283116eb' },
+      { type: 'checklist', title: 'Minar outliers y elegir un vídeo viral que encaje con tu audiencia, traduciéndolo si hace falta' },
+      { type: 'checklist', title: 'Pasárselo a tu IA ya entrenada con tu avatar, tu narrativa, tu formato y tu banco de conocimiento y anécdotas' },
+      { type: 'checklist', title: 'Refinar el título con la IA: pedir feedback, detectar las power words que disparan el pain (tipo "sin querer" / "para siempre"), validar que el tópico es viral y encaja con tus formatos, e iterar hasta el título perfecto' },
+      { type: 'checklist', title: 'Enviar a la IA el título definitivo, la categoría del vídeo y el tópico con tus notas, y pedirle que genere 10 hooks, 10 anécdotas y 10 píldoras de valor (más cierres y CTAs) tirando de tu banco' },
+      { type: 'checklist', title: 'Coger los elementos que más te gusten, unirlos entre sí y reescribirlos con tus propias palabras, asumiendo que es un esqueleto base y no el script final' },
+      { type: 'checklist', title: 'Montar la estructura siguiendo el orden ya visto:' },
+      { type: 'checklist', title: 'Refinar el script varias veces (no quedarte en una sola pasada con la IA) y grabarlo expandiendo cada parte con tus propias palabras' },
+    ],
+    'edicion': [
+      { type: 'video',     title: 'Paso 1: Montaje', url: 'https://www.skool.com/creatorsstuffs/classroom/cc9ac057?md=4dc929c750264eee96b69f1a9aee1c05' },
+      { type: 'checklist', title: 'Partir de un guión estructurado' },
+      { type: 'checklist', title: 'Grabar los brutos por temáticas, mirando el guión solo para situarte, y grabar b-roll desde varios ángulos si usas formato vlog' },
+      { type: 'checklist', title: 'Volcar todos los brutos ordenados por temática en tu programa de edición' },
+      { type: 'checklist', title: 'Hacer el primer montaje recortando silencios y cambiando de plano (deja silencios a propósito para que los cortes sean fáciles y elimina los planos que no te gusten); hazlo tú mismo para ahorrarle tiempo al editor, porque te cuesta cero' },
+      { type: 'checklist', title: 'Marcar cada tema con un color distinto para identificar cada bloque y cerrar el vídeo con tu frase de cierre (o una voz en off si te olvidaste la conclusión)' },
+
+      { type: 'video',     title: 'Paso 2: Narrativa (Voces en off)', url: 'https://www.skool.com/creatorsstuffs/classroom/cc9ac057?md=8e7883d201b24f67b0cf7c86c3f5446b' },
+      { type: 'checklist', title: 'Transcribir cada secuencia/temática en Premiere (Texto → Transcribir) y exportarla a archivo de texto' },
+      { type: 'checklist', title: 'Pasar las transcripciones a la IA y pedirle que una todas las temáticas en una secuencia narrativa de causa-consecuencia, para sacar el guion de las voces en off' },
+      { type: 'checklist', title: 'Grabar las voces en off (por ejemplo en Adobe Audition, leyendo el documento a pantalla dividida); sirven para contextualizar y dar sentido narrativo al vídeo' },
+      { type: 'checklist', title: 'Rellenar esas voces en off con el b-roll grabado o con motion graphics si el editor es experto' },
+      { type: 'checklist', title: 'Crear un editing brief (un documento con tu estilo de edición, ya definido en tu branding) y pasárselo al editor para que se adapte a tu estilo y no tú al suyo' },
+    ],
     'equipo':                [],
     'nutricion':             [],
     'sponsors':              [],
