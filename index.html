@@ -1607,6 +1607,113 @@
   /* Sword inherits the same colour as the Notion / Vídeo / Link icons */
   .ck-row.ck-practice .ck-row-icon { color: var(--text-secondary); }
 
+  /* Signature pad — for commitment items where the user signs to mark
+     it done. The row stacks the prompt + checkbox on top and a drawable
+     canvas pad with Limpiar / Confirmar firma buttons below. */
+  .ck-row.ck-sign {
+    appearance: none;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 14px;
+    cursor: default;
+    font-family: inherit;
+    text-align: left;
+    color: var(--text-primary);
+  }
+  .ck-row.ck-sign:hover { background: var(--surface); border-color: var(--border); }
+  .ck-row.ck-sign:active { transform: none; }
+  .ck-sign-prompt {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .ck-sign-prompt .ck-row-icon { flex: 0 0 24px; }
+  .ck-sign-prompt .ck-row-title {
+    font-weight: 600;
+    color: var(--text-primary);
+    line-height: 1.35;
+  }
+  .ck-row.ck-sign.is-done .ck-sign-prompt .ck-row-title {
+    color: var(--text-tertiary);
+  }
+  .ck-sign-pad-wrap {
+    position: relative;
+    background: rgba(var(--overlay-rgb), 0.04);
+    border: 1px dashed rgba(var(--overlay-rgb), 0.18);
+    border-radius: 10px;
+    overflow: hidden;
+    transition: border-color 0.3s ease, background 0.3s ease;
+  }
+  .ck-row.ck-sign.is-done .ck-sign-pad-wrap {
+    border-style: solid;
+    border-color: var(--accent);
+    background: var(--accent-soft);
+  }
+  .ck-sign-pad {
+    display: block;
+    width: 100%;
+    height: 170px;
+    touch-action: none;
+    cursor: crosshair;
+    color: var(--text-primary);
+  }
+  .ck-row.ck-sign.is-done .ck-sign-pad { cursor: default; }
+  .ck-sign-hint {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    color: var(--text-tertiary);
+    font-size: 12.5px;
+    letter-spacing: 0.05em;
+    opacity: 0.7;
+    transition: opacity 0.2s ease;
+  }
+  .ck-sign-pad-wrap.has-strokes .ck-sign-hint { opacity: 0; }
+  .ck-sign-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    padding: 8px 10px;
+    border-top: 1px solid rgba(var(--overlay-rgb), 0.08);
+    background: rgba(var(--overlay-rgb), 0.02);
+  }
+  .ck-sign-btn {
+    appearance: none;
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    padding: 6px 14px;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+  }
+  .ck-sign-btn:hover:not(:disabled) {
+    background: rgba(var(--overlay-rgb), 0.05);
+    color: var(--text-primary);
+    border-color: var(--border-strong);
+  }
+  .ck-sign-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .ck-sign-btn-confirm {
+    color: var(--accent-hover);
+    border-color: rgba(59,130,246,0.30);
+  }
+  .ck-sign-btn-confirm:hover:not(:disabled) {
+    background: var(--accent);
+    color: white;
+    border-color: var(--accent);
+  }
+
   /* Free-text descriptive paragraph — for the intros under "Paso N:" headers
      and the lead-ins at the top of a checklist. Plain text, no callout.
      Muted enough that it reads as supporting context, not another item. */
@@ -19067,7 +19174,12 @@
   //   { type: 'checklist', title }              → checkbox that toggles + counts toward %
   // Items with type 'notion' or 'link' and a null url render as muted/disabled.
   const CHECKLIST_CONTENT = {
-    'onboarding':            [],
+    'onboarding': [
+      { type: 'checklist', title: 'Entender cómo funciona Skool' },
+      { type: 'checklist', title: 'Entender cómo exprimir al máximo Creators Stuffs' },
+      { type: 'checklist', title: 'Entender cómo funciona la CCChecklist' },
+      { type: 'signature', title: 'Me comprometo a entender y aplicar todos los conceptos' },
+    ],
     // Sub-checklists inside "Crea vídeos outliers" — Grabación and Subida
     // still pending the client's content.
     'grabacion':             [],
@@ -19624,6 +19736,75 @@
     if (navigator.vibrate) { try { navigator.vibrate([20, 40, 60, 40, 80]); } catch (e) {} }
   }
 
+  // Minimal signature pad — wraps an existing <canvas> with pointer-event
+  // handlers. Handles devicePixelRatio so the strokes stay crisp on retina,
+  // tracks whether any stroke has been drawn, and exposes clear / isEmpty /
+  // toDataURL / fromDataURL for the renderer to read & restore.
+  function _setupSignaturePad(canvas, onChange) {
+    const rect = canvas.getBoundingClientRect();
+    const dpr = window.devicePixelRatio || 1;
+    const w = Math.max(1, Math.round(rect.width || 600));
+    const h = Math.max(1, Math.round(rect.height || 170));
+    canvas.width = w * dpr;
+    canvas.height = h * dpr;
+    canvas.style.width = w + 'px';
+    canvas.style.height = h + 'px';
+    const ctx = canvas.getContext('2d');
+    ctx.scale(dpr, dpr);
+    ctx.lineWidth = 2.2;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.strokeStyle = getComputedStyle(canvas).color || '#F5F7FA';
+
+    let drawing = false, lastX = 0, lastY = 0, hasStrokes = false;
+    const getXY = (e) => {
+      const r = canvas.getBoundingClientRect();
+      return { x: e.clientX - r.left, y: e.clientY - r.top };
+    };
+    canvas.addEventListener('pointerdown', (e) => {
+      if (canvas.dataset.locked === '1') return;
+      drawing = true;
+      hasStrokes = true;
+      const p = getXY(e);
+      lastX = p.x; lastY = p.y;
+      try { canvas.setPointerCapture(e.pointerId); } catch (_) {}
+      if (onChange) onChange(true);
+    });
+    canvas.addEventListener('pointermove', (e) => {
+      if (!drawing) return;
+      const p = getXY(e);
+      ctx.beginPath();
+      ctx.moveTo(lastX, lastY);
+      ctx.lineTo(p.x, p.y);
+      ctx.stroke();
+      lastX = p.x; lastY = p.y;
+    });
+    const stop = () => { drawing = false; };
+    canvas.addEventListener('pointerup', stop);
+    canvas.addEventListener('pointercancel', stop);
+    canvas.addEventListener('pointerleave', stop);
+
+    return {
+      clear() {
+        ctx.clearRect(0, 0, w, h);
+        hasStrokes = false;
+        if (onChange) onChange(false);
+      },
+      isEmpty() { return !hasStrokes; },
+      toDataURL() { return canvas.toDataURL('image/png'); },
+      fromDataURL(dataUrl) {
+        const img = new Image();
+        img.onload = () => {
+          ctx.clearRect(0, 0, w, h);
+          ctx.drawImage(img, 0, 0, w, h);
+          hasStrokes = true;
+          if (onChange) onChange(true);
+        };
+        img.src = dataUrl;
+      }
+    };
+  }
+
   function updateChecklistDetailProgress(id) {
     const p = getChecklistProgress(id);
     const fill = document.getElementById('checklistDetailProgressFill');
@@ -19755,6 +19936,29 @@
               +   '<span class="ck-row-icon"><span class="ck-checkbox"><span class="ck-checkbox-tick">✓</span></span></span>'
               +   '<span class="ck-row-title">' + safeTitle + '</span>'
               + '</button>';
+      } else if (item.type === 'signature') {
+        // Commitment row with a signature pad. Counts toward progress
+        // exactly like a checklist item; the canvas is wired up after
+        // innerHTML is set.
+        const isDone = !!doneMap[item.title];
+        const practiceCls = inPractice ? ' is-in-practice' : '';
+        if (currentCluster >= 0) clusters[currentCluster].checkTitles.push(item.title);
+        html += '<div class="ck-row ck-sign' + (isDone ? ' is-done' : '') + practiceCls + '" data-idx="' + i + '"'
+              +   (currentCluster >= 0 ? cAttr(currentCluster) : '')
+              +   '>'
+              +   '<div class="ck-sign-prompt">'
+              +     '<span class="ck-row-icon"><span class="ck-checkbox"><span class="ck-checkbox-tick">✓</span></span></span>'
+              +     '<span class="ck-row-title">' + safeTitle + '</span>'
+              +   '</div>'
+              +   '<div class="ck-sign-pad-wrap">'
+              +     '<canvas class="ck-sign-pad"></canvas>'
+              +     '<div class="ck-sign-hint">Firma aquí para confirmar tu compromiso</div>'
+              +     '<div class="ck-sign-actions">'
+              +       '<button class="ck-sign-btn ck-sign-btn-clear" type="button" disabled>Limpiar</button>'
+              +       '<button class="ck-sign-btn ck-sign-btn-confirm" type="button" disabled>Confirmar firma</button>'
+              +     '</div>'
+              +   '</div>'
+              + '</div>';
       } else {
         // notion / link / video — start a new theory cluster
         inPractice = false;
@@ -19840,6 +20044,62 @@
       card.addEventListener('click', () => {
         _checklistStack.push(card.dataset.checklist);
         openChecklistDetail(card.dataset.checklist);
+      });
+    });
+
+    // Wire signature pads. Each pad restores the saved PNG (if the item
+    // is already marked done), enables the buttons as the user draws, and
+    // on confirm marks the item done + fires the same animations + cluster
+    // re-eval + overview refresh + 100% celebration as a regular check.
+    container.querySelectorAll('.ck-row.ck-sign').forEach(row => {
+      const idx = parseInt(row.dataset.idx, 10);
+      const it = items[idx];
+      const canvas = row.querySelector('.ck-sign-pad');
+      const wrap = row.querySelector('.ck-sign-pad-wrap');
+      const clearBtn = row.querySelector('.ck-sign-btn-clear');
+      const confirmBtn = row.querySelector('.ck-sign-btn-confirm');
+      const sigKey = 'checklist_sig.' + id + ':' + it.title;
+      const pad = _setupSignaturePad(canvas, (hasStrokes) => {
+        clearBtn.disabled = !hasStrokes;
+        confirmBtn.disabled = !hasStrokes;
+        wrap.classList.toggle('has-strokes', hasStrokes);
+      });
+      // Restore signature image if previously confirmed.
+      try {
+        const saved = (typeof storeGet === 'function') ? storeGet(sigKey) : null;
+        if (saved) pad.fromDataURL(saved);
+      } catch (e) {}
+
+      clearBtn.addEventListener('click', () => { pad.clear(); });
+
+      confirmBtn.addEventListener('click', () => {
+        if (pad.isEmpty()) return;
+        const oldPct = getChecklistProgress(id).pct;
+        const dataUrl = pad.toDataURL();
+        if (typeof storeSet === 'function') storeSet(sigKey, dataUrl);
+        const map = checklistDoneMap(id);
+        map[it.title] = true;
+        if (typeof storeSet === 'function') storeSet('checklist_done.' + id, map);
+        doneMap[it.title] = true;
+        // Bounce/burst animation by re-applying is-done.
+        row.classList.remove('is-done');
+        requestAnimationFrame(() => requestAnimationFrame(() => row.classList.add('is-done')));
+        if (navigator.vibrate) { try { navigator.vibrate(14); } catch (e) {} }
+        updateChecklistDetailProgress(id);
+        const ciRaw = row.dataset.clusterIdx;
+        if (ciRaw != null && ciRaw !== '') {
+          const ci = parseInt(ciRaw, 10);
+          const c = clusters[ci];
+          if (c) {
+            const allDone = c.checkTitles.length > 0 && c.checkTitles.every(t => doneMap[t]);
+            container.querySelectorAll('[data-cluster-idx="' + ci + '"]').forEach(el => {
+              el.classList.toggle('is-cluster-done', allDone);
+            });
+          }
+        }
+        const newPct = getChecklistProgress(id).pct;
+        if (newPct === 100 && oldPct < 100) celebrateCompletion();
+        renderOverviewBar();
       });
     });
 
