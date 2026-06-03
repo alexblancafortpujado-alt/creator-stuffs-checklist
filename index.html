@@ -975,7 +975,9 @@
   .overview-cell.is-full:hover .overview-label { color: var(--accent-hover); }
   .overview-cell.is-full .overview-label { color: var(--accent-hover); }
   /* The progress line — empty track always visible; fill grows from the
-     left up to --pct using the success colour. */
+     left up to --pct. Each fill carries a slice of one single bar-wide
+     gradient so all 9 lines together read as one continuous rainbow.
+     The slice is selected via background-position-x driven by --cell-idx. */
   .overview-line {
     position: relative;
     width: 80%;
@@ -988,12 +990,15 @@
     position: absolute;
     inset: 0;
     width: var(--pct, 0%);
-    background: var(--success);
+    background: linear-gradient(90deg, #6BE3A4 0%, #6BA8E3 28%, #B89BE9 52%, #F2C063 78%, #FF8E72 100%);
+    background-size: 900% 100%;
+    background-position-x: calc(var(--cell-idx, 0) * 12.5%);
+    background-repeat: no-repeat;
     border-radius: inherit;
     transition: width 0.45s cubic-bezier(0.4, 0, 0.2, 1);
   }
   .overview-cell.is-full .overview-line-fill {
-    box-shadow: 0 0 8px rgba(52, 211, 153, 0.5);
+    box-shadow: 0 0 10px rgba(var(--overlay-rgb), 0.30);
   }
   .overview-pct {
     font-size: 11px;
@@ -1017,16 +1022,15 @@
     height: 110px; padding: 0;
   }
   .overview-gift-icon {
-    width: 54px;
-    height: 54px;
-    color: var(--accent-hover);
+    width: 78px;
+    height: 78px;
+    object-fit: contain;
     animation: gift-pulse 2.8s ease-in-out infinite;
   }
   .overview-cell.is-gift .overview-label { color: var(--accent-hover); opacity: 0.85; }
   .overview-cell.is-gift .overview-line-fill {
-    background: var(--accent-hover);
-    width: 0%;
-    opacity: 0.55;
+    width: 100%;
+    opacity: 0.30;
     animation: gift-line-pulse 2.8s ease-in-out infinite;
   }
   .overview-cell.is-gift .overview-pct {
@@ -1040,8 +1044,8 @@
     50%      { filter: drop-shadow(0 0 18px rgba(59,130,246,0.70)); transform: scale(1.06); }
   }
   @keyframes gift-line-pulse {
-    0%, 100% { opacity: 0.30; }
-    50%      { opacity: 0.85; }
+    0%, 100% { opacity: 0.25; }
+    50%      { opacity: 0.65; }
   }
   /* Fully unlocked — every other checklist is 100%. Stronger glow,
      no pulse, and the cell becomes clickable. */
@@ -1051,7 +1055,6 @@
   .overview-cell.is-gift.is-unlocked .overview-gift-icon {
     animation: none;
     filter: drop-shadow(0 0 22px rgba(59,130,246,0.85));
-    color: var(--accent);
   }
   .overview-cell.is-gift.is-unlocked .overview-label { opacity: 1; }
   .overview-cell.is-gift.is-unlocked .overview-line-fill { width: 100%; opacity: 1; animation: none; }
@@ -19012,8 +19015,9 @@
     'nutricion':            'Nutricion-progress.png',
     'sponsors':             'Sponsors-progress.png',
   };
-  // Gift SVG used for the locked reward segment at the end of the bar.
-  const ICON_GIFT = '<svg class="overview-gift-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 12v9H4v-9"/><path d="M22 7H2v5h20V7z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>';
+  // Gift PNG used for the locked reward segment at the end of the bar.
+  const ICON_GIFT_SRC = 'Gift-progress.png';
+  const ICON_GIFT = '<img class="overview-gift-icon" src="' + ICON_GIFT_SRC + '" alt="" draggable="false" />';
 
   // Short label used in the overview cell — capitalised first word so the
   // tiny font reads more cleanly than the full folder name.
@@ -19353,14 +19357,17 @@
     const otherIds = CHECKLISTS.filter(c => !c.comingSoon).map(c => c.id);
     const allOthersDone = otherIds.length > 0 && otherIds.every(id => getChecklistProgress(id).pct === 100);
 
-    bar.innerHTML = CHECKLISTS.map(c => {
+    bar.innerHTML = CHECKLISTS.map((c, idx) => {
+      // --cell-idx lets each line fill pick its slice of the bar-wide
+      // gradient via background-position-x.
+      const cellStyle = '--cell-idx:' + idx;
       if (c.comingSoon) {
         const unlockedCls = allOthersDone ? ' is-unlocked' : '';
         const tipText = allOthersDone
           ? 'Has completado toda la checklist — disfruta de tu regalo'
           : 'Completa toda la checklist para desbloquear este regalo';
         return ''
-          + '<div class="overview-cell is-gift' + unlockedCls + '" title="' + escapeHtml(tipText) + '" role="status">'
+          + '<div class="overview-cell is-gift' + unlockedCls + '" title="' + escapeHtml(tipText) + '" role="status" style="' + cellStyle + '">'
           +   '<div class="overview-icon-wrap">' + ICON_GIFT + '</div>'
           +   '<div class="overview-label">' + escapeHtml(overviewLabelFor(c)) + '</div>'
           +   '<div class="overview-line"><div class="overview-line-fill"></div></div>'
@@ -19371,7 +19378,7 @@
       const img = OVERVIEW_IMAGES[c.id];
       const stateCls = p.pct === 100 ? ' is-full' : (p.pct > 0 ? ' is-started' : '');
       return ''
-        + '<button class="overview-cell' + stateCls + '" type="button" data-checklist="' + c.id + '" style="--pct:' + p.pct + '%">'
+        + '<button class="overview-cell' + stateCls + '" type="button" data-checklist="' + c.id + '" style="--pct:' + p.pct + '%; ' + cellStyle + '">'
         +   '<div class="overview-icon-wrap">'
         +     (img ? '<img class="overview-icon" src="' + escapeHtml(img) + '" alt="" draggable="false" />' : '')
         +   '</div>'
