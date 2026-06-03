@@ -908,12 +908,17 @@
   .overview-bar {
     display: flex;
     align-items: flex-start;
-    gap: 4px;
+    gap: 0;
     background: var(--bg);
     border: 1px solid var(--border);
     border-radius: 18px;
-    padding: 30px 20px 26px;
+    padding: 30px 16px 26px;
     margin: 4px 0 40px;
+  }
+  /* Hairline divider between cells — makes the bar read as one segmented
+     element rather than a row of separate buttons. */
+  .overview-cell:not(:last-child) {
+    box-shadow: inset -1px 0 0 rgba(var(--overlay-rgb), 0.05);
   }
   .overview-cell {
     appearance: none;
@@ -999,19 +1004,64 @@
     transition: color 0.3s ease;
   }
   .overview-cell.is-full .overview-pct { color: var(--success); }
-  /* "Coming soon" tile — muted, non-clickable, neutral lock icon. */
-  .overview-cell.is-soon { cursor: not-allowed; opacity: 0.40; }
-  .overview-cell.is-soon:hover { background: transparent; }
-  .overview-cell.is-soon .overview-icon-wrap {
+  /* Locked-but-tempting gift tile — keeps the cell on the bar but renders
+     a glowing accent icon that softly pulses to pull the eye. The cell
+     stays non-clickable (cursor: help) and shows a tooltip explaining
+     the unlock condition on hover. When every other checklist is at
+     100% the tile flips to .is-unlocked (stronger glow, no animation,
+     clickable). */
+  .overview-cell.is-gift { cursor: help; }
+  .overview-cell.is-gift:hover { background: rgba(59,130,246,0.04); transform: translateY(-1px); }
+  .overview-cell.is-gift .overview-icon-wrap {
     width: auto; aspect-ratio: auto;
     height: 110px; padding: 0;
   }
-  .overview-soon-icon { width: 32px; height: 32px; color: var(--text-tertiary); }
+  .overview-gift-icon {
+    width: 54px;
+    height: 54px;
+    color: var(--accent-hover);
+    animation: gift-pulse 2.8s ease-in-out infinite;
+  }
+  .overview-cell.is-gift .overview-label { color: var(--accent-hover); opacity: 0.85; }
+  .overview-cell.is-gift .overview-line-fill {
+    background: var(--accent-hover);
+    width: 0%;
+    opacity: 0.55;
+    animation: gift-line-pulse 2.8s ease-in-out infinite;
+  }
+  .overview-cell.is-gift .overview-pct {
+    color: var(--accent-hover);
+    opacity: 0.7;
+    font-size: 14px;
+    margin-top: -6px;
+  }
+  @keyframes gift-pulse {
+    0%, 100% { filter: drop-shadow(0 0 6px rgba(59,130,246,0.35)); transform: scale(1); }
+    50%      { filter: drop-shadow(0 0 18px rgba(59,130,246,0.70)); transform: scale(1.06); }
+  }
+  @keyframes gift-line-pulse {
+    0%, 100% { opacity: 0.30; }
+    50%      { opacity: 0.85; }
+  }
+  /* Fully unlocked — every other checklist is 100%. Stronger glow,
+     no pulse, and the cell becomes clickable. */
+  .overview-cell.is-gift.is-unlocked {
+    cursor: pointer;
+  }
+  .overview-cell.is-gift.is-unlocked .overview-gift-icon {
+    animation: none;
+    filter: drop-shadow(0 0 22px rgba(59,130,246,0.85));
+    color: var(--accent);
+  }
+  .overview-cell.is-gift.is-unlocked .overview-label { opacity: 1; }
+  .overview-cell.is-gift.is-unlocked .overview-line-fill { width: 100%; opacity: 1; animation: none; }
+  .overview-cell.is-gift.is-unlocked .overview-pct { opacity: 1; }
   @media (max-width: 720px) {
-    .overview-bar { padding: 18px 10px 16px; gap: 2px; }
+    .overview-bar { padding: 18px 10px 16px; gap: 0; }
     .overview-cell { gap: 10px; }
     .overview-icon-wrap { max-width: 64px; }
-    .overview-cell.is-soon .overview-icon-wrap { height: 64px; }
+    .overview-cell.is-gift .overview-icon-wrap { height: 64px; }
+    .overview-gift-icon { width: 38px; height: 38px; }
     .overview-label { font-size: 8.5px; letter-spacing: 0.14em; }
     .overview-pct { font-size: 9.5px; }
     .overview-line { width: 90%; }
@@ -18962,8 +19012,8 @@
     'nutricion':            'Nutricion-progress.png',
     'sponsors':             'Sponsors-progress.png',
   };
-  // Lock SVG used for the Coming Soon segment (no image available).
-  const ICON_LOCK = '<svg class="overview-soon-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>';
+  // Gift SVG used for the locked reward segment at the end of the bar.
+  const ICON_GIFT = '<svg class="overview-gift-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 12v9H4v-9"/><path d="M22 7H2v5h20V7z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>';
 
   // Short label used in the overview cell — capitalised first word so the
   // tiny font reads more cleanly than the full folder name.
@@ -18971,7 +19021,7 @@
     if (c.id === 'mapea-tu-imperio') return 'Imperio';
     if (c.id === 'crea-videos-outliers') return 'Outliers';
     if (c.id === 'feedback-loop') return 'Feedback';
-    if (c.id === 'coming-soon') return 'Coming soon';
+    if (c.id === 'coming-soon') return 'Regalo';
     return c.name;
   }
 
@@ -19299,14 +19349,22 @@
   function renderOverviewBar() {
     const bar = document.getElementById('overviewBar');
     if (!bar) return;
+    // The gift tile unlocks once every actionable checklist is at 100%.
+    const otherIds = CHECKLISTS.filter(c => !c.comingSoon).map(c => c.id);
+    const allOthersDone = otherIds.length > 0 && otherIds.every(id => getChecklistProgress(id).pct === 100);
+
     bar.innerHTML = CHECKLISTS.map(c => {
       if (c.comingSoon) {
+        const unlockedCls = allOthersDone ? ' is-unlocked' : '';
+        const tipText = allOthersDone
+          ? 'Has completado toda la checklist — disfruta de tu regalo'
+          : 'Completa toda la checklist para desbloquear este regalo';
         return ''
-          + '<div class="overview-cell is-soon" aria-disabled="true">'
-          +   '<div class="overview-icon-wrap">' + ICON_LOCK + '</div>'
+          + '<div class="overview-cell is-gift' + unlockedCls + '" title="' + escapeHtml(tipText) + '" role="status">'
+          +   '<div class="overview-icon-wrap">' + ICON_GIFT + '</div>'
           +   '<div class="overview-label">' + escapeHtml(overviewLabelFor(c)) + '</div>'
           +   '<div class="overview-line"><div class="overview-line-fill"></div></div>'
-          +   '<div class="overview-pct">—</div>'
+          +   '<div class="overview-pct">' + (allOthersDone ? '✓' : '🔒') + '</div>'
           + '</div>';
       }
       const p = getChecklistProgress(c.id);
@@ -19322,7 +19380,7 @@
         +   '<div class="overview-pct">' + p.pct + '%</div>'
         + '</button>';
     }).join('');
-    bar.querySelectorAll('.overview-cell:not(.is-soon)').forEach(cell => {
+    bar.querySelectorAll('.overview-cell:not(.is-gift)').forEach(cell => {
       cell.addEventListener('click', () => {
         _checklistStack = [cell.dataset.checklist];
         openChecklistDetail(cell.dataset.checklist);
