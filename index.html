@@ -19312,13 +19312,32 @@
     return (typeof storeGet === 'function' ? storeGet('checklist_done.' + id) : null) || {};
   }
 
-  function getChecklistProgress(id) {
+  function getChecklistProgress(id, _seen) {
     const items = CHECKLIST_CONTENT[id] || [];
-    const checkItems = items.filter(i => i.type === 'checklist');
-    if (checkItems.length === 0) return { done: 0, total: 0, pct: 0 };
+    if (items.length === 0) return { done: 0, total: 0, pct: 0 };
+    // Guard against accidental cycles in CHECKLIST_CONTENT (a sub-folder
+    // pointing back at its parent) — each id only contributes once.
+    _seen = _seen || new Set();
+    if (_seen.has(id)) return { done: 0, total: 0, pct: 0 };
+    _seen.add(id);
+
     const doneMap = checklistDoneMap(id);
-    const done = checkItems.filter(i => doneMap[i.title]).length;
-    return { done, total: checkItems.length, pct: Math.round((done / checkItems.length) * 100) };
+    let done = 0, total = 0;
+    for (const item of items) {
+      if (item.type === 'checklist') {
+        total++;
+        if (doneMap[item.title]) done++;
+      } else if (item.type === 'subfolder') {
+        // Roll the sub-checklist's items up into this checklist's totals.
+        // An empty sub-folder contributes 0/0, so it doesn't block 100%
+        // until it actually has content.
+        const sub = getChecklistProgress(item.id, _seen);
+        total += sub.total;
+        done  += sub.done;
+      }
+    }
+    const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+    return { done, total, pct };
   }
 
   function renderChecklistCard(c) {
