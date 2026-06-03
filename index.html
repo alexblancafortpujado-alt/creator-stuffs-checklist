@@ -1641,28 +1641,75 @@
   .ck-row.ck-sign.is-done .ck-sign-prompt .ck-row-title {
     color: var(--text-tertiary);
   }
+  /* Strike-through on the commitment text, mirroring the normal checklist. */
+  .ck-row.ck-sign .ck-sign-prompt .ck-row-title {
+    position: relative;
+    transition: color 0.30s ease;
+  }
+  .ck-row.ck-sign .ck-sign-prompt .ck-row-title::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    height: 1px;
+    width: 0;
+    background: currentColor;
+    transition: width 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    pointer-events: none;
+  }
+  .ck-row.ck-sign.is-done .ck-sign-prompt .ck-row-title::after { width: 100%; }
+  /* Checkbox tick fires the same bounce + halo + scale-in as a normal check
+     when the signature is confirmed. .ck-row.ck-check was the only selector
+     that styled the filled state before — explicitly mirror it for ck-sign. */
+  .ck-row.ck-sign.is-done .ck-checkbox {
+    background: var(--accent);
+    border-color: var(--accent);
+    animation: ck-pop 0.42s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .ck-row.ck-sign.is-done .ck-checkbox::before {
+    animation: ck-burst 0.55s cubic-bezier(0, 0, 0.2, 1);
+  }
+  .ck-row.ck-sign.is-done .ck-checkbox-tick {
+    transform: scale(1);
+    opacity: 1;
+  }
+  /* Hide the action buttons once confirmed — the row is locked. To re-sign
+     the user clicks the prompt row (toggles is-done off via JS). */
+  .ck-row.ck-sign.is-done .ck-sign-actions { display: none; }
+  .ck-row.ck-sign.is-done .ck-sign-hint    { display: none; }
+  .ck-row.ck-sign.is-done .ck-sign-prompt { cursor: pointer; }
   .ck-sign-pad-wrap {
     position: relative;
+    width: 100%;
+    max-width: 360px;
+    margin: 0 auto;
     background: rgba(var(--overlay-rgb), 0.04);
     border: 1px dashed rgba(var(--overlay-rgb), 0.18);
-    border-radius: 10px;
+    border-radius: 12px;
     overflow: hidden;
-    transition: border-color 0.3s ease, background 0.3s ease;
+    transition: border-color 0.3s ease, background 0.3s ease, transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.4s ease;
   }
   .ck-row.ck-sign.is-done .ck-sign-pad-wrap {
     border-style: solid;
     border-color: var(--accent);
     background: var(--accent-soft);
+    animation: sign-lock 0.55s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-shadow: 0 0 0 0 rgba(59,130,246,0);
+  }
+  @keyframes sign-lock {
+    0%   { transform: scale(1);    box-shadow: 0 0 0 0   rgba(59,130,246,0.55); }
+    50%  { transform: scale(1.02); box-shadow: 0 0 0 8px rgba(59,130,246,0.18); }
+    100% { transform: scale(1);    box-shadow: 0 0 0 0   rgba(59,130,246,0); }
   }
   .ck-sign-pad {
     display: block;
     width: 100%;
-    height: 170px;
+    height: 240px;
     touch-action: none;
     cursor: crosshair;
     color: var(--text-primary);
   }
-  .ck-row.ck-sign.is-done .ck-sign-pad { cursor: default; }
+  .ck-row.ck-sign.is-done .ck-sign-pad { cursor: default; pointer-events: none; }
   .ck-sign-hint {
     position: absolute;
     inset: 0;
@@ -20056,35 +20103,31 @@
       const it = items[idx];
       const canvas = row.querySelector('.ck-sign-pad');
       const wrap = row.querySelector('.ck-sign-pad-wrap');
+      const prompt = row.querySelector('.ck-sign-prompt');
       const clearBtn = row.querySelector('.ck-sign-btn-clear');
       const confirmBtn = row.querySelector('.ck-sign-btn-confirm');
       const sigKey = 'checklist_sig.' + id + ':' + it.title;
       const pad = _setupSignaturePad(canvas, (hasStrokes) => {
+        // Don't drive button state once the row is locked.
+        if (row.classList.contains('is-done')) return;
         clearBtn.disabled = !hasStrokes;
         confirmBtn.disabled = !hasStrokes;
         wrap.classList.toggle('has-strokes', hasStrokes);
       });
-      // Restore signature image if previously confirmed.
+      // Restore signature image if previously confirmed; lock the canvas
+      // so the user can't draw on top until they explicitly re-sign.
       try {
         const saved = (typeof storeGet === 'function') ? storeGet(sigKey) : null;
-        if (saved) pad.fromDataURL(saved);
+        if (saved) {
+          pad.fromDataURL(saved);
+          wrap.classList.add('has-strokes');
+          if (doneMap[it.title]) canvas.dataset.locked = '1';
+        }
       } catch (e) {}
 
-      clearBtn.addEventListener('click', () => { pad.clear(); });
-
-      confirmBtn.addEventListener('click', () => {
-        if (pad.isEmpty()) return;
-        const oldPct = getChecklistProgress(id).pct;
-        const dataUrl = pad.toDataURL();
-        if (typeof storeSet === 'function') storeSet(sigKey, dataUrl);
-        const map = checklistDoneMap(id);
-        map[it.title] = true;
-        if (typeof storeSet === 'function') storeSet('checklist_done.' + id, map);
-        doneMap[it.title] = true;
-        // Bounce/burst animation by re-applying is-done.
-        row.classList.remove('is-done');
-        requestAnimationFrame(() => requestAnimationFrame(() => row.classList.add('is-done')));
-        if (navigator.vibrate) { try { navigator.vibrate(14); } catch (e) {} }
+      function recomputeAfterChange(prevPct, newDone) {
+        if (typeof storeSet === 'function') storeSet('checklist_done.' + id, checklistDoneMap(id));
+        if (navigator.vibrate) { try { navigator.vibrate(newDone ? 14 : 6); } catch (e) {} }
         updateChecklistDetailProgress(id);
         const ciRaw = row.dataset.clusterIdx;
         if (ciRaw != null && ciRaw !== '') {
@@ -20098,8 +20141,44 @@
           }
         }
         const newPct = getChecklistProgress(id).pct;
-        if (newPct === 100 && oldPct < 100) celebrateCompletion();
+        if (newPct === 100 && prevPct < 100) celebrateCompletion();
         renderOverviewBar();
+      }
+
+      clearBtn.addEventListener('click', () => { pad.clear(); });
+
+      confirmBtn.addEventListener('click', () => {
+        if (pad.isEmpty()) return;
+        const oldPct = getChecklistProgress(id).pct;
+        const dataUrl = pad.toDataURL();
+        if (typeof storeSet === 'function') storeSet(sigKey, dataUrl);
+        const map = checklistDoneMap(id);
+        map[it.title] = true;
+        doneMap[it.title] = true;
+        canvas.dataset.locked = '1';
+        // Re-apply is-done so the bounce/burst/sign-lock animations fire.
+        row.classList.remove('is-done');
+        requestAnimationFrame(() => requestAnimationFrame(() => row.classList.add('is-done')));
+        recomputeAfterChange(oldPct, true);
+      });
+
+      // Tapping the prompt (checkbox / commitment text) once the row is
+      // locked unlocks it for re-signing. While unlocked, tapping doesn't
+      // toggle (the row only becomes done via Confirmar firma) — that
+      // keeps the explicit-commitment moment intact.
+      prompt.addEventListener('click', () => {
+        if (!row.classList.contains('is-done')) return;
+        const oldPct = getChecklistProgress(id).pct;
+        const map = checklistDoneMap(id);
+        delete map[it.title];
+        delete doneMap[it.title];
+        canvas.dataset.locked = '';
+        row.classList.remove('is-done');
+        // Re-enable buttons if the canvas already has strokes restored.
+        const hasStrokes = !pad.isEmpty();
+        clearBtn.disabled = !hasStrokes;
+        confirmBtn.disabled = !hasStrokes;
+        recomputeAfterChange(oldPct, false);
       });
     });
 
