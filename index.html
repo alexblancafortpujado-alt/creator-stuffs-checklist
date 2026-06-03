@@ -14,20 +14,20 @@
 <style>
   :root {
     /* Dark theme is the default; .theme-light on <html> swaps the palette.
-       The bg ↔ surface delta is intentionally a bit wider than typical dark
-       themes so cards visibly lift off the background. */
+       The bg ↔ surface delta is intentionally wide so cards stand out from
+       the background on average-calibration monitors, not just OLED. */
     --overlay-rgb: 255, 255, 255;
-    --bg: #07090F;
-    --surface: #161B24;
-    --surface-elevated: #1C222D;
-    --border: rgba(var(--overlay-rgb), 0.12);
-    --border-strong: rgba(var(--overlay-rgb), 0.18);
-    --text-primary: #F3F4F7;
-    --text-secondary: #B0B6C0;
-    --text-tertiary: #7A8290;
+    --bg: #0A0D14;
+    --surface: #1E2532;
+    --surface-elevated: #29303F;
+    --border: rgba(var(--overlay-rgb), 0.16);
+    --border-strong: rgba(var(--overlay-rgb), 0.24);
+    --text-primary: #F5F7FA;
+    --text-secondary: #C5CAD3;
+    --text-tertiary: #8E97A2;
     --accent: #3B82F6;
     --accent-hover: #60A5FA;
-    --accent-soft: rgba(59,130,246,0.14);
+    --accent-soft: rgba(59,130,246,0.16);
     --success: #34D399;
     --warning: #FBBF24;
     --danger: #F87171;
