@@ -900,97 +900,117 @@
   }
 
   /* Overall progress bar at the top of the Checklist tab.
-     One row of N cells (one per checklist). Each cell is a clickable
-     entry point into its checklist; its background fills horizontally
-     with --accent-soft proportional to that checklist's % done. */
+     One row of N cells (one per checklist). Each cell stacks an icon,
+     an uppercase label, a thin progress line that fills with --success,
+     and the % below. Empty icons render desaturated; once a cell hits
+     100% the icon snaps to full colour, the label flips to the accent
+     blue and the % + line flip to success green. */
   .overview-bar {
     display: flex;
+    align-items: flex-start;
+    gap: 4px;
     background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: 12px;
-    overflow: hidden;
-    margin: 4px 0 32px;
+    border-radius: 16px;
+    padding: 22px 14px 20px;
+    margin: 4px 0 36px;
   }
   .overview-cell {
     appearance: none;
     flex: 1;
-    position: relative;
+    min-width: 0;
     background: transparent;
     border: none;
-    border-right: 1px solid var(--border);
-    padding: 12px 8px 10px;
+    padding: 4px 4px 0;
     cursor: pointer;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 6px;
-    min-height: 92px;
+    gap: 12px;
     font-family: inherit;
     text-align: center;
+    border-radius: 10px;
     transition: background 0.15s ease;
   }
-  .overview-cell:last-child { border-right: none; }
-  .overview-cell:hover { background: rgba(var(--overlay-rgb), 0.04); }
-  .overview-cell:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
-  /* The fill — sits behind the icon + label and grows left-to-right. */
-  .overview-cell::before {
-    content: '';
-    position: absolute;
-    inset: 0 auto 0 0;
-    width: var(--pct, 0%);
-    background: var(--accent-soft);
-    pointer-events: none;
-    transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-  /* A subtle 100%-complete indicator: full saturation on the cell + a
-     soft inner glow so the user sees the milestone at a glance. */
-  .overview-cell.is-full::before {
-    background: rgba(59,130,246,0.22);
-  }
-  .overview-cell.is-full .overview-icon-wrap { transform: scale(1.04); }
+  .overview-cell:hover { background: rgba(var(--overlay-rgb), 0.03); }
+  .overview-cell:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
   .overview-icon-wrap {
-    width: 40px;
-    height: 40px;
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    max-width: 84px;
     display: flex;
     align-items: center;
     justify-content: center;
-    position: relative;
-    z-index: 1;
-    transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    padding: 4px;
   }
-  .overview-icon { max-width: 100%; max-height: 100%; object-fit: contain; }
+  .overview-icon {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    /* Desaturated + dimmed by default. Cells that have any progress get a
+       partial fade-back via .is-started; full ones go to full colour. */
+    filter: grayscale(1) brightness(0.65) contrast(0.95);
+    transition: filter 0.4s ease, transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .overview-cell.is-started .overview-icon { filter: grayscale(0.55) brightness(0.85); }
+  .overview-cell.is-full .overview-icon { filter: none; transform: scale(1.04); }
+  .overview-cell:hover .overview-icon { filter: grayscale(0.35) brightness(0.92); }
+  .overview-cell.is-full:hover .overview-icon { filter: none; }
   .overview-label {
     font-size: 10.5px;
-    font-weight: 600;
-    color: var(--text-secondary);
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--text-tertiary);
     line-height: 1.2;
+    transition: color 0.3s ease;
+  }
+  .overview-cell.is-full .overview-label { color: var(--accent-hover); }
+  /* The progress line — empty track always visible; fill grows from the
+     left up to --pct using the success colour. */
+  .overview-line {
     position: relative;
-    z-index: 1;
-    letter-spacing: 0.01em;
+    width: 80%;
+    height: 2px;
+    background: rgba(var(--overlay-rgb), 0.10);
+    border-radius: 999px;
+    overflow: hidden;
+  }
+  .overview-line-fill {
+    position: absolute;
+    inset: 0;
+    width: var(--pct, 0%);
+    background: var(--success);
+    border-radius: inherit;
+    transition: width 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .overview-cell.is-full .overview-line-fill {
+    box-shadow: 0 0 8px rgba(52, 211, 153, 0.5);
   }
   .overview-pct {
-    font-size: 9.5px;
-    font-weight: 700;
+    font-size: 11px;
+    font-weight: 600;
     color: var(--text-tertiary);
     font-variant-numeric: tabular-nums;
-    position: relative;
-    z-index: 1;
+    margin-top: -4px;
+    transition: color 0.3s ease;
   }
-  .overview-cell.is-full .overview-pct { color: var(--accent-hover); }
+  .overview-cell.is-full .overview-pct { color: var(--success); }
   /* "Coming soon" tile — muted, non-clickable, neutral lock icon. */
-  .overview-cell.is-soon { cursor: not-allowed; opacity: 0.45; }
+  .overview-cell.is-soon { cursor: not-allowed; opacity: 0.40; }
   .overview-cell.is-soon:hover { background: transparent; }
-  .overview-cell.is-soon::before { display: none; }
-  .overview-soon-icon {
-    width: 22px;
-    height: 22px;
-    color: var(--text-tertiary);
+  .overview-cell.is-soon .overview-icon-wrap {
+    width: auto; aspect-ratio: auto;
+    height: 84px; padding: 0;
   }
+  .overview-soon-icon { width: 26px; height: 26px; color: var(--text-tertiary); }
   @media (max-width: 720px) {
-    .overview-cell { padding: 10px 4px 8px; min-height: 78px; }
-    .overview-icon-wrap { width: 30px; height: 30px; }
-    .overview-label { font-size: 9px; }
-    .overview-pct { font-size: 9px; }
+    .overview-bar { padding: 16px 8px 14px; gap: 2px; }
+    .overview-cell { gap: 8px; }
+    .overview-icon-wrap { max-width: 52px; }
+    .overview-label { font-size: 8.5px; letter-spacing: 0.12em; }
+    .overview-pct { font-size: 9.5px; }
+    .overview-line { width: 90%; }
   }
 
   /* Checklist tab — folder grid */
@@ -19281,17 +19301,20 @@
           + '<div class="overview-cell is-soon" aria-disabled="true">'
           +   '<div class="overview-icon-wrap">' + ICON_LOCK + '</div>'
           +   '<div class="overview-label">' + escapeHtml(overviewLabelFor(c)) + '</div>'
+          +   '<div class="overview-line"><div class="overview-line-fill"></div></div>'
+          +   '<div class="overview-pct">—</div>'
           + '</div>';
       }
       const p = getChecklistProgress(c.id);
       const img = OVERVIEW_IMAGES[c.id];
-      const fullCls = p.pct === 100 ? ' is-full' : '';
+      const stateCls = p.pct === 100 ? ' is-full' : (p.pct > 0 ? ' is-started' : '');
       return ''
-        + '<button class="overview-cell' + fullCls + '" type="button" data-checklist="' + c.id + '" style="--pct:' + p.pct + '%">'
+        + '<button class="overview-cell' + stateCls + '" type="button" data-checklist="' + c.id + '" style="--pct:' + p.pct + '%">'
         +   '<div class="overview-icon-wrap">'
         +     (img ? '<img class="overview-icon" src="' + escapeHtml(img) + '" alt="" draggable="false" />' : '')
         +   '</div>'
         +   '<div class="overview-label">' + escapeHtml(overviewLabelFor(c)) + '</div>'
+        +   '<div class="overview-line"><div class="overview-line-fill"></div></div>'
         +   '<div class="overview-pct">' + p.pct + '%</div>'
         + '</button>';
     }).join('');
