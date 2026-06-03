@@ -1009,6 +1009,35 @@
     transition: color 0.3s ease;
   }
   .overview-cell.is-full .overview-pct { color: var(--success); }
+  /* Locked checklist tile — content not built yet. The folder image is
+     dimmed to ~30% and a small lock badge sits in the centre. The cell
+     stays non-clickable; on hover the tooltip just says "Próximamente". */
+  .overview-cell.is-locked { cursor: not-allowed; opacity: 0.45; }
+  .overview-cell.is-locked:hover { background: transparent; transform: none; }
+  .overview-cell.is-locked .overview-icon-wrap { position: relative; }
+  .overview-cell.is-locked .overview-icon {
+    filter: grayscale(1) brightness(0.7) contrast(0.9);
+  }
+  .overview-lock-badge {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+  }
+  .overview-lock-icon {
+    width: 26px;
+    height: 26px;
+    color: var(--text-secondary);
+    background: var(--bg);
+    border-radius: 50%;
+    padding: 4px;
+    box-sizing: content-box;
+  }
+  .overview-cell.is-locked .overview-line-fill { width: 0% !important; }
+  .overview-cell.is-locked .overview-pct { color: var(--text-tertiary); font-size: 13px; }
+
   /* Locked-but-tempting gift tile — keeps the cell on the bar but renders
      a glowing accent icon that softly pulses to pull the eye. The cell
      stays non-clickable (cursor: help) and shows a tooltip explaining
@@ -18974,8 +19003,8 @@
       subtitle: 'haz mejor contenido',
       checklists: [
         { id: 'crea-videos-outliers', name: 'Crea videos outliers' },
-        { id: 'feedback-loop',        name: 'Feedback loop' },
-        { id: 'equipo',               name: 'Equipo' },
+        { id: 'feedback-loop',        name: 'Feedback loop',           comingSoon: true },
+        { id: 'equipo',               name: 'Equipo',                  comingSoon: true },
       ],
     },
     {
@@ -18983,9 +19012,9 @@
       title: 'Cash',
       subtitle: 'leverage',
       checklists: [
-        { id: 'nutricion',   name: 'Nutrición' },
-        { id: 'sponsors',    name: 'Sponsors' },
-        { id: 'coming-soon', name: 'Coming soon…', comingSoon: true },
+        { id: 'nutricion',   name: 'Nutrición', comingSoon: true },
+        { id: 'sponsors',    name: 'Sponsors',  comingSoon: true },
+        { id: 'coming-soon', name: 'Coming soon…', comingSoon: true, isGift: true },
       ],
     },
   ];
@@ -19018,6 +19047,8 @@
   // Gift PNG used for the locked reward segment at the end of the bar.
   const ICON_GIFT_SRC = 'Gift-progress.png';
   const ICON_GIFT = '<img class="overview-gift-icon" src="' + ICON_GIFT_SRC + '" alt="" draggable="false" />';
+  // Smaller lock SVG for checklists that exist but aren't built yet.
+  const ICON_LOCK_OVERVIEW = '<svg class="overview-lock-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>';
 
   // Short label used in the overview cell — capitalised first word so the
   // tiny font reads more cleanly than the full folder name.
@@ -19040,7 +19071,16 @@
     // Sub-checklists inside "Crea vídeos outliers" — Grabación and Subida
     // still pending the client's content.
     'grabacion':             [],
-    'subida':                [],
+    'subida': [
+      { type: 'practice',  title: 'Práctica: Ajustes de subida a YouTube', url: 'https://www.skool.com/creatorsstuffs/classroom/cc9ac057?md=0622a3af091841bd9fb36c981bcf0c29' },
+      { type: 'checklist', title: 'Configurar los ajustes predeterminados de subida del canal' },
+      { type: 'checklist', title: 'Subir el archivo y poner el título (lo más importante; tenlo pensado de antemano y, si quieres, prueba experimentos A/B de miniatura)' },
+      { type: 'checklist', title: 'Escribir la descripción usando la intro de tu guión (acortada) e incluir tu CTA, para darle al algoritmo metadatos sobre la temática del vídeo' },
+      { type: 'checklist', title: 'Seleccionar la miniatura, añadir el vídeo a la lista de reproducción que toque y marcar la promoción de pago si la tiene (sin tocar "contenido alterado")' },
+      { type: 'checklist', title: 'Poner las etiquetas sacándolas del autocompletado de YouTube en una ventana de incógnito (escribe tu tema y usa las sugerencias como tags)' },
+      { type: 'checklist', title: 'Activar la monetización metiendo espacios publicitarios cada 2-5 minutos para subir el RPM (cuanto más cortos, más agresivo y mejor RPM)' },
+      { type: 'checklist', title: 'Configurar la pantalla final con un vídeo específico relacionado (no la opción automática), añadir tarjetas con CTA a otros vídeos para subir el watch time, y programar la subida a la hora elegida' },
+    ],
     'packaging': [
       { type: 'desc',      title: 'Ahora que ya tenemos ideas ganadoras sobre la mesa, toca ocuparse de lo que decide si esas ideas llegan a ver la luz o se mueren en el feed: el packaging.' },
       { type: 'desc',      title: 'Porque por muy buena que sea tu idea, por muy bien producido que esté el vídeo y por mucho valor que aporte dentro, si el packaging no hace su trabajo, nadie va a llegar a descubrirlo.' },
@@ -19486,15 +19526,16 @@
   function renderOverviewBar() {
     const bar = document.getElementById('overviewBar');
     if (!bar) return;
-    // The gift tile unlocks once every actionable checklist is at 100%.
-    const otherIds = CHECKLISTS.filter(c => !c.comingSoon).map(c => c.id);
-    const allOthersDone = otherIds.length > 0 && otherIds.every(id => getChecklistProgress(id).pct === 100);
+    // The gift tile unlocks once every actionable (non-locked) checklist
+    // is at 100%. Locked tiles (comingSoon without isGift) don't count.
+    const liveIds = CHECKLISTS.filter(c => !c.comingSoon).map(c => c.id);
+    const allOthersDone = liveIds.length > 0 && liveIds.every(id => getChecklistProgress(id).pct === 100);
 
     bar.innerHTML = CHECKLISTS.map((c, idx) => {
       // --cell-idx lets each line fill pick its slice of the bar-wide
       // gradient via background-position-x.
       const cellStyle = '--cell-idx:' + idx;
-      if (c.comingSoon) {
+      if (c.isGift) {
         const unlockedCls = allOthersDone ? ' is-unlocked' : '';
         const tipText = allOthersDone
           ? 'Has completado toda la checklist — disfruta de tu regalo'
@@ -19505,6 +19546,22 @@
           +   '<div class="overview-label">' + escapeHtml(overviewLabelFor(c)) + '</div>'
           +   '<div class="overview-line"><div class="overview-line-fill"></div></div>'
           +   '<div class="overview-pct">' + (allOthersDone ? '✓' : '🔒') + '</div>'
+          + '</div>';
+      }
+      if (c.comingSoon) {
+        // Locked checklist — content not built yet, shown as muted with a
+        // lock icon. Folder image still appears (so users see what's
+        // coming) but at low opacity and non-clickable.
+        const img = OVERVIEW_IMAGES[c.id];
+        return ''
+          + '<div class="overview-cell is-locked" title="Próximamente" aria-disabled="true" style="' + cellStyle + '">'
+          +   '<div class="overview-icon-wrap">'
+          +     (img ? '<img class="overview-icon" src="' + escapeHtml(img) + '" alt="" draggable="false" />' : '')
+          +     '<div class="overview-lock-badge">' + ICON_LOCK_OVERVIEW + '</div>'
+          +   '</div>'
+          +   '<div class="overview-label">' + escapeHtml(overviewLabelFor(c)) + '</div>'
+          +   '<div class="overview-line"><div class="overview-line-fill"></div></div>'
+          +   '<div class="overview-pct">🔒</div>'
           + '</div>';
       }
       const p = getChecklistProgress(c.id);
@@ -19520,7 +19577,7 @@
         +   '<div class="overview-pct">' + p.pct + '%</div>'
         + '</button>';
     }).join('');
-    bar.querySelectorAll('.overview-cell:not(.is-gift)').forEach(cell => {
+    bar.querySelectorAll('.overview-cell:not(.is-gift):not(.is-locked)').forEach(cell => {
       cell.addEventListener('click', () => {
         _checklistStack = [cell.dataset.checklist];
         openChecklistDetail(cell.dataset.checklist);
