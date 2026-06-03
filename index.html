@@ -899,6 +899,100 @@
     background: var(--surface);
   }
 
+  /* Overall progress bar at the top of the Checklist tab.
+     One row of N cells (one per checklist). Each cell is a clickable
+     entry point into its checklist; its background fills horizontally
+     with --accent-soft proportional to that checklist's % done. */
+  .overview-bar {
+    display: flex;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    margin: 4px 0 32px;
+  }
+  .overview-cell {
+    appearance: none;
+    flex: 1;
+    position: relative;
+    background: transparent;
+    border: none;
+    border-right: 1px solid var(--border);
+    padding: 12px 8px 10px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    min-height: 92px;
+    font-family: inherit;
+    text-align: center;
+    transition: background 0.15s ease;
+  }
+  .overview-cell:last-child { border-right: none; }
+  .overview-cell:hover { background: rgba(var(--overlay-rgb), 0.04); }
+  .overview-cell:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+  /* The fill — sits behind the icon + label and grows left-to-right. */
+  .overview-cell::before {
+    content: '';
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: var(--pct, 0%);
+    background: var(--accent-soft);
+    pointer-events: none;
+    transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  /* A subtle 100%-complete indicator: full saturation on the cell + a
+     soft inner glow so the user sees the milestone at a glance. */
+  .overview-cell.is-full::before {
+    background: rgba(59,130,246,0.22);
+  }
+  .overview-cell.is-full .overview-icon-wrap { transform: scale(1.04); }
+  .overview-icon-wrap {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    z-index: 1;
+    transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .overview-icon { max-width: 100%; max-height: 100%; object-fit: contain; }
+  .overview-label {
+    font-size: 10.5px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    line-height: 1.2;
+    position: relative;
+    z-index: 1;
+    letter-spacing: 0.01em;
+  }
+  .overview-pct {
+    font-size: 9.5px;
+    font-weight: 700;
+    color: var(--text-tertiary);
+    font-variant-numeric: tabular-nums;
+    position: relative;
+    z-index: 1;
+  }
+  .overview-cell.is-full .overview-pct { color: var(--accent-hover); }
+  /* "Coming soon" tile — muted, non-clickable, neutral lock icon. */
+  .overview-cell.is-soon { cursor: not-allowed; opacity: 0.45; }
+  .overview-cell.is-soon:hover { background: transparent; }
+  .overview-cell.is-soon::before { display: none; }
+  .overview-soon-icon {
+    width: 22px;
+    height: 22px;
+    color: var(--text-tertiary);
+  }
+  @media (max-width: 720px) {
+    .overview-cell { padding: 10px 4px 8px; min-height: 78px; }
+    .overview-icon-wrap { width: 30px; height: 30px; }
+    .overview-label { font-size: 9px; }
+    .overview-pct { font-size: 9px; }
+  }
+
   /* Checklist tab — folder grid */
   .checklist-grid {
     display: grid;
@@ -7774,6 +7868,10 @@
 <div class="tab-panel is-active" data-tab="checklist">
   <div class="section">
     <div class="section-title" id="checklistSectionTitle">Checklist</div>
+
+    <!-- Overall progress bar — 9 segments, one per checklist, fills as each
+         checklist progresses. Hidden when the user drills into a detail view. -->
+    <div class="overview-bar" id="overviewBar"></div>
 
     <!-- Grid view: list of all checklists as folder cards -->
     <div class="checklist-groups" id="checklistGrid"></div>
@@ -18828,6 +18926,31 @@
   };
   function folderImageFor(id) { return FOLDER_IMAGES[id] || 'folder.png'; }
 
+  // Per-checklist icon used in the overall progress bar at the top.
+  // Same key namespace as CHECKLISTS / FOLDER_IMAGES.
+  const OVERVIEW_IMAGES = {
+    'onboarding':           'Onboarding-progress.png',
+    'mapea-tu-imperio':     'Imperio-progress.png',
+    'estrategia':           'Estretegia-progress.png',
+    'crea-videos-outliers': 'Outliers-progress.png',
+    'feedback-loop':        'Feedback-progress.png',
+    'equipo':               'Team-progress.png',
+    'nutricion':            'Nutricion-progress.png',
+    'sponsors':             'Sponsors-progress.png',
+  };
+  // Lock SVG used for the Coming Soon segment (no image available).
+  const ICON_LOCK = '<svg class="overview-soon-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>';
+
+  // Short label used in the overview cell — capitalised first word so the
+  // tiny font reads more cleanly than the full folder name.
+  function overviewLabelFor(c) {
+    if (c.id === 'mapea-tu-imperio') return 'Imperio';
+    if (c.id === 'crea-videos-outliers') return 'Outliers';
+    if (c.id === 'feedback-loop') return 'Feedback';
+    if (c.id === 'coming-soon') return 'Coming soon';
+    return c.name;
+  }
+
   // Per-checklist content. Items are rendered in order. Three kinds:
   //   { type: 'group',     title }              → step header, not clickable
   //   { type: 'notion',    title, url }         → opens Notion link in new tab
@@ -19149,7 +19272,39 @@
       + '</button>';
   }
 
+  function renderOverviewBar() {
+    const bar = document.getElementById('overviewBar');
+    if (!bar) return;
+    bar.innerHTML = CHECKLISTS.map(c => {
+      if (c.comingSoon) {
+        return ''
+          + '<div class="overview-cell is-soon" aria-disabled="true">'
+          +   '<div class="overview-icon-wrap">' + ICON_LOCK + '</div>'
+          +   '<div class="overview-label">' + escapeHtml(overviewLabelFor(c)) + '</div>'
+          + '</div>';
+      }
+      const p = getChecklistProgress(c.id);
+      const img = OVERVIEW_IMAGES[c.id];
+      const fullCls = p.pct === 100 ? ' is-full' : '';
+      return ''
+        + '<button class="overview-cell' + fullCls + '" type="button" data-checklist="' + c.id + '" style="--pct:' + p.pct + '%">'
+        +   '<div class="overview-icon-wrap">'
+        +     (img ? '<img class="overview-icon" src="' + escapeHtml(img) + '" alt="" draggable="false" />' : '')
+        +   '</div>'
+        +   '<div class="overview-label">' + escapeHtml(overviewLabelFor(c)) + '</div>'
+        +   '<div class="overview-pct">' + p.pct + '%</div>'
+        + '</button>';
+    }).join('');
+    bar.querySelectorAll('.overview-cell:not(.is-soon)').forEach(cell => {
+      cell.addEventListener('click', () => {
+        _checklistStack = [cell.dataset.checklist];
+        openChecklistDetail(cell.dataset.checklist);
+      });
+    });
+  }
+
   function renderChecklistGrid() {
+    renderOverviewBar();
     const container = document.getElementById('checklistGrid');
     if (!container) return;
     container.innerHTML = CHECKLIST_GROUPS.map(g => ''
@@ -19236,6 +19391,7 @@
     const doneMap = checklistDoneMap(id);
 
     document.getElementById('checklistGrid').style.display = 'none';
+    document.getElementById('overviewBar').style.display = 'none';
     document.getElementById('checklistDetail').style.display = 'block';
     document.getElementById('checklistDetailTitle').textContent = meta.name;
     // Breadcrumb from the nav stack: "Checklist · parent · child".
@@ -19386,6 +19542,11 @@
         // Celebrate when this toggle crosses into 100%.
         const newPct = getChecklistProgress(id).pct;
         if (newPct === 100 && oldPct < 100) celebrateCompletion();
+        // Overview bar mirrors per-checklist progress — refresh it too so
+        // the user can see the % climb without leaving the detail view.
+        // (It's display:none in detail view but recomputed for when they
+        // close back to the grid.)
+        renderOverviewBar();
       });
     });
 
@@ -19411,6 +19572,7 @@
     }
     document.getElementById('checklistDetail').style.display = 'none';
     document.getElementById('checklistGrid').style.display = '';
+    document.getElementById('overviewBar').style.display = '';
     document.getElementById('checklistSectionTitle').textContent = 'Checklist';
     renderChecklistGrid();
   }
